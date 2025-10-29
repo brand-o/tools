@@ -1,4 +1,4 @@
 # Serve PowerShell scripts as plain text (proxy mode with forced content-type)
-/run https://raw.githubusercontent.com/brand-o/tools/main/make.ps1 200
+/run https://raw.githubusercontent.com/brand-o/tools/main/run.ps1 200
 /make.ps1 https://raw.githubusercontent.com/brand-o/tools/main/make.ps1 200
 /bundle.json https://raw.githubusercontent.com/brand-o/tools/main/bundle.json 200
