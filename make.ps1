@@ -80,6 +80,26 @@ param(
     [switch]$Force
 )
 
+# ============================================================================
+# AUTO-ELEVATION - Re-launch as admin if not already elevated
+# ============================================================================
+
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Host "Not running as Administrator. Relaunching with elevation..." -ForegroundColor Yellow
+
+    # Get the full script content
+    $scriptContent = $MyInvocation.MyCommand.ScriptContents
+
+    # Choose PowerShell executable (prefer pwsh if available)
+    $powershellCmd = if (Get-Command pwsh -ErrorAction SilentlyContinue) { "pwsh" } else { "powershell" }
+
+    # Launch elevated PowerShell with the script
+    Start-Process $powershellCmd -ArgumentList "-ExecutionPolicy Bypass -NoProfile -Command `"$scriptContent`"" -Verb RunAs
+
+    # Exit this non-elevated instance
+    exit
+}
+
 $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 
