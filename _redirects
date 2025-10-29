@@ -1,8 +1,4 @@
-# Redirect /run to the wrapper script (better compatibility)
-/run https://raw.githubusercontent.com/brand-o/tools/main/run.ps1 200!
-
-# Redirect /make.ps1 to raw PowerShell script
-/make.ps1 https://raw.githubusercontent.com/brand-o/tools/main/make.ps1 200!
-
-# Optional: Redirect /bundle.json to raw file
-/bundle.json https://raw.githubusercontent.com/brand-o/tools/main/bundle.json 200!
+# Serve PowerShell scripts as plain text (proxy mode with forced content-type)
+/run https://raw.githubusercontent.com/brand-o/tools/main/run.ps1 200
+/make.ps1 https://raw.githubusercontent.com/brand-o/tools/main/make.ps1 200
+/bundle.json https://raw.githubusercontent.com/brand-o/tools/main/bundle.json 200
