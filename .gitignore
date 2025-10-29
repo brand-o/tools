@@ -1,0 +1,23 @@
+# Staging directory
+_staging/
+
+# Downloaded files
+*.iso
+*.img
+*.exe
+*.msi
+*.zip
+*.7z
+*.torrent
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini
