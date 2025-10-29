@@ -62,6 +62,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     License: MIT
 #>
 
+& {
 [CmdletBinding()]
 param(
     [Parameter()]
@@ -2579,3 +2580,4 @@ catch {
     Write-Log "Stack trace: $($_.ScriptStackTrace)" -Level ERROR
     exit 1
 }
+} @args
