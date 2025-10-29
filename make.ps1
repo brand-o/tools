@@ -63,21 +63,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #>
 
 & {
-[CmdletBinding()]
+
+# When executed via 'irm | iex', parameters are not supported
+# For parameter support, download and run the script locally: .\make.ps1 -ConfigPath <path>
+
 param(
-    [Parameter()]
     [string]$ConfigPath = "",
-
-    [Parameter()]
     [string]$BundleUrl = "",
-
-    [Parameter()]
     [switch]$SkipDownloads,
-
-    [Parameter()]
     [switch]$TestMode,
-
-    [Parameter()]
     [switch]$Force
 )
 
