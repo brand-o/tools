@@ -1,0 +1,8 @@
+# Redirect /run to raw PowerShell script
+/run https://raw.githubusercontent.com/brand-o/tools/main/make.ps1 200
+
+# Redirect /make.ps1 to raw PowerShell script
+/make.ps1 https://raw.githubusercontent.com/brand-o/tools/main/make.ps1 200
+
+# Optional: Redirect /bundle.json to raw file
+/bundle.json https://raw.githubusercontent.com/brand-o/tools/main/bundle.json 200
