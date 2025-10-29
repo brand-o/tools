@@ -2337,7 +2337,7 @@ function Main {
 
     # Set default BundleUrl if not provided
     if ([string]::IsNullOrEmpty($BundleUrl)) {
-        $BundleUrl = "https://brando.tools/bundle.json"
+        $BundleUrl = "https://raw.githubusercontent.com/brand-o/tools/main/bundle.json"
     }
 
     # Set default ConfigPath for fallback
