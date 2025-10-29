@@ -14,7 +14,6 @@ iex (irm 'https://brando.tools/run')
 2. run it (will prompt for admin privileges)
 
 ## what it does
-
 the powershell script automates everything:
 
 1. **auto-detects** all connected flash drives
@@ -25,13 +24,7 @@ the powershell script automates everything:
 6. **organizes** everything into a clean three-partition structure
 7. **makes bootable via ventoy** — ready to use as your ultimate tech toolkit
 
-### resume capability
-if the script is interrupted, it will detect partial installs and offer to:
-- resume from where it left off
-- or reformat and start over
-
 ## requirements
-
 - **Windows** (requires PowerShell + administrator privileges)
 - **fast 64gb+ USB flash drive** (256-512gb+ recommended)
 - **internet connection** for downloads
@@ -52,6 +45,11 @@ the script creates three partitions on your drive:
 ### 3. backup (remaining space)
 - **size:** all remaining drive space
 - **contents:** your personal files, backups, documents
+
+### resume capability
+if the script is interrupted, it will detect partial installs and offer to:
+- resume from where it left off
+- or reformat and start over
 
 ## included software
 
@@ -231,9 +229,6 @@ the script automatically creates a modified Windows 11 ISO with:
 - privacy questions skipped
 - local account allowed (no Microsoft Account required)
 
-### automatic updates
-uses GitHub API and direct sources to fetch latest versions
-
 ### hash verification
 SHA-256 integrity checking (soft mode - warns but continues on mismatch)
 
@@ -243,45 +238,10 @@ detects existing files and skips re-downloading
 ### portable focus
 most applications are portable, requiring no installation
 
-## project statistics
-
-- **total items:** 80 software packages
-- **automated downloads:** 68 items
-- **manual downloads required:** 12 items (due to vendor restrictions)
-
-## security & consent
-
-**dual-use tools** (require explicit consent via environment variable):
-- John the Ripper
-- Hashcat
-
-these tools are included for:
-- authorized security testing
-- forensics
-- password recovery on owned systems
-- educational purposes only
-
-## use cases
-
-perfect for:
-- technicians & IT professionals
-- system administrators
-- tinkerers & enthusiasts
-- anyone who needs a portable powerhouse of tools
-
-## important notes
-
-- **the drive will be formatted** - all existing data will be erased
-- requires **administrator privileges**
-- internet connection required for downloads
-- 12 items require manual download due to vendor restrictions (NVIDIA, AMD, Realtek)
-
 ## license
-
 this project is foss (free and open source software) — licensed under the GPL v3 License
 
 ## credits
-
 we love foss. this project builds upon the incredible work of:
 - [7-Zip](https://www.7-zip.org/)
 - [Angry IP Scanner](https://angryip.org/)
