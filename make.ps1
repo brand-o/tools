@@ -2570,7 +2570,7 @@ function Main {
     Write-Host ""
 }
 
-# Run
+# Run Main function
 try {
     Main
 }
@@ -2579,6 +2579,3 @@ catch {
     Write-Log "Stack trace: $($_.ScriptStackTrace)" -Level ERROR
     exit 1
 }
-
-# Auto-execute Main when script is run
-Main
