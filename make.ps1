@@ -1082,6 +1082,14 @@ function Reorganize-PortableApp {
     )
 
     try {
+        # Validate input parameters
+        if ([string]::IsNullOrWhiteSpace($AppPath)) {
+            throw "AppPath parameter is empty for app: $AppName"
+        }
+        if ([string]::IsNullOrWhiteSpace($PortableRoot)) {
+            throw "PortableRoot parameter is empty for app: $AppName"
+        }
+
         $appBaseName = Split-Path $AppPath -Leaf
         $filesSubfolder = Join-Path $PortableRoot "Files"
         $newAppPath = Join-Path $filesSubfolder $appBaseName
@@ -2072,6 +2080,11 @@ function Start-Provisioning {
             }
 
             # Download to staging
+            # Validate filename is not empty
+            if ([string]::IsNullOrWhiteSpace($resolved.filename)) {
+                throw "Resolved filename is empty! Item: $($item.name), Strategy: $($item.resolve.strategy)"
+            }
+
             $stagingFile = Join-Path $script:StagingDir "downloads\$($resolved.filename)"
 
             $downloadSuccess = Invoke-FileDownload -Url $resolved.url -Destination $stagingFile -DisplayName $item.name -ExpectedSize $resolved.size
@@ -2132,10 +2145,31 @@ function Start-Provisioning {
             }
             else {
                 # Copy to final destination
+                # Validate destFile before processing
+                if ([string]::IsNullOrWhiteSpace($destFile)) {
+                    throw "destFile is empty! Item: $($item.name), destBase: '$destBase', finalFilename: '$finalFilename'"
+                }
+
                 $destDir = Split-Path -Parent $destFile
+
+                # Validate destDir after split
+                if ([string]::IsNullOrWhiteSpace($destDir)) {
+                    throw "destDir is empty after Split-Path! Item: $($item.name), destFile: '$destFile'"
+                }
+
                 if (-not (Test-Path $destDir)) {
                     New-Item -ItemType Directory -Path $destDir -Force | Out-Null
                 }
+
+                # Validate staging file exists
+                if ([string]::IsNullOrWhiteSpace($stagingFile)) {
+                    throw "stagingFile is empty! Item: $($item.name)"
+                }
+                if (-not (Test-Path $stagingFile)) {
+                    throw "Staging file not found: '$stagingFile'"
+                }
+
+                Write-Log "  Copying from staging to destination..." -Level INFO
                 Copy-Item -Path $stagingFile -Destination $destFile -Force
             }
 
