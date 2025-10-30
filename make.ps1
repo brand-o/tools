@@ -945,19 +945,45 @@ function Get-DynamicPartitionSizes {
     )
 
     $driveSizeGB = [math]::Round($DriveSizeBytes / 1GB, 2)
-    $threshold = $PartitionRules.small_drive_threshold_gb
-
-    if ($driveSizeGB -lt $threshold) {
-        $ventoyGB = $PartitionRules.small_drive.ventoy_gb
-        $utilsGB = $PartitionRules.small_drive.utils_gb
+    
+    # Smart partitioning based on actual drive size
+    # Reserve ~10GB for Ventoy overhead and leave minimum 5GB for BACKUP
+    $minBackupGB = 5
+    $ventoyOverheadGB = 10
+    $availableGB = $driveSizeGB - $ventoyOverheadGB - $minBackupGB
+    
+    if ($driveSizeGB -lt 64) {
+        throw "Drive too small. Minimum 64GB required, found $driveSizeGB GB"
+    }
+    elseif ($driveSizeGB -lt 150) {
+        # Small drives (64-149GB): Conservative allocation
+        # 64GB drive: ~35GB Ventoy, ~5GB Utils, ~14GB Backup
+        # 128GB drive: ~35GB Ventoy, ~5GB Utils, ~78GB Backup
+        $ventoyGB = 35
+        $utilsGB = 5
+    }
+    elseif ($driveSizeGB -lt 300) {
+        # Medium drives (150-299GB): Moderate allocation
+        # 256GB drive: ~50GB Ventoy, ~10GB Utils, ~186GB Backup
+        $ventoyGB = 50
+        $utilsGB = 10
     }
     else {
-        $ventoyGB = $PartitionRules.large_drive.ventoy_gb
-        $utilsGB = $PartitionRules.large_drive.utils_gb
+        # Large drives (300GB+): Generous allocation
+        # 512GB+ drive: ~100GB Ventoy, ~20GB Utils, rest for Backup
+        $ventoyGB = 100
+        $utilsGB = 20
+    }
+    
+    # Safety check: ensure we don't exceed available space
+    if (($ventoyGB + $utilsGB) -gt $availableGB) {
+        Write-Log "Warning: Calculated partitions too large, adjusting..." -Level WARNING
+        $ventoyGB = [math]::Floor($availableGB * 0.7)  # 70% for Ventoy
+        $utilsGB = [math]::Floor($availableGB * 0.15)  # 15% for Utils (leaving 15% for Backup)
     }
 
-    Write-Log ('  Drive size: {0} gigabytes' -f $driveSizeGB) -Level INFO
-    Write-Log ('  Partition scheme: Ventoy {0} gigs, Utils {1} gigs, Backup (remaining)' -f $ventoyGB, $utilsGB) -Level INFO
+    Write-Log ('  Drive size: {0} GB' -f $driveSizeGB) -Level INFO
+    Write-Log ('  Partition scheme: Ventoy {0} GB, Utils {1} GB, Backup (remaining)' -f $ventoyGB, $utilsGB) -Level INFO
 
     return @{
         ventoy_gb = $ventoyGB
@@ -1705,11 +1731,14 @@ function Install-Ventoy {
     }
 
     # Calculate reserve space (UTILS + BACKUP combined, in MB)
-    $reserveMB = [int](($Settings.utils_gb + 200) * 1024)  # Reserve for UTILS + approximate BACKUP
+    # Reserve space = Utils + minimum 10GB for Backup
+    # This leaves rest of drive for Ventoy partition
+    $minBackupGB = 10
+    $reserveMB = [int](($Settings.utils_gb + $minBackupGB) * 1024)
 
     # Install Ventoy
     Write-Log "Installing Ventoy to \\.\PhysicalDrive${DiskNumber}..."
-    Write-Log ('  Flags: GPT, Secure Boot enabled, Reserve {0} megabytes' -f $reserveMB)
+    Write-Log ('  Flags: GPT, Secure Boot enabled, Reserve {0} MB ({1} GB)' -f $reserveMB, [math]::Round($reserveMB/1024, 2))
 
     try {
         # Use Ventoy CLI mode (documented at https://www.ventoy.net/en/doc_windows_cli.html)
