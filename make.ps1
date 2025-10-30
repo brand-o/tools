@@ -1872,7 +1872,7 @@ function Initialize-FolderStructure {
     # UTILS structure
     $utilsFolders = @(
         "Portable",
-        "Programs",
+        "Installers",
         "Drivers\Storage",
         "Drivers\Networking",
         "Drivers\Bluetooth",
