@@ -947,15 +947,16 @@ function Get-DynamicPartitionSizes {
     $driveSizeGB = [math]::Round($DriveSizeBytes / 1GB, 2)
     
     # Smart partitioning: Fixed Ventoy + Utils sizes, FILES gets all remaining space
-    # Ventoy needs space for: ISOs (~50GB) + temp space for modding (18GB per ISO) + overhead
+    # Ventoy needs space for: ISOs (~50GB) + temp space for modding (~20GB per ISO) + overhead
     if ($driveSizeGB -lt 55) {
         throw "Drive too small. Minimum 55GB usable required, found $driveSizeGB GB"
     }
     elseif ($driveSizeGB -lt 100) {
         # Very small drives (55-99GB) - typically "64GB" drives with ~59GB usable
-        # 64GB actual: 40GB Ventoy (limited ISOs), 4GB Utils, ~5GB FILES
-        $ventoyGB = 40
-        $utilsGB = 4
+        # 64GB actual: 45GB Ventoy (2-3 Windows ISOs + modding), 3GB Utils, ~1GB FILES
+        # Warning: Limited space - can only mod 1-2 ISOs at a time
+        $ventoyGB = 45
+        $utilsGB = 3
     }
     elseif ($driveSizeGB -lt 200) {
         # Medium drives (100-199GB) - typically "128GB" drives with ~119GB usable
