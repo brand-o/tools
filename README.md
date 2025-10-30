@@ -12,10 +12,7 @@ iex (irm 'https://brando.tools/run')
 ### option 2: download and run
 1. download `RUN_ME.bat` from here [this repo](https://github.com/brand-o/tools/raw/refs/heads/main/RUN_ME.bat) (right click > save link as RUN_ME.bat)
 2. run it (will prompt for admin privileges)
-if needed to allow scripts use this
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force
-```
+
 
 ### if having issues with permissions running scripts use:
 if needed to allow scripts use this
