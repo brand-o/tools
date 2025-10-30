@@ -850,7 +850,10 @@ function Invoke-ISOModding {
 
         # Write to file
         $fileStream = [System.IO.File]::Create($finalISO)
-        $reader = New-Object System.IO.BinaryReader($stream)
+        
+        # BinaryReader requires a stream and encoding/leaveOpen parameter
+        # Using IStream COM interface requires special handling
+        $reader = New-Object System.IO.BinaryReader($stream, [System.Text.Encoding]::Default, $false)
         $buffer = New-Object byte[] 2048
 
         do {
@@ -872,10 +875,23 @@ function Invoke-ISOModding {
     catch {
         Write-Log "  ISO modding failed: $($_.Exception.Message)" -Level ERROR
 
+        # Close any open file handles
+        try {
+            if ($fileStream) { $fileStream.Close(); $fileStream.Dispose() }
+            if ($reader) { $reader.Close(); $reader.Dispose() }
+        } catch {}
+
         # Fallback to stock ISO
         if (Test-Path $SourceISO) {
             Write-Log "  Falling back to stock ISO" -Level WARN
             $fallback = Join-Path $Destination "Win11_OEM.iso"
+            
+            # Remove failed modded ISO if it exists
+            if (Test-Path $finalISO) {
+                Start-Sleep -Seconds 1
+                Remove-Item $finalISO -Force -ErrorAction SilentlyContinue
+            }
+            
             Copy-Item -Path $SourceISO -Destination $fallback -Force
             return $fallback
         }
@@ -883,10 +899,21 @@ function Invoke-ISOModding {
         return $null
     }
     finally {
-        # Cleanup
+        # Cleanup - ensure all handles are released
+        try {
+            if ($fileStream) { $fileStream.Close(); $fileStream.Dispose() }
+            if ($reader) { $reader.Close(); $reader.Dispose() }
+            if ($fsi) { [System.Runtime.InteropServices.Marshal]::ReleaseComObject($fsi) | Out-Null }
+        } catch {}
+
+        # Dismount ISO
         Dismount-DiskImage -ImagePath $SourceISO -ErrorAction SilentlyContinue | Out-Null
+        
+        # Wait for filesystem to release locks
+        Start-Sleep -Seconds 2
+        
+        # Cleanup work directory
         if (Test-Path $workDir) {
-            Start-Sleep -Seconds 1
             Remove-Item $workDir -Recurse -Force -ErrorAction SilentlyContinue
         }
     }
@@ -1142,8 +1169,14 @@ function Invoke-FidoDownload {
     Write-Log "  Starting Fido download for $Edition..." -Level INFO
 
     # Check if ISO already exists in destination (manual download or previous run)
-    $existingISOs = Get-ChildItem -Path $Destination -Filter "*.iso" -ErrorAction SilentlyContinue |
-        Where-Object { $_.Name -match "Win(10|11)" } |
+    # Match specific edition to avoid Win10 finding Win11 or vice versa
+    $searchPattern = switch ($Edition) {
+        "Win10Pro" { "Win10_*.iso" }
+        "Win11Pro" { "Win11_OEM*.iso" }  # Match only stock Win11 (OEM), not modded
+        default { "Win*.iso" }
+    }
+
+    $existingISOs = Get-ChildItem -Path $Destination -Filter $searchPattern -ErrorAction SilentlyContinue |
         Sort-Object LastWriteTime -Descending
 
     if ($existingISOs) {
