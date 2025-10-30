@@ -1562,16 +1562,14 @@
                                 }
                   },
                   {
-                      "name":  "Snappy Driver Installer Origin",
+                      "name":  "NVIDIA App",
                       "category":  "driver",
                       "type":  "exe",
                       "resolve":  {
-                                      "strategy":  "github_latest",
-                                      "repo":  "Glenn-1990/SDI",
-                                      "asset_regex":  "SDI_R.*\\.exe$",
-                                      "note":  "Offline driver installer with massive driver database"
+                                      "strategy":  "direct",
+                                      "note":  "NVIDIA App - Replaces GeForce Experience with unified driver and GPU management"
                                   },
-                      "source_url":  "",
+                      "source_url":  "https://us.download.nvidia.com/nvapp/client/11.0.5.420/NVIDIA_app_v11.0.5.420.exe",
                       "sha256":  "",
                       "dest":  "UTILS:/Drivers/",
                       "post":  [
@@ -1583,15 +1581,14 @@
                                 }
                   },
                   {
-                      "name":  "Basic Driver Pack",
+                      "name":  "AMD Adrenalin Software",
                       "category":  "driver",
-                      "type":  "torrent",
+                      "type":  "exe",
                       "resolve":  {
                                       "strategy":  "direct",
-                                      "filename":  "Drivers.torrent",
-                                      "note":  "Torrent with basic driver collection - requires torrent client"
+                                      "note":  "AMD Software Adrenalin Edition - Graphics driver and control panel"
                                   },
-                      "source_url":  "https://www.glenn.delahoy.com/downloads/sdio/Drivers.torrent",
+                      "source_url":  "https://drivers.amd.com/drivers/installer/25.20/whql/amd-software-adrenalin-edition-25.10.2-minimalsetup-251027_web.exe",
                       "sha256":  "",
                       "dest":  "UTILS:/Drivers/",
                       "post":  [

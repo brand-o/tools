@@ -29,7 +29,7 @@ the powershell script automates everything:
 1. **auto-detects** all connected flash drives
 2. **select** your target drive from the list
 3. **formats & partitions** the drive automatically (with confirmation)
-4. **downloads** 68+ tools, isos, drivers, and scripts from original or reliable sources
+4. **downloads** 80 tools, isos, drivers, and scripts from original or reliable sources
 5. **verifies hashes** (sha-256) where available for security
 6. **organizes** everything into a clean three-partition structure
 7. **makes bootable via ventoy** — ready to use as your ultimate tech toolkit
@@ -152,12 +152,12 @@ if the script is interrupted, it will detect partial installs and offer to:
 
 ### drivers (6 total)
 
-- Intel RST Driver
+- Intel RST (Rapid Storage Technology)
 - Intel Wi-Fi 6E/7 Driver
-- Intel 2.5GbE Driver  
 - Intel Bluetooth Driver
-- Snappy Driver Installer Origin
-- Basic Driver Pack
+- Realtek USB Ethernet Driver
+- NVIDIA App (Graphics Driver & Control Panel)
+- AMD Adrenalin Software (Graphics Driver & Control Panel)
 
 ### browser extensions
 - uBlock Origin (Firefox)
