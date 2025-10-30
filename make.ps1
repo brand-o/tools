@@ -947,22 +947,28 @@ function Get-DynamicPartitionSizes {
     $driveSizeGB = [math]::Round($DriveSizeBytes / 1GB, 2)
     
     # Smart partitioning: Fixed Ventoy + Utils sizes, FILES gets all remaining space
-    if ($driveSizeGB -lt 64) {
-        throw "Drive too small. Minimum 64GB required, found $driveSizeGB GB"
+    # Ventoy needs space for: ISOs (~50GB) + temp space for modding (18GB per ISO) + overhead
+    if ($driveSizeGB -lt 55) {
+        throw "Drive too small. Minimum 55GB usable required, found $driveSizeGB GB"
+    }
+    elseif ($driveSizeGB -lt 100) {
+        # Very small drives (55-99GB) - typically "64GB" drives with ~59GB usable
+        # 64GB actual: 40GB Ventoy (limited ISOs), 4GB Utils, ~5GB FILES
+        $ventoyGB = 40
+        $utilsGB = 4
     }
     elseif ($driveSizeGB -lt 200) {
-        # Small drives (64-199GB)
-        # 64GB: 45GB Ventoy, 5GB Utils, ~4GB FILES
-        # 128GB: 45GB Ventoy, 5GB Utils, ~68GB FILES
-        $ventoyGB = 45
-        $utilsGB = 5
+        # Medium drives (100-199GB) - typically "128GB" drives with ~119GB usable
+        # 128GB: 70GB Ventoy (50GB ISOs + 20GB modding temp), 15GB Utils, ~24GB FILES
+        $ventoyGB = 70
+        $utilsGB = 15
     }
     else {
         # Large drives (200GB+)
-        # 256GB: 60GB Ventoy, 15GB Utils, ~171GB FILES
-        # 512GB: 60GB Ventoy, 15GB Utils, ~427GB FILES
-        $ventoyGB = 60
-        $utilsGB = 15
+        # 256GB: 80GB Ventoy (more ISOs + modding space), 20GB Utils, ~146GB FILES
+        # 512GB+: 80GB Ventoy, 20GB Utils, rest for FILES
+        $ventoyGB = 80
+        $utilsGB = 20
     }
 
     Write-Log ('  Drive size: {0} GB' -f $driveSizeGB) -Level INFO
@@ -1342,7 +1348,7 @@ function Get-CandidateDisks {
     $disks = Get-Disk | Where-Object {
         # Filter: USB bus type OR removable AND reasonable size
         ($_.BusType -eq 'USB' -or $_.BusType -eq 'SCSI') -and
-        $_.Size -gt 100GB -and
+        $_.Size -gt 50GB -and
         $_.Size -lt 2TB -and
         -not $_.IsBoot -and
         -not $_.IsSystem
