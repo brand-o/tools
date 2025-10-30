@@ -2069,13 +2069,24 @@ function Start-Provisioning {
 
             # Determine destination path
             $destBase = if ($item.dest.StartsWith("VENTOY:")) {
+                if ([string]::IsNullOrWhiteSpace($Folders.VentoyRoot)) {
+                    throw "VentoyRoot is not set - partitions may not be mounted properly"
+                }
                 $item.dest -replace "^VENTOY:", $Folders.VentoyRoot
             }
             elseif ($item.dest.StartsWith("UTILS:")) {
+                if ([string]::IsNullOrWhiteSpace($Folders.UtilsRoot)) {
+                    throw "UtilsRoot is not set - partitions may not be mounted properly"
+                }
                 $item.dest -replace "^UTILS:", $Folders.UtilsRoot
             }
             else {
                 throw "Invalid destination prefix: $($item.dest)"
+            }
+
+            # Validate destBase is not empty or just a slash
+            if ([string]::IsNullOrWhiteSpace($destBase) -or $destBase -match '^[/\\]+$') {
+                throw "Invalid destination path generated: destBase='$destBase', item.dest='$($item.dest)', VentoyRoot='$($Folders.VentoyRoot)', UtilsRoot='$($Folders.UtilsRoot)'"
             }
 
             # Apply filename standardization for ISOs
