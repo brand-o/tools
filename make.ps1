@@ -1334,9 +1334,9 @@ function Get-CandidateDisks {
 
     $disks = Get-Disk | Where-Object {
         # Filter: USB bus type OR removable AND minimum 128GB drive size
+        # No upper size limit - support all large drives (1TB, 2TB, etc.)
         ($_.BusType -eq 'USB' -or $_.BusType -eq 'SCSI') -and
         $_.Size -gt 111GB -and
-        $_.Size -lt 2TB -and
         -not $_.IsBoot -and
         -not $_.IsSystem
     }
@@ -1724,7 +1724,8 @@ function Install-Ventoy {
     $disk = Get-Disk -Number $DiskNumber
     $totalDriveSizeGB = [math]::Round($disk.Size / 1GB, 2)
     $ventoyGB = $Settings.ventoy_gb
-    $ventoyOverheadGB = 10  # Ventoy's partition table overhead
+    # GPT overhead: ~34MB for partition table + 1GB safety margin for alignment
+    $ventoyOverheadGB = 2
     
     # Reserve = everything except Ventoy partition
     $reserveGB = $totalDriveSizeGB - $ventoyGB - $ventoyOverheadGB

@@ -54,23 +54,12 @@ if the script is interrupted, it will detect partial installs and offer to:
 
 ## included software
 
-### operating system isos (14 total)
+### operating system isos (15 total)
 
 **windows**
-- Windows 11 Pro 24H2 (OEM)
-- Windows 11 Pro 24H2 (OEM + modded)
-    - TPM 2.0 bypass
-    - Secure Boot bypass
-    - RAM requirement bypass
-    - Product key skip
-    - English (World) locale (to avoid bloatware install)
-    - Telemetry disabled
-    - BitLocker auto-encryption disabled
-    - Privacy questions skipped
-    - Local account allowed (no Microsoft Account required)
-- Windows 10 Pro 22H2 (OEM)
-- Windows 11 Enterprise LTSC 2024 (OEM)
-- Windows 10 Enterprise LTSC 2021 (OEM)
+- Windows 11 Pro 24H2 (Stock + Modded version with TPM/SecureBoot/RAM bypasses)
+- Windows 10 Pro 22H2 (Stock OEM)
+- Windows 11 Enterprise LTSC 2024
 - Tiny11 (lightweight Windows 11)
 - Live11 (live Windows 11 environment)
 
@@ -88,124 +77,78 @@ if the script is interrupted, it will detect partial installs and offer to:
 - MemTest86+ 7.20
 - Macrium Reflect Free v8
 
-### portable applications (42 total)
+### portable applications (31 total)
 
-**system utilities**
-- 7-Zip 25.01
-- Rufus
-- Balena Etcher
-- CPU-Z 2.17
-- HWiNFO
-- CrystalDiskInfo 9.5
-- CrystalDiskMark 8.0.5
-- NirSoft Suite (100+ utilities)
-- Sysinternals Suite
-- DDU v18.1.3.7
-- CRU 1.5.2
-- Everything 1.4.1
-- TreeSize Free
-- WinDirStat 1.1.2
-- ImDisk Toolkit
-- Process Hacker 2.39
-- Speccy
-
-**productivity & office**
-- Notepad++ (latest)
-- PDFsam Basic
-- VLC Media Player 3.0.21
-
-**network & security tools**
-- PuTTY
-- FileZilla
-- WinSCP 6.4.2
-- Nmap 7.98
+- 7-Zip
+- Advanced Port Scanner
 - Angry IP Scanner
-- Advanced Port Scanner 2.5
-- WinMTR 0.92
-- Wireshark 4.6.0
-- KeePassXC
-
-**download & torrent**
-- qBittorrent 5.1.1
-
-**password cracking & recovery** (require consent)
-- John the Ripper 1.9.0
+- Balena Etcher
+- CPU-Z
+- CRU (Custom Resolution Utility)
+- CrystalDiskInfo
+- CrystalDiskMark
+- DDU (Display Driver Uninstaller)
+- Everything (Search)
 - Hashcat
-
-**data recovery**
-- TestDisk & PhotoRec 7.1
-- Recuva
-
-**development & editors**
-- HxD (hex editor)
-
-### installer applications (32 total)
-
-**essential software**
-- 7-Zip 25.01
-- Git for Windows
-- Bulk Crap Uninstaller
-- Revo Uninstaller Free
+- HWiNFO
+- HxD Hex Editor
+- ImDisk Toolkit
+- John the Ripper
+- KeePassXC Portable
+- NirSoft Suite
+- Notepad++
+- PDFsam Basic Portable
+- Process Hacker
+- PuTTY
+- qBittorrent Portable
 - Rufus
+- Sysinternals Suite
+- TestDisk & PhotoRec
+- TreeSize Free
+- VLC Media Player Portable
+- WinDirStat
+- WinMTR
+- WinSCP Portable
+- Wireshark Portable
 
-**productivity & office suites**
-- LibreOffice 25.8.2
-- ONLYOFFICE Desktop Editors
-- Microsoft Office Deployment Tool
+### installer applications (27 total)
 
-**internet & communication**
-- Mozilla Firefox
-- Brave Browser
-- Discord
-- ProtonVPN 4.3.5
-
-**media & entertainment**
-- VLC Media Player 3.0.21
-- qBittorrent 5.1.2
-- Steam
-
-**development tools**
-- VS Code
-- Node.js LTS 22.21.0
-- Python 3.13.1
-
-**system tools**
-- HWiNFO64
-- Android Platform Tools (ADB & Fastboot)
-- VirtualBox 7.1.4
-- Wireshark 4.6.0
-- FileZilla
-
-**remote access**
-- TeamViewer
+- 7-Zip Installer
+- Android Platform Tools
 - AnyDesk
+- Brave Browser
+- BullCrapUninstaller
+- Discord
+- Git for Windows
+- HWiNFO64 Installer
+- LibreOffice
+- Microsoft Office Deployment Tool
+- Mozilla Firefox
+- Nmap
+- Node.js LTS
+- ONLYOFFICE Desktop Editors
+- Proton VPN
+- Python
+- qBittorrent Installer
+- Recuva
+- Revo Uninstaller Free
+- Rufus Installer
+- Speccy
+- Steam
+- TeamViewer
+- VirtualBox
+- VLC Media Player Installer
+- VS Code
+- Wireshark Installer
 
-**gpu software** (manual download required)
-- NVIDIA App
-- AMD Software Adrenalin Edition
+### drivers (6 total)
 
-### drivers (12 total)
-
-**storage drivers**
-- Intel RST (Rapid Storage Technology)
-- AMD NVMe Driver (manual)
-
-**networking drivers**
-- Intel Wi-Fi 6E/7 Driver 23.160.0
-- Realtek Wi-Fi Driver (manual)
-- Intel 2.5GbE Ethernet Driver 30.5
-- Realtek 2.5GbE Driver (manual)
-
-**bluetooth drivers**
-- Intel Bluetooth Driver 23.160.0
-- Realtek Bluetooth Driver (manual)
-
-**chipset drivers**
-- AMD Chipset Software (manual)
-
-**driver installers**
+- Intel RST Driver
+- Intel Wi-Fi 6E/7 Driver
+- Intel 2.5GbE Driver  
+- Intel Bluetooth Driver
 - Snappy Driver Installer Origin
-- Basic Driver Pack (torrent)
+- Basic Driver Pack
 
 ### browser extensions
 - uBlock Origin (Firefox)
