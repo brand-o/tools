@@ -950,18 +950,18 @@ function Get-DynamicPartitionSizes {
     if ($driveSizeGB -lt 64) {
         throw "Drive too small. Minimum 64GB required, found $driveSizeGB GB"
     }
-    elseif ($driveSizeGB -lt 150) {
-        # Small drives (64-149GB)
-        # 64GB: 37GB Ventoy, 5GB Utils, ~12GB FILES
-        # 128GB: 37GB Ventoy, 5GB Utils, ~76GB FILES
-        $ventoyGB = 37
+    elseif ($driveSizeGB -lt 200) {
+        # Small drives (64-199GB)
+        # 64GB: 45GB Ventoy, 5GB Utils, ~4GB FILES
+        # 128GB: 45GB Ventoy, 5GB Utils, ~68GB FILES
+        $ventoyGB = 45
         $utilsGB = 5
     }
     else {
-        # Large drives (150GB+)
-        # 256GB: 50GB Ventoy, 15GB Utils, ~181GB FILES
-        # 512GB: 50GB Ventoy, 15GB Utils, ~437GB FILES
-        $ventoyGB = 50
+        # Large drives (200GB+)
+        # 256GB: 60GB Ventoy, 15GB Utils, ~171GB FILES
+        # 512GB: 60GB Ventoy, 15GB Utils, ~427GB FILES
+        $ventoyGB = 60
         $utilsGB = 15
     }
 
