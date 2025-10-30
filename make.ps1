@@ -2463,6 +2463,7 @@ function Main {
         $driveSizeBytes = $selectedDisk.SizeBytes
         $dynamicSizes = Get-DynamicPartitionSizes -DriveSizeBytes $driveSizeBytes -PartitionRules $settings.partition_rules
         $settings.ventoy_iso_gb = $dynamicSizes.ventoy_gb
+        $settings.ventoy_gb = $dynamicSizes.ventoy_gb  # Also set ventoy_gb for Install-Ventoy function
         $settings.utils_gb = $dynamicSizes.utils_gb
 
         # Check for existing brando's toolkit installation
