@@ -27,7 +27,7 @@ the powershell script automates everything:
 
 ## requirements
 - **Windows** (requires PowerShell + administrator privileges)
-- **fast 64gb+ USB flash drive** (256-512gb+ recommended)
+- **fast 128GB+ USB flash drive** (256-512GB+ recommended)
 - **internet connection** for downloads
 - **~30-90 minutes** depending on drive speed and internet connection
 
@@ -36,15 +36,15 @@ the powershell script automates everything:
 the script creates three partitions on your drive:
 
 ### 1. ventoy (uefi secure boot compatible)
-- **size:** 55gb (small drives) or 70gb (large drives ≥100gb)
+- **size:** 55GB (all ISOs + 20% buffer for modding temp space)
 - **contents:** all bootable ISOs for multi-boot capability
 
 ### 2. utils (tools & installers)
-- **size:** 3gb (small drives) or 20gb (large drives ≥100gb)
+- **size:** 8GB (all tools/drivers + 20% buffer)
 - **contents:** portable apps, installers, drivers, scripts
 
-### 3. backup (remaining space)
-- **size:** all remaining drive space
+### 3. files (remaining space)
+- **size:** all remaining drive space (typically 50-60GB on 128GB drives)
 - **contents:** your personal files, backups, documents
 
 ### resume capability

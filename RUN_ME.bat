@@ -40,7 +40,7 @@ echo     - Organized folder structure with shortcuts
 echo.
 echo   Requirements:
 echo     - Administrator privileges (will request automatically)
-echo     - USB drive 64GB or larger
+echo     - USB drive 128GB or larger
 echo     - Internet connection for downloads
 echo.
 echo   Downloading latest version from brando.tools...
@@ -58,15 +58,17 @@ if %errorLevel% == 0 (
 
 :: Request admin privileges
 echo [INFO] Requesting Administrator privileges...
+echo [INFO] A new window will open - please accept the UAC prompt
 echo.
+pause
 
 :: Use PowerShell to elevate and run the online script
-powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process powershell -ArgumentList '-NoProfile -ExecutionPolicy Bypass -NoExit -Command \"iex (iwr ''https://brando.tools/make.ps1'' -UseBasicParsing).Content\"' -Verb RunAs"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process powershell -ArgumentList '-NoProfile -ExecutionPolicy Bypass -Command \"Write-Host ''Brando''''s Toolkit - Launching...''; irm brando.tools/run | iex; Write-Host ''''; Write-Host ''Press any key to exit...''; $null = $Host.UI.RawUI.ReadKey(''''NoEcho,IncludeKeyDown'''')\"' -Verb RunAs"
 
 :: Exit this window since we spawned an elevated one
 exit /b
 
 :RunScript
 :: If we're already admin, run the script directly
-powershell -NoProfile -ExecutionPolicy Bypass -NoExit -Command "iex (iwr 'https://brando.tools/make.ps1' -UseBasicParsing).Content"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Write-Host 'Brando''s Toolkit - Launching...'; irm brando.tools/run | iex; Write-Host ''; Write-Host 'Press any key to exit...'; $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')"
 exit /b

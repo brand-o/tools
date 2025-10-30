@@ -25,7 +25,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     - Ventoy bootloader (GPT, Secure Boot enabled)
     - VENTOY partition (NTFS) for ISO files
     - UTILS partition (exFAT) for portable tools and installers
-    - FILES partition (exFAT) for large FILESs
+    - BACKUP partition (exFAT) for large backups
 
     It downloads official tools, ISOs, and utilities with SHA-256 verification,
     creates organized folder structures, and generates a Ventoy menu configuration.
@@ -62,16 +62,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     License: MIT
 #>
 
-& {
-
-# When executed via 'irm | iex', parameters are not supported
-# For parameter support, download and run the script locally: .\make.ps1 -ConfigPath <path>
-
+[CmdletBinding()]
 param(
+    [Parameter()]
     [string]$ConfigPath = "",
+
+    [Parameter()]
     [string]$BundleUrl = "",
+
+    [Parameter()]
     [switch]$SkipDownloads,
+
+    [Parameter()]
     [switch]$TestMode,
+
+    [Parameter()]
     [switch]$Force
 )
 
@@ -82,18 +87,14 @@ param(
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Host "Not running as Administrator. Relaunching with elevation..." -ForegroundColor Yellow
 
+    # Get the full script content
+    $scriptContent = $MyInvocation.MyCommand.ScriptContents
+
     # Choose PowerShell executable (prefer pwsh if available)
     $powershellCmd = if (Get-Command pwsh -ErrorAction SilentlyContinue) { "pwsh" } else { "powershell" }
 
-    # Check if script is running from a file or was invoked directly
-    if ($MyInvocation.MyCommand.Path) {
-        # Running from a file - relaunch the file
-        Start-Process $powershellCmd -ArgumentList "-ExecutionPolicy Bypass -NoProfile -File `"$($MyInvocation.MyCommand.Path)`"" -Verb RunAs
-    } else {
-        # Running from command line (iex) - relaunch with script content
-        $scriptContent = $MyInvocation.MyCommand.ScriptContents
-        Start-Process $powershellCmd -ArgumentList "-ExecutionPolicy Bypass -NoProfile -Command `"$scriptContent`"" -Verb RunAs
-    }
+    # Launch elevated PowerShell with the script
+    Start-Process $powershellCmd -ArgumentList "-ExecutionPolicy Bypass -NoProfile -Command `"$scriptContent`"" -Verb RunAs
 
     # Exit this non-elevated instance
     exit
@@ -945,21 +946,19 @@ function Get-DynamicPartitionSizes {
     )
 
     $driveSizeGB = [math]::Round($DriveSizeBytes / 1GB, 2)
-    
-    # Fixed partitioning scheme for all drives (128GB+ required)
-    # VENTOY: 55GB (45.7GB ISOs + 20% buffer for modding temp space)
-    # UTILS: 8GB (6GB tools/drivers + 20% buffer)
-    # FILES: All remaining space (personal files, backups, etc.)
-    
-    if ($driveSizeGB -lt 111) {
-        throw "Drive too small. Minimum 128GB drive required (111GB usable), found $driveSizeGB GB"
+    $threshold = $PartitionRules.small_drive_threshold_gb
+
+    if ($driveSizeGB -lt $threshold) {
+        $ventoyGB = $PartitionRules.small_drive.ventoy_gb
+        $utilsGB = $PartitionRules.small_drive.utils_gb
+    }
+    else {
+        $ventoyGB = $PartitionRules.large_drive.ventoy_gb
+        $utilsGB = $PartitionRules.large_drive.utils_gb
     }
 
-    $ventoyGB = 55
-    $utilsGB = 8
-
-    Write-Log ('  Drive size: {0} GB' -f $driveSizeGB) -Level INFO
-    Write-Log ('  Partition scheme: Ventoy {0} GB, Utils {1} GB, FILES (all remaining)' -f $ventoyGB, $utilsGB) -Level INFO
+    Write-Log ('  Drive size: {0} gigabytes' -f $driveSizeGB) -Level INFO
+    Write-Log ('  Partition scheme: Ventoy {0} gigs, Utils {1} gigs, Backup (remaining)' -f $ventoyGB, $utilsGB) -Level INFO
 
     return @{
         ventoy_gb = $ventoyGB
@@ -1333,9 +1332,9 @@ function Get-CandidateDisks {
     Write-Log "Scanning for candidate USB drives..."
 
     $disks = Get-Disk | Where-Object {
-        # Filter: USB bus type OR removable AND minimum 128GB drive size
+        # Filter: USB bus type OR removable AND reasonable size
         ($_.BusType -eq 'USB' -or $_.BusType -eq 'SCSI') -and
-        $_.Size -gt 111GB -and
+        $_.Size -gt 100GB -and
         $_.Size -lt 2TB -and
         -not $_.IsBoot -and
         -not $_.IsSystem
@@ -1504,22 +1503,22 @@ function Test-ExistingBrandoToolkit {
         }
     }
 
-    # Look for characteristic brando's toolkit volumes (VENTOY, UTILS, FILES)
+    # Look for characteristic brando's toolkit volumes (VENTOY, UTILS, BACKUP)
     $hasVentoy = $volumes | Where-Object { $_.FileSystemLabel -eq "VENTOY" }
     $hasUtils = $volumes | Where-Object { $_.FileSystemLabel -eq "UTILS" }
-    $hasFILES = $volumes | Where-Object { $_.FileSystemLabel -eq "FILES" }
+    $hasBackup = $volumes | Where-Object { $_.FileSystemLabel -eq "BACKUP" }
 
-    if ($hasVentoy -or $hasUtils -or $hasFILES) {
+    if ($hasVentoy -or $hasUtils -or $hasBackup) {
         Write-Log "  Found existing brando's toolkit partitions:" -Level WARN
         if ($hasVentoy) { Write-Log "    - VENTOY: $($hasVentoy.DriveLetter):\" -Level WARN }
         if ($hasUtils) { Write-Log "    - UTILS: $($hasUtils.DriveLetter):\" -Level WARN }
-        if ($hasFILES) { Write-Log "    - FILES: $($hasFILES.DriveLetter):\" -Level WARN }
+        if ($hasBackup) { Write-Log "    - BACKUP: $($hasBackup.DriveLetter):\" -Level WARN }
 
         return @{
             Exists = $true
             Ventoy = $hasVentoy
             Utils = $hasUtils
-            FILES = $hasFILES
+            Backup = $hasBackup
         }
     }
 
@@ -1608,17 +1607,11 @@ convert gpt
     $utilsSizeBytes = [int64]($Settings.utils_gb * 1GB)
 
     try {
-        # Create partition WITHOUT drive letter to prevent Explorer popup
-        $utilsPartition = New-Partition -DiskNumber $diskNumber -Size $utilsSizeBytes -ErrorAction Stop
-        Start-Sleep -Seconds 1
+        $utilsPartition = New-Partition -DiskNumber $diskNumber -Size $utilsSizeBytes -AssignDriveLetter -ErrorAction Stop
+        Start-Sleep -Seconds 2
 
-        # Format the partition while it has no drive letter (prevents "needs formatting" popup)
         $utilsVolume = Format-Volume -Partition $utilsPartition -FileSystem exFAT -NewFileSystemLabel "UTILS" -Confirm:$false -ErrorAction Stop
-        Start-Sleep -Seconds 1
-
-        # Now assign drive letter after formatting
-        $utilsPartition | Add-PartitionAccessPath -AssignDriveLetter -ErrorAction Stop
-        Start-Sleep -Seconds 1
+        Start-Sleep -Seconds 2
 
         # Refresh partition info to get the assigned drive letter
         $utilsPartition = Get-Partition -DiskNumber $diskNumber -PartitionNumber $utilsPartition.PartitionNumber
@@ -1632,31 +1625,25 @@ convert gpt
         throw
     }
 
-    # Step 5: Create FILES partition (use remaining space)
-    Write-Log "Step 5/5: Creating FILES partition..."
+    # Step 5: Create BACKUP partition (use remaining space)
+    Write-Log "Step 5/5: Creating BACKUP partition..."
 
     try {
-        # Create partition WITHOUT drive letter to prevent Explorer popup
-        $FILESPartition = New-Partition -DiskNumber $diskNumber -UseMaximumSize -ErrorAction Stop
-        Start-Sleep -Seconds 1
+        $backupPartition = New-Partition -DiskNumber $diskNumber -UseMaximumSize -AssignDriveLetter -ErrorAction Stop
+        Start-Sleep -Seconds 2
 
-        # Format the partition while it has no drive letter (prevents "needs formatting" popup)
-        $FILESVolume = Format-Volume -Partition $FILESPartition -FileSystem exFAT -NewFileSystemLabel "FILES" -Confirm:$false -ErrorAction Stop
-        Start-Sleep -Seconds 1
-
-        # Now assign drive letter after formatting
-        $FILESPartition | Add-PartitionAccessPath -AssignDriveLetter -ErrorAction Stop
-        Start-Sleep -Seconds 1
+        $backupVolume = Format-Volume -Partition $backupPartition -FileSystem exFAT -NewFileSystemLabel "BACKUP" -Confirm:$false -ErrorAction Stop
+        Start-Sleep -Seconds 2
 
         # Refresh partition info to get the assigned drive letter
-        $FILESPartition = Get-Partition -DiskNumber $diskNumber -PartitionNumber $FILESPartition.PartitionNumber
-        $FILESLetter = $FILESPartition.DriveLetter
+        $backupPartition = Get-Partition -DiskNumber $diskNumber -PartitionNumber $backupPartition.PartitionNumber
+        $backupLetter = $backupPartition.DriveLetter
 
-        $friendlySize = Get-FriendlySize $FILESPartition.Size
-        Write-Log "  FILES partition created: ${FILESLetter}:\ ($friendlySize)" -Level SUCCESS
+        $friendlySize = Get-FriendlySize $backupPartition.Size
+        Write-Log "  BACKUP partition created: ${backupLetter}:\ ($friendlySize)" -Level SUCCESS
     }
     catch {
-        Write-Log "  Failed to create FILES partition: $($_.Exception.Message)" -Level ERROR
+        Write-Log "  Failed to create BACKUP partition: $($_.Exception.Message)" -Level ERROR
         throw
     }
 
@@ -1666,10 +1653,10 @@ convert gpt
         DiskNumber = $diskNumber
         VentoyLetter = $ventoyInfo.Letter
         UtilsLetter = $utilsLetter
-        FILESLetter = $FILESLetter
+        BackupLetter = $backupLetter
         VentoySize = $ventoyInfo.Size
         UtilsSize = $utilsSizeBytes
-        FILESSize = $FILESPartition.Size
+        BackupSize = $backupPartition.Size
     }
 }
 
@@ -1718,21 +1705,12 @@ function Install-Ventoy {
         }
     }
 
-    # Calculate reserve space (UTILS + FILES combined, in MB)
-    # Reserve = Total Drive Size - Ventoy Size - Overhead
-    # This ensures FILES gets ALL remaining space after Ventoy and Utils
-    $disk = Get-Disk -Number $DiskNumber
-    $totalDriveSizeGB = [math]::Round($disk.Size / 1GB, 2)
-    $ventoyGB = $Settings.ventoy_gb
-    $ventoyOverheadGB = 10  # Ventoy's partition table overhead
-    
-    # Reserve = everything except Ventoy partition
-    $reserveGB = $totalDriveSizeGB - $ventoyGB - $ventoyOverheadGB
-    $reserveMB = [int]($reserveGB * 1024)
+    # Calculate reserve space (UTILS + BACKUP combined, in MB)
+    $reserveMB = [int](($Settings.utils_gb + 200) * 1024)  # Reserve for UTILS + approximate BACKUP
 
     # Install Ventoy
     Write-Log "Installing Ventoy to \\.\PhysicalDrive${DiskNumber}..."
-    Write-Log ('  Flags: GPT, Secure Boot enabled, Reserve {0} MB ({1} GB)' -f $reserveMB, [math]::Round($reserveMB/1024, 2))
+    Write-Log ('  Flags: GPT, Secure Boot enabled, Reserve {0} megabytes' -f $reserveMB)
 
     try {
         # Use Ventoy CLI mode (documented at https://www.ventoy.net/en/doc_windows_cli.html)
@@ -1858,7 +1836,7 @@ function Initialize-FolderStructure {
     # UTILS structure
     $utilsFolders = @(
         "Portable",
-        "Installers",
+        "Programs",
         "Drivers\Storage",
         "Drivers\Networking",
         "Drivers\Bluetooth",
@@ -1879,7 +1857,7 @@ function Initialize-FolderStructure {
     return @{
         VentoyRoot = $ventoyRoot
         UtilsRoot = $utilsRoot
-        FILESRoot = "$($DriveInfo.FILESLetter):\"
+        BackupRoot = "$($DriveInfo.BackupLetter):\"
     }
 }
 
@@ -2364,7 +2342,7 @@ function Main {
 
     # Set default BundleUrl if not provided
     if ([string]::IsNullOrEmpty($BundleUrl)) {
-        $BundleUrl = "https://raw.githubusercontent.com/brand-o/tools/main/bundle.json"
+        $BundleUrl = "https://brando.tools/bundle.json"
     }
 
     # Set default ConfigPath for fallback
@@ -2440,7 +2418,7 @@ function Main {
         $Folders = @{
             VentoyRoot = Join-Path $testRoot "VENTOY"
             UtilsRoot = Join-Path $testRoot "UTILS"
-            FILESRoot = Join-Path $testRoot "FILES"
+            BackupRoot = Join-Path $testRoot "BACKUP"
         }
 
         foreach ($folder in $Folders.Values) {
@@ -2461,7 +2439,6 @@ function Main {
         $driveSizeBytes = $selectedDisk.SizeBytes
         $dynamicSizes = Get-DynamicPartitionSizes -DriveSizeBytes $driveSizeBytes -PartitionRules $settings.partition_rules
         $settings.ventoy_iso_gb = $dynamicSizes.ventoy_gb
-        $settings.ventoy_gb = $dynamicSizes.ventoy_gb  # Also set ventoy_gb for Install-Ventoy function
         $settings.utils_gb = $dynamicSizes.utils_gb
 
         # Check for existing brando's toolkit installation
@@ -2487,7 +2464,7 @@ function Main {
             $driveInfo = @{
                 VentoyLetter = if ($existingDrive.Ventoy) { $existingDrive.Ventoy.DriveLetter } else { $null }
                 UtilsLetter = if ($existingDrive.Utils) { $existingDrive.Utils.DriveLetter } else { $null }
-                FILESLetter = if ($existingDrive.FILES) { $existingDrive.FILES.DriveLetter } else { $null }
+                BackupLetter = if ($existingDrive.Backup) { $existingDrive.Backup.DriveLetter } else { $null }
             }
 
             if (-not $driveInfo.VentoyLetter -or -not $driveInfo.UtilsLetter) {
@@ -2578,10 +2555,10 @@ function Main {
     Write-Host "Drive Layout:" -ForegroundColor Cyan
     $ventoySize = Get-FriendlySize $driveInfo.VentoySize
     $utilsSize = Get-FriendlySize $driveInfo.UtilsSize
-    $FILESSize = Get-FriendlySize $driveInfo.FILESSize
+    $backupSize = Get-FriendlySize $driveInfo.BackupSize
     Write-Host "  VENTOY:  $($folders.VentoyRoot)  ($ventoySize)" -ForegroundColor White
     Write-Host "  UTILS:   $($folders.UtilsRoot)  ($utilsSize)" -ForegroundColor White
-    Write-Host "  FILES:  $($folders.FILESRoot)  ($FILESSize)" -ForegroundColor White
+    Write-Host "  BACKUP:  $($folders.BackupRoot)  ($backupSize)" -ForegroundColor White
     Write-Host ""
     Write-Host "Next steps:" -ForegroundColor Yellow
     Write-Host "  1. Review the manifest: $($folders.UtilsRoot)_Meta\manifest.json" -ForegroundColor Gray
@@ -2593,7 +2570,7 @@ function Main {
     Write-Host ""
 }
 
-# Run Main function
+# Run
 try {
     Main
 }
@@ -2602,4 +2579,6 @@ catch {
     Write-Log "Stack trace: $($_.ScriptStackTrace)" -Level ERROR
     exit 1
 }
-} @args
+
+# Auto-execute Main when script is run
+Main
