@@ -953,10 +953,11 @@ function Get-DynamicPartitionSizes {
     }
     elseif ($driveSizeGB -lt 100) {
         # Very small drives (55-99GB) - typically "64GB" drives with ~59GB usable
-        # 64GB actual: 45GB Ventoy (2-3 Windows ISOs + modding), 3GB Utils, ~1GB FILES
+        # 64GB actual: 40GB Ventoy (2-3 Windows ISOs + modding), 8GB Utils (all tools), ~1GB FILES
         # Warning: Limited space - can only mod 1-2 ISOs at a time
-        $ventoyGB = 45
-        $utilsGB = 3
+        # Note: 8GB Utils ensures all portable tools + installers + drivers fit
+        $ventoyGB = 40
+        $utilsGB = 8
     }
     elseif ($driveSizeGB -lt 200) {
         # Medium drives (100-199GB) - typically "128GB" drives with ~119GB usable
