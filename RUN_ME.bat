@@ -63,12 +63,12 @@ echo.
 pause
 
 :: Use PowerShell to elevate and run the online script
-powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process powershell -ArgumentList '-NoProfile -ExecutionPolicy Bypass -Command \"Write-Host ''Brando''''s Toolkit - Launching...''; irm brando.tools/run | iex; Write-Host ''''; Write-Host ''Press any key to exit...''; $null = $Host.UI.RawUI.ReadKey(''''NoEcho,IncludeKeyDown'''')\"' -Verb RunAs"
+powershell -NoProfile -Command "Start-Process PowerShell -Verb RunAs -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-Command','irm https://brando.tools/run | iex; Write-Host """"; Write-Host ""Press any key to exit...""; $null = $Host.UI.RawUI.ReadKey(""NoEcho,IncludeKeyDown"")'"
 
 :: Exit this window since we spawned an elevated one
 exit /b
 
 :RunScript
 :: If we're already admin, run the script directly
-powershell -NoProfile -ExecutionPolicy Bypass -Command "Write-Host 'Brando''s Toolkit - Launching...'; irm brando.tools/run | iex; Write-Host ''; Write-Host 'Press any key to exit...'; $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "irm brando.tools/run | iex; Write-Host ''; Write-Host 'Press any key to exit...'; $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')"
 exit /b
