@@ -47,6 +47,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 .PARAMETER Force
     Skip confirmation prompts (use with extreme caution)
 
+.PARAMETER Skip
+    Skip specific categories (e.g., "iso", "portable", "installer", "driver")
+    Can specify multiple categories: -Skip iso,driver
+
 .EXAMPLE
     .\make.ps1
 
@@ -55,6 +59,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 .EXAMPLE
     .\make.ps1 -BundleUrl "https://brando.tools/bundle.json"
+
+.EXAMPLE
+    .\make.ps1 -Skip iso
+    Skip all ISO downloads (faster testing)
+
+.EXAMPLE
+    .\make.ps1 -Skip iso,driver
+    Skip both ISOs and drivers
 
 .NOTES
     Author: Brando (Generated with Claude Code)
@@ -72,7 +84,8 @@ param(
     [string]$BundleUrl = "",
     [switch]$SkipDownloads,
     [switch]$TestMode,
-    [switch]$Force
+    [switch]$Force,
+    [string[]]$Skip = @()
 )
 
 # ============================================================================
@@ -1942,6 +1955,10 @@ function Start-Provisioning {
 
     Write-Log "Starting provisioning phase..."
 
+    if ($Skip.Count -gt 0) {
+        Write-Log "Skipping categories: $($Skip -join ', ')" -Level WARN
+    }
+
     $items = $Config.items
     $totalItems = ($items | Where-Object { -not $_.flags.manual }).Count
     $processed = 0
@@ -1969,6 +1986,13 @@ function Start-Provisioning {
         # Check if requires consent
         if ($item.flags.require_consent -and -not $env:TECHDRIVE_CONSENT_DUALUSE) {
             Write-Log "  Requires consent (dual-use tool). Set `$env:TECHDRIVE_CONSENT_DUALUSE=1 to enable." -Level WARN
+            $skipped++
+            continue
+        }
+
+        # Check if category should be skipped
+        if ($Skip -contains $item.category) {
+            Write-Log "  Skipping (category: $($item.category))" -Level WARN
             $skipped++
             continue
         }
