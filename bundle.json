@@ -809,6 +809,66 @@
                                 }
                   },
                   {
+                      "name":  "Recuva",
+                      "category":  "installer",
+                      "type":  "exe",
+                      "resolve":  {
+                                      "strategy":  "direct",
+                                      "filename":  "rcsetup.exe",
+                                      "note":  "File recovery tool by Piriform/CCleaner"
+                                  },
+                      "source_url":  "https://download.ccleaner.com/rcsetup153.exe",
+                      "sha256":  "",
+                      "dest":  "UTILS:/Installers/",
+                      "post":  [
+
+                               ],
+                      "flags":  {
+                                    "require_consent":  false,
+                                    "manual":  false
+                                }
+                  },
+                  {
+                      "name":  "Speccy",
+                      "category":  "installer",
+                      "type":  "exe",
+                      "resolve":  {
+                                      "strategy":  "direct",
+                                      "filename":  "spsetup.exe",
+                                      "note":  "System information tool by Piriform"
+                                  },
+                      "source_url":  "https://download.ccleaner.com/spsetup132.exe",
+                      "sha256":  "",
+                      "dest":  "UTILS:/Installers/",
+                      "post":  [
+
+                               ],
+                      "flags":  {
+                                    "require_consent":  false,
+                                    "manual":  false
+                                }
+                  },
+                  {
+                      "name":  "Nmap",
+                      "category":  "installer",
+                      "type":  "exe",
+                      "resolve":  {
+                                      "strategy":  "direct",
+                                      "filename":  "nmap-setup.exe",
+                                      "note":  "Network scanner and security auditing tool"
+                                  },
+                      "source_url":  "https://nmap.org/dist/nmap-7.98-setup.exe",
+                      "sha256":  "",
+                      "dest":  "UTILS:/Installers/",
+                      "post":  [
+
+                               ],
+                      "flags":  {
+                                    "require_consent":  false,
+                                    "manual":  false
+                                }
+                  },
+                  {
                       "name":  "WinSCP Portable",
                       "category":  "portable",
                       "type":  "zip",
