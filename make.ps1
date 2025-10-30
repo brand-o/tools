@@ -2091,18 +2091,26 @@ function Start-Provisioning {
                 if ([string]::IsNullOrWhiteSpace($Folders.VentoyRoot)) {
                     throw "VentoyRoot is not set - partitions may not be mounted properly"
                 }
-                $item.dest -replace "^VENTOY:", $Folders.VentoyRoot
+                # Replace prefix and normalize path separators
+                $replaced = $item.dest -replace "^VENTOY:", $Folders.VentoyRoot
+                $replaced -replace '/', '\'
             }
             elseif ($item.dest.StartsWith("UTILS:")) {
                 if ([string]::IsNullOrWhiteSpace($Folders.UtilsRoot)) {
                     throw "UtilsRoot is not set - partitions may not be mounted properly"
                 }
-                $item.dest -replace "^UTILS:", $Folders.UtilsRoot
+                # Replace prefix and normalize path separators
+                $replaced = $item.dest -replace "^UTILS:", $Folders.UtilsRoot
+                $replaced -replace '/', '\'
             }
             else {
                 throw "Invalid destination prefix: $($item.dest)"
             }
 
+            # Normalize: remove duplicate backslashes (except after drive letter)
+            # E:\\Portable\ becomes E:\Portable\
+            $destBase = $destBase -replace '(.)\\\\', '$1\'
+            
             # Validate destBase is not empty or just a slash
             if ([string]::IsNullOrWhiteSpace($destBase) -or $destBase -match '^[/\\]+$') {
                 throw "Invalid destination path generated: destBase='$destBase', item.dest='$($item.dest)', VentoyRoot='$($Folders.VentoyRoot)', UtilsRoot='$($Folders.UtilsRoot)'"
