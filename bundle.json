@@ -8,7 +8,6 @@
     "settings":  {
                      "ventoy_iso_gb":  "auto",
                      "utils_gb":  "auto",
-                     "verify_mode":  "soft",
                      "partition_rules":  {
                                              "small_drive_threshold_gb":  100,
                                              "small_drive":  {
