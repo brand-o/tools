@@ -149,13 +149,6 @@ Disk 0 (128GB = 111GB usable)
 
 ### Known Issues & Limitations
 
-#### CRITICAL: Hash Verification
-- **Status**: ⚠️ **0/78 items have SHA256 hashes**
-- **Impact**: ALL downloads skip hash verification
-- **Risk**: Security vulnerability, no integrity checks
-- **Solution**: Manual hash collection for each item
-- **Timeline**: Post-production (too time-consuming for today)
-
 #### Path Errors
 - **Status**: ⚠️ Under investigation
 - **Symptoms**: "Cannot bind argument to parameter 'Path' because it is an empty string"
@@ -174,10 +167,9 @@ Disk 0 (128GB = 111GB usable)
 ## Future Ideas & Enhancements
 
 ### Short-Term (Next Release)
-1. **Hash Implementation**: Add SHA256 hashes for all 78 items
-2. **Path Debugging**: Fix partition detection on all drive types
-3. **Error Recovery**: Better handling of partial failures
-4. **Progress UI**: Show overall completion percentage
+1. **Path Debugging**: Fix partition detection on all drive types
+2. **Error Recovery**: Better handling of partial failures
+3. **Progress UI**: Show overall completion percentage
 
 ### Medium-Term
 1. **[1] Full / [2] Minimal Install**: Let users skip large items
@@ -222,7 +214,6 @@ Disk 0 (128GB = 111GB usable)
 - [ ] Document any remaining issues
 
 ### Post-Launch
-- [ ] Collect SHA256 hashes for all 78 items
 - [ ] Test on various drive brands/sizes
 - [ ] Test on Windows 10 vs 11
 - [ ] Test Ventoy boot on UEFI vs Legacy
@@ -240,14 +231,13 @@ Disk 0 (128GB = 111GB usable)
 
 ## Technical Debt
 
-1. **No hash verification**: Security risk, integrity unknown
-2. **Hardcoded URLs**: Many URLs will break when versions update
-3. **Limited error handling**: Some failures don't recover gracefully
-4. **No logging rotation**: Log files grow indefinitely
-5. **Magic numbers**: Partition sizes hardcoded (55GB, 8GB)
-6. **Minimal testing**: No unit tests, manual testing only
-7. **Windows-only**: No Linux/macOS support for creation
-8. **No CI/CD**: Manual testing and deployment
+1. **Hardcoded URLs**: Many URLs will break when versions update
+2. **Limited error handling**: Some failures don't recover gracefully
+3. **No logging rotation**: Log files grow indefinitely
+4. **Magic numbers**: Partition sizes hardcoded (55GB, 8GB)
+5. **Minimal testing**: No unit tests, manual testing only
+6. **Windows-only**: No Linux/macOS support for creation
+7. **No CI/CD**: Manual testing and deployment
 
 ---
 

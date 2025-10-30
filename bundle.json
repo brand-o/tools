@@ -1,10 +1,10 @@
-{
-    "_license": {
-        "name": "GNU General Public License v3.0",
-        "url": "https://www.gnu.org/licenses/gpl-3.0.html",
-        "copyright": "Copyright (C) 2025 Brando",
-        "notice": "This configuration file is part of Brando's Toolkit. This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See https://www.gnu.org/licenses/ for details."
-    },
+﻿{
+    "_license":  {
+                     "name":  "GNU General Public License v3.0",
+                     "url":  "https://www.gnu.org/licenses/gpl-3.0.html",
+                     "copyright":  "Copyright (C) 2025 Brando",
+                     "notice":  "This configuration file is part of Brando\u0027s Toolkit. This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See https://www.gnu.org/licenses/ for details."
+                 },
     "settings":  {
                      "ventoy_iso_gb":  "auto",
                      "utils_gb":  "auto",
@@ -37,7 +37,6 @@
                                       "note":  "Downloads stock ISO, then creates modded version with TPM/SecureBoot/RAM bypasses using Get-Win11.cmd. Both ISOs saved to drive."
                                   },
                       "source_url":  "https://raw.githubusercontent.com/pbatard/Fido/master/Fido.ps1",
-                      "sha256":  "",
                       "dest":  "VENTOY:/ISO/Windows/",
                       "flags":  {
                                     "require_consent":  false,
@@ -55,7 +54,6 @@
                                       "note":  "Official Microsoft ISO - TPM not required for Win10"
                                   },
                       "source_url":  "https://raw.githubusercontent.com/pbatard/Fido/master/Fido.ps1",
-                      "sha256":  "",
                       "dest":  "VENTOY:/ISO/Windows/",
                       "flags":  {
                                     "require_consent":  false,
@@ -73,8 +71,7 @@
                                       "modifications":  "None - LTSC already has relaxed requirements",
                                       "note":  "Official Microsoft OEM download - file extension auto-renamed to .iso"
                                   },
-                      "source_url":  "https://oemsoc.download.prss.microsoft.com/dbazure/X23-81951_26100.1742.240906-0331.ge_release_svc_refresh_CLIENT_ENTERPRISES_OEM_x64FRE_en-us.iso_640de540-87c4-427f-be87-e6d53a3a60b4?t=2c3b664b-b119-4088-9db1-ccff72c6d22e&P1=102816950270&P2=601&P3=2&P4=OC448onxqdmdUsBUApAiE8pj1FZ%2bEPTU3%2bC6Quq29MVwMyyDUtR%2fsbiy7RdVoZOHaZRndvzeOOnIwJZ2x3%2bmP6YK9cjJSP41Lvs0SulF4SVyL5C0DdDmiWqh2QW%2bcDPj2Xp%2bMrI9NOeElSBS5kkOWP8Eiyf2VkkQFM3g5vIk3HJVvu5sWo6pFKpFv4lML%2bHaIiTSuwbPMs5xwEQTfScuTKfigNlUZPdHRMp1B3uKLgIA3r0IbRpZgHYMXEwXQ%2fSLMdDNQthpqQvz1PThVkx7ObD55CXgt0GNSAWRfjdURWb8ywWk1gT7ozAgpP%2fKNm56U5nh33WZSuMZIuO1SBM2vw%3d%3d",
-                      "sha256":  "",
+                      "source_url":  "https://oemsoc.download.prss.microsoft.com/dbazure/X23-81951_26100.1742.240906-0331.ge_release_svc_refresh_CLIENT_ENTERPRISES_OEM_x64FRE_en-us.iso_640de540-87c4-427f-be87-e6d53a3a60b4?t=2c3b664b-b119-4088-9db1-ccff72c6d22e\u0026P1=102816950270\u0026P2=601\u0026P3=2\u0026P4=OC448onxqdmdUsBUApAiE8pj1FZ%2bEPTU3%2bC6Quq29MVwMyyDUtR%2fsbiy7RdVoZOHaZRndvzeOOnIwJZ2x3%2bmP6YK9cjJSP41Lvs0SulF4SVyL5C0DdDmiWqh2QW%2bcDPj2Xp%2bMrI9NOeElSBS5kkOWP8Eiyf2VkkQFM3g5vIk3HJVvu5sWo6pFKpFv4lML%2bHaIiTSuwbPMs5xwEQTfScuTKfigNlUZPdHRMp1B3uKLgIA3r0IbRpZgHYMXEwXQ%2fSLMdDNQthpqQvz1PThVkx7ObD55CXgt0GNSAWRfjdURWb8ywWk1gT7ozAgpP%2fKNm56U5nh33WZSuMZIuO1SBM2vw%3d%3d",
                       "dest":  "VENTOY:/ISO/Windows/",
                       "post":  [
 
@@ -93,7 +90,6 @@
                                       "note":  "Check releases page for latest ISO"
                                   },
                       "source_url":  "https://archive.org/download/tiny11_25H2/tiny11_25H2_Oct25.iso",
-                      "sha256":  "",
                       "dest":  "VENTOY:/ISO/Windows/",
                       "post":  [
 
@@ -112,7 +108,6 @@
                                       "note":  "Latest stable from gparted.org downloads"
                                   },
                       "source_url":  "https://downloads.sourceforge.net/gparted/gparted-live-1.7.0-8-amd64.iso",
-                      "sha256":  "",
                       "dest":  "VENTOY:/ISO/Tools/",
                       "post":  [
 
@@ -131,7 +126,6 @@
                                       "note":  "Official Tails download"
                                   },
                       "source_url":  "https://download.tails.net/tails/stable/tails-amd64-7.1/tails-amd64-7.1.img",
-                      "sha256":  "",
                       "dest":  "VENTOY:/ISO/Linux/",
                       "post":  [
 
@@ -150,7 +144,6 @@
                                       "note":  "Latest amd64 live ISO from kali.org"
                                   },
                       "source_url":  "https://cdimage.kali.org/kali-2025.3/kali-linux-2025.3-live-amd64.iso",
-                      "sha256":  "",
                       "dest":  "VENTOY:/ISO/Linux/",
                       "post":  [
 
@@ -170,7 +163,6 @@
                                       "note":  "Latest stable Mint Cinnamon from linuxmint.com mirrors"
                                   },
                       "source_url":  "https://mirrors.layeronline.com/linuxmint/stable/22.1/linuxmint-22.1-cinnamon-64bit.iso",
-                      "sha256":  "",
                       "dest":  "VENTOY:/ISO/Linux/",
                       "post":  [
 
@@ -189,7 +181,6 @@
                                       "note":  "Latest Fedora Workstation x86_64 live ISO"
                                   },
                       "source_url":  "https://download.fedoraproject.org/pub/fedora/linux/releases/42/Workstation/x86_64/iso/Fedora-Workstation-Live-42-1.1.x86_64.iso",
-                      "sha256":  "",
                       "dest":  "VENTOY:/ISO/Linux/",
                       "post":  [
 
@@ -208,7 +199,6 @@
                                       "note":  "Live Windows 11 ISO from archive.org"
                                   },
                       "source_url":  "https://archive.org/download/live-11-mbr/live11%20mbr%20alpha%200.iso",
-                      "sha256":  "",
                       "dest":  "VENTOY:/ISO/Windows/",
                       "post":  [
 
@@ -227,7 +217,6 @@
                                       "note":  "Official Hiren\u0027s BootCD PE"
                                   },
                       "source_url":  "https://www.hirensbootcd.org/files/HBCD_PE_x64.iso",
-                      "sha256":  "",
                       "dest":  "VENTOY:/ISO/Tools/",
                       "post":  [
 
@@ -247,7 +236,6 @@
                                       "asset_regex":  "rescuezilla-.*-64bit\\.oracular\\.iso$"
                                   },
                       "source_url":  "",
-                      "sha256":  "",
                       "dest":  "VENTOY:/ISO/Tools/",
                       "post":  [
 
@@ -266,7 +254,6 @@
                                       "note":  "Official memtest.org (not PassMark)"
                                   },
                       "source_url":  "https://memtest.org/download/v7.20/mt86plus_7.20_64.grub.iso.zip",
-                      "sha256":  "",
                       "dest":  "VENTOY:/ISO/Tools/",
                       "post":  [
                                    "unzip"
@@ -285,7 +272,6 @@
                                       "note":  "Stable release from clonezilla.org"
                                   },
                       "source_url":  "https://sourceforge.net/projects/clonezilla/files/clonezilla_live_stable/3.3.0-33/clonezilla-live-3.3.0-33-amd64.iso/download",
-                      "sha256":  "",
                       "dest":  "VENTOY:/ISO/Tools/",
                       "post":  [
 
@@ -305,7 +291,6 @@
                                       "note":  "Macrium Reflect Free v8.0.7783 from archive.org"
                                   },
                       "source_url":  "https://archive.org/download/Macrium_Reflect_Free_Latest/v8.0.7783_reflect_setup_free_x64.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -324,7 +309,6 @@
                                       "note":  "Official 7-zip.org download"
                                   },
                       "source_url":  "https://www.7-zip.org/a/7z2501-x64.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/7zip/",
                       "post":  [
 
@@ -344,7 +328,6 @@
                                       "asset_regex":  "rufus-.*\\.exe$"
                                   },
                       "source_url":  "",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/",
                       "post":  [
 
@@ -364,7 +347,6 @@
                                       "asset_regex":  "balenaEtcher-win32-x64-.*\\.zip$"
                                   },
                       "source_url":  "",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/etcher/",
                       "post":  [
                                    "unzip"
@@ -383,7 +365,6 @@
                                       "note":  "Official cpuid.com download"
                                   },
                       "source_url":  "https://download.cpuid.com/cpu-z/cpu-z_2.17-en.zip",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/cpuz/",
                       "post":  [
                                    "unzip"
@@ -403,7 +384,6 @@
                                       "note":  "Official HWiNFO portable"
                                   },
                       "source_url":  "https://sourceforge.net/projects/hwinfo/files/latest/download",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/hwinfo/",
                       "post":  [
                                    "unzip"
@@ -423,7 +403,6 @@
                                       "note":  "Official CrystalDiskInfo portable"
                                   },
                       "source_url":  "https://sourceforge.net/projects/crystaldiskinfo/files/9.5.0/CrystalDiskInfo9_5_0.zip/download",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/crystaldiskinfo/",
                       "post":  [
                                    "unzip"
@@ -443,7 +422,6 @@
                                       "note":  "Official CrystalDiskMark portable"
                                   },
                       "source_url":  "https://sourceforge.net/projects/crystaldiskmark/files/8.0.5/CrystalDiskMark8_0_5.zip/download",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/crystaldiskmark/",
                       "post":  [
                                    "unzip"
@@ -463,7 +441,6 @@
                                       "note":  "Official NirSoft utilities package"
                                   },
                       "source_url":  "https://www.nirsoft.net/packages/nirsoft_package_1.30.66.zip",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/NirSoft/",
                       "post":  [
                                    "unzip"
@@ -482,7 +459,6 @@
                                       "note":  "Official Openwall build"
                                   },
                       "source_url":  "https://www.openwall.com/john/k/john-1.9.0-jumbo-1-win64.7z",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/john/",
                       "post":  [
                                    "extract7z"
@@ -502,7 +478,6 @@
                                       "asset_regex":  "hashcat-.*\\.7z$"
                                   },
                       "source_url":  "",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/hashcat/",
                       "post":  [
                                    "extract7z"
@@ -522,7 +497,6 @@
                                       "note":  "Official Wagnardsoft download"
                                   },
                       "source_url":  "https://www.wagnardsoft.com/DDU/download/DDU%20v18.1.3.7.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/",
                       "post":  [
 
@@ -541,7 +515,6 @@
                                       "note":  "Official Monitor Tests download"
                                   },
                       "source_url":  "https://www.monitortests.com/download/cru/cru-1.5.2.zip",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/cru/",
                       "post":  [
                                    "unzip"
@@ -560,7 +533,6 @@
                                       "note":  "Official PuTTY download"
                                   },
                       "source_url":  "https://the.earth.li/~sgtatham/putty/latest/w64/putty.zip",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/putty/",
                       "post":  [
                                    "unzip"
@@ -580,7 +552,6 @@
                                       "note":  "Official CGSecurity download"
                                   },
                       "source_url":  "https://www.cgsecurity.org/testdisk-7.1.win.zip",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/testdisk/",
                       "post":  [
                                    "unzip"
@@ -599,7 +570,6 @@
                                       "note":  "Official voidtools download"
                                   },
                       "source_url":  "https://www.voidtools.com/Everything-1.4.1.1029.x64.zip",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/everything/",
                       "post":  [
                                    "unzip"
@@ -619,7 +589,6 @@
                                       "asset_regex":  "npp\\..*\\.portable\\.x64\\.zip$"
                                   },
                       "source_url":  "",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/notepadpp/",
                       "post":  [
                                    "unzip"
@@ -638,7 +607,6 @@
                                       "note":  "Official Microsoft download"
                                   },
                       "source_url":  "https://download.sysinternals.com/files/SysinternalsSuite.zip",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/sysinternals/",
                       "post":  [
                                    "unzip"
@@ -658,7 +626,6 @@
                                       "asset_regex":  "pdfsam-basic-.*-windows-x64\\.zip$"
                                   },
                       "source_url":  "",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/pdfsam/",
                       "post":  [
                                    "unzip"
@@ -678,7 +645,6 @@
                                       "note":  "Official qBittorrent portable (PortableApps format)"
                                   },
                       "source_url":  "https://sourceforge.net/projects/portableapps/files/qBittorrent%20Portable/qBittorrentPortable_5.1.1.paf.exe/download",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/qbittorrent/",
                       "post":  [
 
@@ -698,7 +664,6 @@
                                       "note":  "Official VLC portable from videolan.org"
                                   },
                       "source_url":  "https://get.videolan.org/vlc/3.0.21/win64/vlc-3.0.21-win64.zip",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/vlc/",
                       "post":  [
                                    "unzip"
@@ -718,7 +683,6 @@
                                       "asset_regex":  "ipscan-win64-.*\\.exe$"
                                   },
                       "source_url":  "",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/",
                       "post":  [
 
@@ -738,7 +702,6 @@
                                       "note":  "Fast network scanner with remote control features"
                                   },
                       "source_url":  "https://download.advanced-port-scanner.com/download/files/Advanced_Port_Scanner_2.5.3869.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/",
                       "post":  [
 
@@ -758,7 +721,6 @@
                                       "note":  "Professional disk space analyzer"
                                   },
                       "source_url":  "https://downloads.jam-software.de/treesize_free/TreeSizeFree-Portable.zip",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/treesize/",
                       "post":  [
                                    "unzip"
@@ -778,7 +740,6 @@
                                       "note":  "Network diagnostic tool combining ping and traceroute"
                                   },
                       "source_url":  "https://github.com/White-Tiger/WinMTR/releases/download/v1.0/WinMTR_x64.zip",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/winmtr/",
                       "post":  [
                                    "unzip"
@@ -798,7 +759,6 @@
                                       "note":  "Hex editor for binary files"
                                   },
                       "source_url":  "https://mh-nexus.de/downloads/HxDPortableSetup.zip",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/hxd/",
                       "post":  [
                                    "unzip"
@@ -818,7 +778,6 @@
                                       "note":  "File recovery tool by Piriform/CCleaner"
                                   },
                       "source_url":  "https://download.ccleaner.com/rcsetup153.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -838,7 +797,6 @@
                                       "note":  "System information tool by Piriform"
                                   },
                       "source_url":  "https://download.ccleaner.com/spsetup132.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -858,7 +816,6 @@
                                       "note":  "Network scanner and security auditing tool"
                                   },
                       "source_url":  "https://nmap.org/dist/nmap-7.98-setup.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -878,7 +835,6 @@
                                       "note":  "SFTP/SCP client for file transfers"
                                   },
                       "source_url":  "https://winscp.net/download/WinSCP-6.5.4-Portable.zip",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/winscp/",
                       "post":  [
                                    "unzip"
@@ -898,7 +854,6 @@
                                       "note":  "Advanced process viewer and system monitor"
                                   },
                       "source_url":  "https://github.com/processhacker/processhacker/releases/download/v2.39/processhacker-2.39-bin.zip",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/processhacker/",
                       "post":  [
                                    "unzip"
@@ -918,7 +873,6 @@
                                       "note":  "Virtual disk driver - mount ISOs/IMGs"
                                   },
                       "source_url":  "https://sourceforge.net/projects/imdisk-toolkit/files/latest/download",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/imdisk/",
                       "post":  [
                                    "unzip"
@@ -938,7 +892,6 @@
                                       "note":  "Disk usage analyzer - portable exe"
                                   },
                       "source_url":  "https://sourceforge.net/projects/windirstat/files/windirstat/1.1.2%20installer%20re-release%20%28more%20languages%21%29/windirstat1_1_2_setup.exe/download",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/",
                       "post":  [
 
@@ -958,7 +911,6 @@
                                       "asset_regex":  "KeePassXC-.*-Win64-Portable\\.zip$"
                                   },
                       "source_url":  "",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/keepassxc/",
                       "post":  [
                                    "unzip"
@@ -978,7 +930,6 @@
                                       "note":  "Network protocol analyzer - PortableApps format"
                                   },
                       "source_url":  "https://www.wireshark.org/download/win64/WiresharkPortable64_4.6.0.paf.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Portable/wireshark/",
                       "post":  [
 
@@ -997,7 +948,6 @@
                                       "note":  "Official 7-zip installer"
                                   },
                       "source_url":  "https://www.7-zip.org/a/7z2501-x64.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1017,7 +967,6 @@
                                       "asset_regex":  "Git-.*-64-bit\\.exe$"
                                   },
                       "source_url":  "",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1037,7 +986,6 @@
                                       "asset_regex":  "BCUninstaller_.*\\.zip$"
                                   },
                       "source_url":  "",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/BCUninstaller/",
                       "post":  [
                                    "unzip"
@@ -1057,7 +1005,6 @@
                                       "asset_regex":  "rufus-.*\\.exe$"
                                   },
                       "source_url":  "",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1077,7 +1024,6 @@
                                       "note":  "Official HWiNFO installer from hwinfo.com"
                                   },
                       "source_url":  "https://sourceforge.net/projects/hwinfo/files/latest/download",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1096,7 +1042,6 @@
                                       "note":  "Official Google SDK platform tools"
                                   },
                       "source_url":  "https://dl.google.com/android/repository/platform-tools-latest-windows.zip",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/AndroidPlatformTools/",
                       "post":  [
                                    "unzip"
@@ -1116,7 +1061,6 @@
                                       "note":  "Official Proton VPN download"
                                   },
                       "source_url":  "https://vpn.protondownload.com/download/ProtonVPN_v4.3.5_x64.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1136,7 +1080,6 @@
                                       "note":  "Official LibreOffice download"
                                   },
                       "source_url":  "https://download.documentfoundation.org/libreoffice/stable/25.8.2/win/x86_64/LibreOffice_25.8.2_Win_x86-64.msi",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1156,7 +1099,6 @@
                                       "note":  "Online installer - auto-detects x64/x86"
                                   },
                       "source_url":  "https://github.com/ONLYOFFICE/desktop-onlineinstaller/releases/latest/download/ONLYOFFICEDesktopInstaller.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1176,7 +1118,6 @@
                                       "note":  "Official ODT for downloading/installing Office LTSC 2024/2021/365"
                                   },
                       "source_url":  "https://download.microsoft.com/download/6c1eeb25-cf8b-41d9-8d0d-cc1dbc032140/officedeploymenttool_19029-20278.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/Office/",
                       "post":  [
 
@@ -1196,7 +1137,6 @@
                                       "note":  "Official Discord setup with API redirect"
                                   },
                       "source_url":  "https://discord.com/api/downloads/distributions/app/installers/latest?channel=stable\u0026platform=win\u0026arch=x64",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1216,7 +1156,6 @@
                                       "note":  "Official Steam installer"
                                   },
                       "source_url":  "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1236,7 +1175,6 @@
                                       "note":  "Official Node.js LTS installer"
                                   },
                       "source_url":  "https://nodejs.org/dist/v22.21.0/node-v22.21.0-x64.msi",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1256,7 +1194,6 @@
                                       "note":  "Official qBittorrent installer"
                                   },
                       "source_url":  "https://sourceforge.net/projects/qbittorrent/files/qbittorrent-win32/qbittorrent-5.1.2/qbittorrent_5.1.2_x64_setup.exe/download",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1276,7 +1213,6 @@
                                       "note":  "Official VLC installer from videolan.org"
                                   },
                       "source_url":  "https://get.videolan.org/vlc/3.0.21/win64/vlc-3.0.21-win64.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1296,7 +1232,6 @@
                                       "note":  "Python 3.13 installer"
                                   },
                       "source_url":  "https://www.python.org/ftp/python/3.13.1/python-3.13.1-amd64.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1316,7 +1251,6 @@
                                       "note":  "VM software for testing and development"
                                   },
                       "source_url":  "https://download.virtualbox.org/virtualbox/7.1.4/VirtualBox-7.1.4-165100-Win.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1336,7 +1270,6 @@
                                       "note":  "Remote support software - free for personal use"
                                   },
                       "source_url":  "https://download.teamviewer.com/download/TeamViewer_Setup_x64.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1356,7 +1289,6 @@
                                       "note":  "Fast remote desktop - free for personal use"
                                   },
                       "source_url":  "https://download.anydesk.com/AnyDesk.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1376,7 +1308,6 @@
                                       "note":  "Advanced uninstaller with leftover removal"
                                   },
                       "source_url":  "https://download.revouninstaller.com/download/revosetup.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1396,7 +1327,6 @@
                                       "note":  "Network protocol analyzer installer"
                                   },
                       "source_url":  "https://2.na.dl.wireshark.org/win64/Wireshark-4.6.0-x64.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1415,8 +1345,7 @@
                                       "filename":  "Firefox_Setup.exe",
                                       "note":  "Official Firefox installer"
                                   },
-                      "source_url":  "https://download.mozilla.org/?product=firefox-latest-ssl&os=win64&lang=en-US",
-                      "sha256":  "",
+                      "source_url":  "https://download.mozilla.org/?product=firefox-latest-ssl\u0026os=win64\u0026lang=en-US",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1436,7 +1365,6 @@
                                       "note":  "Official Brave browser installer"
                                   },
                       "source_url":  "https://laptop-updates.brave.com/latest/winx64",
-                      "sha256":  "",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1455,8 +1383,7 @@
                                       "filename":  "VSCodeSetup.exe",
                                       "note":  "Official VS Code installer"
                                   },
-                      "source_url":  "https://code.visualstudio.com/sha/download?build=stable&os=win32-x64-user",
-                      "sha256":  "",
+                      "source_url":  "https://code.visualstudio.com/sha/download?build=stable\u0026os=win32-x64-user",
                       "dest":  "UTILS:/Installers/",
                       "post":  [
 
@@ -1475,7 +1402,6 @@
                                       "note":  "Direct download from GitHub - latest Firefox extension"
                                   },
                       "source_url":  "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/addon-607454-latest.xpi",
-                      "sha256":  "",
                       "dest":  "UTILS:/Extensions/",
                       "post":  [
 
@@ -1494,7 +1420,6 @@
                                       "note":  "Intel Rapid Storage Technology driver - Needs extraction with SetupRST.exe -extractdrivers SetupRST_extracted"
                                   },
                       "source_url":  "https://downloadmirror.intel.com/773229/SetupRST.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Drivers/Storage/",
                       "post":  [
                                    "extract_rst"
@@ -1513,7 +1438,6 @@
                                       "note":  "Intel Wi-Fi drivers from intel.com"
                                   },
                       "source_url":  "https://downloadmirror.intel.com/863003/WiFi-23.160.0-Driver64-Win10-Win11.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Drivers/Networking/",
                       "post":  [
 
@@ -1532,7 +1456,6 @@
                                       "note":  "Intel Ethernet drivers from intel.com - Complete ethernet driver pack"
                                   },
                       "source_url":  "https://downloadmirror.intel.com/867466/Release_30.5.zip",
-                      "sha256":  "",
                       "dest":  "UTILS:/Drivers/Networking/",
                       "post":  [
                                    "unzip"
@@ -1551,7 +1474,6 @@
                                       "note":  "Intel Bluetooth drivers from intel.com"
                                   },
                       "source_url":  "https://downloadmirror.intel.com/862107/BT-23.160.0-64UWD-Win10-Win11.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Drivers/Bluetooth/",
                       "post":  [
 
@@ -1570,7 +1492,6 @@
                                       "note":  "NVIDIA App - Replaces GeForce Experience with unified driver and GPU management"
                                   },
                       "source_url":  "https://us.download.nvidia.com/nvapp/client/11.0.5.420/NVIDIA_app_v11.0.5.420.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Drivers/",
                       "post":  [
 
@@ -1589,7 +1510,6 @@
                                       "note":  "AMD Software Adrenalin Edition - Graphics driver and control panel"
                                   },
                       "source_url":  "https://drivers.amd.com/drivers/installer/25.20/whql/amd-software-adrenalin-edition-25.10.2-minimalsetup-251027_web.exe",
-                      "sha256":  "",
                       "dest":  "UTILS:/Drivers/",
                       "post":  [
 

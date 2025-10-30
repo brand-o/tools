@@ -156,17 +156,6 @@ function Get-FriendlySize {
     return "$Bytes B"
 }
 
-function Get-FileSHA256 {
-    param([string]$Path)
-
-    if (-not (Test-Path $Path)) {
-        throw "File not found: $Path"
-    }
-
-    $hash = Get-FileHash -Path $Path -Algorithm SHA256
-    return $hash.Hash.ToLower()
-}
-
 function Invoke-GitHubAPI {
     param(
         [string]$Endpoint,
@@ -584,39 +573,6 @@ function Invoke-FileDownload {
     }
 
     return $false
-}
-
-function Test-FileHash {
-    param(
-        [string]$FilePath,
-        [string]$ExpectedHash,
-        [string]$VerifyMode
-    )
-
-    if ([string]::IsNullOrWhiteSpace($ExpectedHash)) {
-        if ($VerifyMode -eq "strict") {
-            Write-Log "  Hash verification: FAILED (no hash provided in strict mode)" -Level ERROR
-            return $false
-        }
-        else {
-            Write-Log "  Hash verification: SKIPPED (no hash available)" -Level WARN
-            return $true
-        }
-    }
-
-    Write-Log "  Calculating SHA-256..."
-    $actualHash = Get-FileSHA256 -Path $FilePath
-
-    if ($actualHash -eq $ExpectedHash.ToLower()) {
-        Write-Log "  Hash verification: OK" -Level SUCCESS
-        return $true
-    }
-    else {
-        Write-Log "  Hash verification: FAILED" -Level ERROR
-        Write-Log "    Expected: $ExpectedHash" -Level ERROR
-        Write-Log "    Actual:   $actualHash" -Level ERROR
-        return $false
-    }
 }
 
 function Get-FidoScript {
@@ -1940,12 +1896,10 @@ powershell -NoProfile -Command "Start-Process PowerShell -Verb RunAs -ArgumentLi
 function Start-Provisioning {
     param(
         [hashtable]$Config,
-        [hashtable]$Folders,
-        [string]$VerifyMode
+        [hashtable]$Folders
     )
 
     Write-Log "Starting provisioning phase..."
-    Write-Log "  Verify mode: $VerifyMode"
 
     $items = $Config.items
     $totalItems = ($items | Where-Object { -not $_.flags.manual }).Count
@@ -2098,37 +2052,23 @@ function Start-Provisioning {
 
             $destFile = Join-Path $destBase $finalFilename
 
-            # Check if already exists and matches hash
+            # Check if already exists
             if (Test-Path $destFile) {
-                if ($item.sha256) {
-                    $existingHash = Get-FileSHA256 -Path $destFile
-                    if ($existingHash -eq $item.sha256.ToLower()) {
-                        Write-Log "  File already exists and hash matches, skipping" -Level SUCCESS
-                        $succeeded++
+                Write-Log "  File already exists, skipping" -Level SUCCESS
+                $succeeded++
 
-                        # Add to manifest
-                        $script:Manifest += @{
-                            name = $item.name
-                            version = $resolved.version
-                            source_url = $resolved.url
-                            sha256 = $existingHash
-                            size = (Get-Item $destFile).Length
-                            placed_path = $destFile
-                            downloaded_at = (Get-Item $destFile).LastWriteTime.ToString("o")
-                            status = "existing"
-                        }
+                # Add to manifest
+                $script:Manifest += @{
+                    name = $item.name
+                    version = $resolved.version
+                    source_url = $resolved.url
+                    size = (Get-Item $destFile).Length
+                    placed_path = $destFile
+                    downloaded_at = (Get-Item $destFile).LastWriteTime.ToString("o")
+                    status = "existing"
+                }
 
-                        continue
-                    }
-                    else {
-                        Write-Log "  File exists but hash mismatch, re-downloading" -Level WARN
-                    }
-                }
-                else {
-                    Write-Log "  File already exists (no hash to verify), skipping" -Level WARN
-                    $succeeded++
-                    continue
-                }
+                continue
             }
 
             # Download to staging
@@ -2139,22 +2079,6 @@ function Start-Provisioning {
             if (-not $downloadSuccess) {
                 throw "Download failed"
             }
-
-            # Verify hash
-            $hashValid = Test-FileHash -FilePath $stagingFile -ExpectedHash $item.sha256 -VerifyMode $VerifyMode
-
-            if (-not $hashValid) {
-                if ($VerifyMode -eq "strict") {
-                    $failed++
-                    continue
-                }
-                else {
-                    Write-Log "  Continuing despite hash mismatch (soft mode)" -Level WARN
-                }
-            }
-
-            # Calculate actual hash for manifest
-            $actualHash = Get-FileSHA256 -Path $stagingFile
 
             # Handle .iso renaming if needed (for Microsoft OEM links)
             if ($resolved.requires_rename -eq $true) {
@@ -2255,7 +2179,6 @@ function Start-Provisioning {
                 name = $item.name
                 version = $resolved.version
                 source_url = $resolved.url
-                sha256 = $actualHash
                 size = (Get-Item $stagingFile).Length
                 placed_path = $finalDest
                 downloaded_at = (Get-Date).ToString("o")
@@ -2419,7 +2342,6 @@ function Main {
     $settings = @{
         ventoy_iso_gb = $config.settings.ventoy_iso_gb
         utils_gb = $config.settings.utils_gb
-        verify_mode = $config.settings.verify_mode
         partition_rules = @{
             small_drive_threshold_gb = $config.settings.partition_rules.small_drive_threshold_gb
             small_drive = @{
@@ -2434,7 +2356,6 @@ function Main {
     }
 
     Write-Log "  Partition sizing: Auto (dynamic based on drive size)"
-    Write-Log "  Verify mode: $($settings.verify_mode)"
 
     # Create staging directory
     if (-not (Test-Path $script:StagingDir)) {
@@ -2576,7 +2497,7 @@ function Main {
             items = $config.items
         }
 
-        Start-Provisioning -Config $configHash -Folders $folders -VerifyMode $settings.verify_mode
+        Start-Provisioning -Config $configHash -Folders $folders
 
         # Export manifest
         Export-Manifest -UtilsRoot $folders.UtilsRoot

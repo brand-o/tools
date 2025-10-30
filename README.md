@@ -29,10 +29,9 @@ the powershell script automates everything:
 1. **auto-detects** all connected flash drives
 2. **select** your target drive from the list
 3. **formats & partitions** the drive automatically (with confirmation)
-4. **downloads** 80 tools, isos, drivers, and scripts from original or reliable sources
-5. **verifies hashes** (sha-256) where available for security
-6. **organizes** everything into a clean three-partition structure
-7. **makes bootable via ventoy** — ready to use as your ultimate tech toolkit
+4. **downloads** 80 tools, isos, drivers, and scripts from official or reliable sources
+5. **organizes** everything into a clean three-partition structure
+6. **makes bootable via ventoy** — ready to use as your ultimate tech toolkit
 
 ## requirements
 - **Windows** (requires PowerShell + administrator privileges)
@@ -181,9 +180,6 @@ the script automatically creates a modified Windows 11 ISO with:
 - BitLocker auto-encryption disabled
 - privacy questions skipped
 - local account allowed (no Microsoft Account required)
-
-### hash verification
-SHA-256 integrity checking (soft mode - warns but continues on mismatch)
 
 ### resume support
 detects existing files and skips re-downloading
