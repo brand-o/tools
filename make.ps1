@@ -1622,11 +1622,17 @@ convert gpt
     $utilsSizeBytes = [int64]($Settings.utils_gb * 1GB)
 
     try {
-        $utilsPartition = New-Partition -DiskNumber $diskNumber -Size $utilsSizeBytes -AssignDriveLetter -ErrorAction Stop
-        Start-Sleep -Seconds 2
+        # Create partition WITHOUT drive letter to prevent Explorer popup
+        $utilsPartition = New-Partition -DiskNumber $diskNumber -Size $utilsSizeBytes -ErrorAction Stop
+        Start-Sleep -Seconds 1
 
+        # Format the partition while it has no drive letter (prevents "needs formatting" popup)
         $utilsVolume = Format-Volume -Partition $utilsPartition -FileSystem exFAT -NewFileSystemLabel "UTILS" -Confirm:$false -ErrorAction Stop
-        Start-Sleep -Seconds 2
+        Start-Sleep -Seconds 1
+
+        # Now assign drive letter after formatting
+        $utilsPartition | Add-PartitionAccessPath -AssignDriveLetter -ErrorAction Stop
+        Start-Sleep -Seconds 1
 
         # Refresh partition info to get the assigned drive letter
         $utilsPartition = Get-Partition -DiskNumber $diskNumber -PartitionNumber $utilsPartition.PartitionNumber
@@ -1644,11 +1650,17 @@ convert gpt
     Write-Log "Step 5/5: Creating FILES partition..."
 
     try {
-        $FILESPartition = New-Partition -DiskNumber $diskNumber -UseMaximumSize -AssignDriveLetter -ErrorAction Stop
-        Start-Sleep -Seconds 2
+        # Create partition WITHOUT drive letter to prevent Explorer popup
+        $FILESPartition = New-Partition -DiskNumber $diskNumber -UseMaximumSize -ErrorAction Stop
+        Start-Sleep -Seconds 1
 
+        # Format the partition while it has no drive letter (prevents "needs formatting" popup)
         $FILESVolume = Format-Volume -Partition $FILESPartition -FileSystem exFAT -NewFileSystemLabel "FILES" -Confirm:$false -ErrorAction Stop
-        Start-Sleep -Seconds 2
+        Start-Sleep -Seconds 1
+
+        # Now assign drive letter after formatting
+        $FILESPartition | Add-PartitionAccessPath -AssignDriveLetter -ErrorAction Stop
+        Start-Sleep -Seconds 1
 
         # Refresh partition info to get the assigned drive letter
         $FILESPartition = Get-Partition -DiskNumber $diskNumber -PartitionNumber $FILESPartition.PartitionNumber
