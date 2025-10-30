@@ -709,26 +709,6 @@
                                 }
                   },
                   {
-                      "name":  "Nmap",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "nmap.zip",
-                                      "note":  "Network scanner and security auditing tool"
-                                  },
-                      "source_url":  "https://nmap.org/dist/nmap-7.98-win32.zip",
-                      "sha256":  "",
-                      "dest":  "UTILS:/Portable/nmap/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
                       "name":  "Angry IP Scanner",
                       "category":  "portable",
                       "type":  "exe",
@@ -771,10 +751,10 @@
                   {
                       "name":  "TreeSize Free",
                       "category":  "portable",
-                      "type":  "exe",
+                      "type":  "zip",
                       "resolve":  {
                                       "strategy":  "direct",
-                                      "filename":  "TreeSizeFree.exe",
+                                      "filename":  "TreeSizeFree-Portable.zip",
                                       "note":  "Professional disk space analyzer"
                                   },
                       "source_url":  "https://downloads.jam-software.de/treesize_free/TreeSizeFree-Portable.zip",
@@ -797,49 +777,9 @@
                                       "filename":  "winmtr.zip",
                                       "note":  "Network diagnostic tool combining ping and traceroute"
                                   },
-                      "source_url":  "https://github.com/White-Tiger/WinMTR/releases/download/v0.92/WinMTR_x64.zip",
+                      "source_url":  "https://github.com/White-Tiger/WinMTR/releases/download/v1.0/WinMTR_x64.zip",
                       "sha256":  "",
                       "dest":  "UTILS:/Portable/winmtr/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Recuva Portable",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "recuva_portable.zip",
-                                      "note":  "File recovery tool by Piriform/CCleaner"
-                                  },
-                      "source_url":  "https://download.ccleaner.com/rcsetup153.exe",
-                      "sha256":  "",
-                      "dest":  "UTILS:/Portable/recuva/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Speccy Portable",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "speccy_portable.zip",
-                                      "note":  "System information tool by Piriform"
-                                  },
-                      "source_url":  "https://download.ccleaner.com/spsetup132.exe",
-                      "sha256":  "",
-                      "dest":  "UTILS:/Portable/speccy/",
                       "post":  [
                                    "unzip"
                                ],
@@ -877,7 +817,7 @@
                                       "filename":  "winscp_portable.zip",
                                       "note":  "SFTP/SCP client for file transfers"
                                   },
-                      "source_url":  "https://winscp.net/download/WinSCP-6.4.2-Portable.zip",
+                      "source_url":  "https://winscp.net/download/WinSCP-6.5.4-Portable.zip",
                       "sha256":  "",
                       "dest":  "UTILS:/Portable/winscp/",
                       "post":  [

@@ -24,6 +24,40 @@
 
 ---
 
+## 🔧 FOUND CORRECT URLS - Ready to Update
+
+### WinSCP Portable ✅
+**Old URL**: `https://winscp.net/download/WinSCP-6.4.2-Portable.zip`
+**New URL**: `https://winscp.net/download/WinSCP-6.5.4-Portable.zip`
+**Status**: Direct download available (no redirect issue)
+
+### WinMTR ✅
+**Old URL**: `https://github.com/White-Tiger/WinMTR/releases/download/v0.92/WinMTR_x64.zip`
+**New URL**: `https://github.com/White-Tiger/WinMTR/releases/download/v1.0/WinMTR_x64.zip`
+**Note**: Version changed from v0.92 to v1.0
+
+### Nmap ⚠️
+**Current**: `https://nmap.org/dist/nmap-7.98-win32.zip`
+**Issue**: No Windows ZIP available - only installer EXE
+**Options**:
+1. Change to installer: `https://nmap.org/dist/nmap-7.98-setup.exe` and remove `unzip` post-processing
+2. Remove from bundle (use installer version separately)
+
+### KeePassXC 🔄
+**Pattern**: `KeePassXC-.*-Win64-Portable\.zip$`
+**Issue**: GitHub page shows 29 assets but pattern might be wrong
+**Action**: Need to check actual asset names via GitHub API to verify pattern
+
+### Recuva & Speccy ⚠️
+**Issue**: CCleaner only provides installers, NO portable ZIP versions
+**Current URLs**: Point to installer EXEs not ZIPs
+**Options**:
+1. Remove from portable category
+2. Change to installer category and remove `unzip` post-processing
+3. Find alternative portable versions
+
+---
+
 ## 🔧 TODO: Category 2 - URL/Server Issues (6 items)
 
 ### 1. NirSoft Suite ⚠️ NEEDS FALLBACK
