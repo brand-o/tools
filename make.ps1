@@ -880,6 +880,10 @@ function Invoke-ISOModding {
         $fsi = New-Object -ComObject IMAPI2FS.MsftFileSystemImage
         $fsi.VolumeName = "WIN11_MOD"
         $fsi.FileSystemsToCreate = 4  # UDF
+        
+        # Increase ISO size limit to 8GB (Windows 11 ISOs are ~6.5GB)
+        # Default is 2GB which is too small for Windows 11
+        $fsi.FreeMediaBlocks = 4194304  # 8GB in 2KB blocks (8*1024*1024*1024/2048)
 
         # Add all files
         $fsi.Root.AddTree($isoExtract, $false)

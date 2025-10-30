@@ -17,6 +17,15 @@ _staging/
 *.tmp
 *.bak
 
+# Internal documentation
+BUGFIX_GAMEPLAN.md
+CLOUDFLARE_SETUP.md
+GITHUB_RECOMMENDATIONS_SETUP.md
+
+# Test files
+test-*.ps1
+verify-*.ps1
+
 # System files
 .DS_Store
 Thumbs.db
