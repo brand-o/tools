@@ -15,7 +15,6 @@ iex (irm 'https://brando.tools/run')
 
 
 ### if having issues with permissions running scripts use:
-if needed to allow scripts use this
 ```powershell
 Set-ExecutionPolicy Bypass -Scope Process -Force
 ```
