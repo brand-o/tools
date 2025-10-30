@@ -19,7 +19,7 @@ iex (irm 'https://brando.tools/run')
 Set-ExecutionPolicy Bypass -Scope Process -Force
 ```
 
--------------------------------------------------------------------------------------------
+### ---------------------------------------------------------------
 
 ## what it does
 the powershell script automates everything:
