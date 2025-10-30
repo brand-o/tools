@@ -1,1523 +1,1423 @@
 {
-    "_license":  {
-                     "name":  "GNU General Public License v3.0",
-                     "url":  "https://www.gnu.org/licenses/gpl-3.0.html",
-                     "copyright":  "Copyright (C) 2025 Brando",
-                     "notice":  "This configuration file is part of Brando\u0027s Toolkit. This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See https://www.gnu.org/licenses/ for details.",
-                     "updated":  "2025-10-30T08:50:00Z"
-                 },
-    "settings":  {
-                     "ventoy_iso_gb":  "auto",
-                     "utils_gb":  "auto",
-                     "partition_rules":  {
-                                             "small_drive_threshold_gb":  100,
-                                             "small_drive":  {
-                                                                 "ventoy_gb":  55,
-                                                                 "utils_gb":  3
-                                                             },
-                                             "large_drive":  {
-                                                                 "ventoy_gb":  70,
-                                                                 "utils_gb":  20
-                                                             }
-                                         },
-                     "include_optional":  {
-                                              "stress_tools":  true,
-                                              "wordlists":  false
-                                          }
-                 },
-    "items":  [
-                  {
-                      "name":  "Windows 11 Pro 24H2 (Stock + Modded)",
-                      "category":  "iso",
-                      "type":  "iso",
-                      "resolve":  {
-                                      "strategy":  "fido_with_mods",
-                                      "edition":  "Win11Pro",
-                                      "language":  "English",
-                                      "note":  "Downloads stock ISO, then creates modded version with TPM/SecureBoot/RAM bypasses using Get-Win11.cmd. Both ISOs saved to drive."
-                                  },
-                      "source_url":  "https://raw.githubusercontent.com/pbatard/Fido/master/Fido.ps1",
-                      "dest":  "VENTOY:/ISO/Windows/",
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Windows 10 Pro 22H2 (Stock OEM)",
-                      "category":  "iso",
-                      "type":  "iso",
-                      "resolve":  {
-                                      "strategy":  "fido_automated",
-                                      "edition":  "Win10Pro",
-                                      "language":  "English",
-                                      "note":  "Official Microsoft ISO - TPM not required for Win10"
-                                  },
-                      "source_url":  "https://raw.githubusercontent.com/pbatard/Fido/master/Fido.ps1",
-                      "dest":  "VENTOY:/ISO/Windows/",
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Windows 11 Enterprise LTSC 2024",
-                      "category":  "iso",
-                      "type":  "iso",
-                      "resolve":  {
-                                      "strategy":  "direct_rename_iso",
-                                      "edition":  "Win11LTSC",
-                                      "filename":  "Win11_Enterprise_LTSC_2024_x64.iso",
-                                      "modifications":  "None - LTSC already has relaxed requirements",
-                                      "note":  "Official Microsoft OEM download - file extension auto-renamed to .iso"
-                                  },
-                      "source_url":  "https://oemsoc.download.prss.microsoft.com/dbazure/X23-81951_26100.1742.240906-0331.ge_release_svc_refresh_CLIENT_ENTERPRISES_OEM_x64FRE_en-us.iso_640de540-87c4-427f-be87-e6d53a3a60b4?t=2c3b664b-b119-4088-9db1-ccff72c6d22e\u0026P1=102816950270\u0026P2=601\u0026P3=2\u0026P4=OC448onxqdmdUsBUApAiE8pj1FZ%2bEPTU3%2bC6Quq29MVwMyyDUtR%2fsbiy7RdVoZOHaZRndvzeOOnIwJZ2x3%2bmP6YK9cjJSP41Lvs0SulF4SVyL5C0DdDmiWqh2QW%2bcDPj2Xp%2bMrI9NOeElSBS5kkOWP8Eiyf2VkkQFM3g5vIk3HJVvu5sWo6pFKpFv4lML%2bHaIiTSuwbPMs5xwEQTfScuTKfigNlUZPdHRMp1B3uKLgIA3r0IbRpZgHYMXEwXQ%2fSLMdDNQthpqQvz1PThVkx7ObD55CXgt0GNSAWRfjdURWb8ywWk1gT7ozAgpP%2fKNm56U5nh33WZSuMZIuO1SBM2vw%3d%3d",
-                      "dest":  "VENTOY:/ISO/Windows/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Tiny11",
-                      "category":  "iso",
-                      "type":  "iso",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Check releases page for latest ISO"
-                                  },
-                      "source_url":  "https://archive.org/download/tiny11_25H2/tiny11_25H2_Oct25.iso",
-                      "dest":  "VENTOY:/ISO/Windows/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "GParted Live",
-                      "category":  "iso",
-                      "type":  "iso",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Latest stable from gparted.org downloads"
-                                  },
-                      "source_url":  "https://downloads.sourceforge.net/gparted/gparted-live-1.7.0-8-amd64.iso",
-                      "dest":  "VENTOY:/ISO/Tools/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Tails",
-                      "category":  "iso",
-                      "type":  "img",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Official Tails download"
-                                  },
-                      "source_url":  "https://download.tails.net/tails/stable/tails-amd64-7.1/tails-amd64-7.1.img",
-                      "dest":  "VENTOY:/ISO/Linux/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Kali Linux",
-                      "category":  "iso",
-                      "type":  "iso",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Latest amd64 live ISO from kali.org"
-                                  },
-                      "source_url":  "https://cdimage.kali.org/kali-2025.3/kali-linux-2025.3-live-amd64.iso",
-                      "dest":  "VENTOY:/ISO/Linux/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Linux Mint 22.2 Cinnamon",
-                      "category":  "iso",
-                      "type":  "iso",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "linuxmint-22.2-cinnamon-64bit.iso",
-                                      "note":  "Latest stable Mint Cinnamon from linuxmint.com mirrors"
-                                  },
-                      "source_url":  "https://mirrors.layeronline.com/linuxmint/stable/22.1/linuxmint-22.1-cinnamon-64bit.iso",
-                      "dest":  "VENTOY:/ISO/Linux/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Fedora Workstation 42",
-                      "category":  "iso",
-                      "type":  "iso",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Latest Fedora Workstation x86_64 live ISO"
-                                  },
-                      "source_url":  "https://download.fedoraproject.org/pub/fedora/linux/releases/42/Workstation/x86_64/iso/Fedora-Workstation-Live-42-1.1.x86_64.iso",
-                      "dest":  "VENTOY:/ISO/Linux/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Live11",
-                      "category":  "iso",
-                      "type":  "iso",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Live Windows 11 ISO from archive.org"
-                                  },
-                      "source_url":  "https://archive.org/download/live-11-mbr/live11%20mbr%20alpha%200.iso",
-                      "dest":  "VENTOY:/ISO/Windows/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Hiren\u0027s Boot PE",
-                      "category":  "iso",
-                      "type":  "iso",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Official Hiren\u0027s BootCD PE"
-                                  },
-                      "source_url":  "https://www.hirensbootcd.org/files/HBCD_PE_x64.iso",
-                      "dest":  "VENTOY:/ISO/Tools/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Rescuezilla",
-                      "category":  "iso",
-                      "type":  "iso",
-                      "resolve":  {
-                                      "strategy":  "github_latest",
-                                      "repo":  "rescuezilla/rescuezilla",
-                                      "asset_regex":  "rescuezilla-.*-64bit\\.oracular\\.iso$"
-                                  },
-                      "source_url":  "",
-                      "dest":  "VENTOY:/ISO/Tools/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Memtest86+",
-                      "category":  "iso",
-                      "type":  "iso",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Official memtest.org (not PassMark)"
-                                  },
-                      "source_url":  "https://memtest.org/download/v7.20/mt86plus_7.20_64.grub.iso.zip",
-                      "dest":  "VENTOY:/ISO/Tools/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Clonezilla",
-                      "category":  "iso",
-                      "type":  "iso",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Stable release from clonezilla.org"
-                                  },
-                      "source_url":  "https://sourceforge.net/projects/clonezilla/files/clonezilla_live_stable/3.3.0-33/clonezilla-live-3.3.0-33-amd64.iso/download",
-                      "dest":  "VENTOY:/ISO/Tools/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Macrium Reflect Free",
-                      "category":  "iso",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "Macrium.exe",
-                                      "note":  "Macrium Reflect Free v8.0.7783 from archive.org"
-                                  },
-                      "source_url":  "https://archive.org/download/Macrium_Reflect_Free_Latest/v8.0.7783_reflect_setup_free_x64.exe",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "7-Zip",
-                      "category":  "portable",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Official 7-zip.org download"
-                                  },
-                      "source_url":  "https://www.7-zip.org/a/7z2501-x64.exe",
-                      "dest":  "UTILS:/Portable/7zip/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Rufus",
-                      "category":  "portable",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "github_latest",
-                                      "repo":  "pbatard/rufus",
-                                      "asset_regex":  "rufus-.*\\.exe$"
-                                  },
-                      "source_url":  "",
-                      "dest":  "UTILS:/Portable/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Balena Etcher",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "github_latest",
-                                      "repo":  "balena-io/etcher",
-                                      "asset_regex":  "balenaEtcher-win32-x64-.*\\.zip$"
-                                  },
-                      "source_url":  "",
-                      "dest":  "UTILS:/Portable/etcher/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "CPU-Z",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Official cpuid.com download"
-                                  },
-                      "source_url":  "https://download.cpuid.com/cpu-z/cpu-z_2.17-en.zip",
-                      "dest":  "UTILS:/Portable/cpuz/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "HWiNFO",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "hw64_832.zip",
-                                      "note":  "Official HWiNFO portable"
-                                  },
-                      "source_url":  "https://sourceforge.net/projects/hwinfo/files/latest/download",
-                      "dest":  "UTILS:/Portable/hwinfo/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "CrystalDiskInfo",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "CrystalDiskInfo9_5_0.zip",
-                                      "note":  "Official CrystalDiskInfo portable"
-                                  },
-                      "source_url":  "https://sourceforge.net/projects/crystaldiskinfo/files/9.5.0/CrystalDiskInfo9_5_0.zip/download",
-                      "dest":  "UTILS:/Portable/crystaldiskinfo/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "CrystalDiskMark",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "CrystalDiskMark8_0_5.zip",
-                                      "note":  "Official CrystalDiskMark portable"
-                                  },
-                      "source_url":  "https://sourceforge.net/projects/crystaldiskmark/files/8.0.5/CrystalDiskMark8_0_5.zip/download",
-                      "dest":  "UTILS:/Portable/crystaldiskmark/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "NirSoft Suite",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "nirsoft_package_1.30.66.zip",
-                                      "note":  "Official NirSoft utilities package"
-                                  },
-                      "source_url":  "https://www.nirsoft.net/packages/nirsoft_package_1.30.66.zip",
-                      "dest":  "UTILS:/Portable/NirSoft/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "John the Ripper",
-                      "category":  "portable",
-                      "type":  "7z",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Official Openwall build"
-                                  },
-                      "source_url":  "https://www.openwall.com/john/k/john-1.9.0-jumbo-1-win64.7z",
-                      "dest":  "UTILS:/Portable/john/",
-                      "post":  [
-                                   "extract7z"
-                               ],
-                      "flags":  {
-                                    "require_consent":  true,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Hashcat",
-                      "category":  "portable",
-                      "type":  "7z",
-                      "resolve":  {
-                                      "strategy":  "github_latest",
-                                      "repo":  "hashcat/hashcat",
-                                      "asset_regex":  "hashcat-.*\\.7z$"
-                                  },
-                      "source_url":  "",
-                      "dest":  "UTILS:/Portable/hashcat/",
-                      "post":  [
-                                   "extract7z"
-                               ],
-                      "flags":  {
-                                    "require_consent":  true,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "DDU (Display Driver Uninstaller)",
-                      "category":  "portable",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "DDU_v18.1.3.7.exe",
-                                      "note":  "Official Wagnardsoft download"
-                                  },
-                      "source_url":  "https://www.wagnardsoft.com/DDU/download/DDU%20v18.1.3.7.exe",
-                      "dest":  "UTILS:/Portable/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "CRU (Custom Resolution Utility)",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Official Monitor Tests download"
-                                  },
-                      "source_url":  "https://www.monitortests.com/download/cru/cru-1.5.2.zip",
-                      "dest":  "UTILS:/Portable/cru/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "PuTTY",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Official PuTTY download"
-                                  },
-                      "source_url":  "https://the.earth.li/~sgtatham/putty/latest/w64/putty.zip",
-                      "dest":  "UTILS:/Portable/putty/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "TestDisk \u0026 PhotoRec",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "testdisk-7.2-WIP.win.zip",
-                                      "note":  "Official CGSecurity download"
-                                  },
-                      "source_url":  "https://www.cgsecurity.org/testdisk-7.1.win.zip",
-                      "dest":  "UTILS:/Portable/testdisk/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Everything (Search)",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Official voidtools download"
-                                  },
-                      "source_url":  "https://www.voidtools.com/Everything-1.4.1.1029.x64.zip",
-                      "dest":  "UTILS:/Portable/everything/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Notepad++",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "github_latest",
-                                      "repo":  "notepad-plus-plus/notepad-plus-plus",
-                                      "asset_regex":  "npp\\..*\\.portable\\.x64\\.zip$"
-                                  },
-                      "source_url":  "",
-                      "dest":  "UTILS:/Portable/notepadpp/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Sysinternals Suite",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Official Microsoft download"
-                                  },
-                      "source_url":  "https://download.sysinternals.com/files/SysinternalsSuite.zip",
-                      "dest":  "UTILS:/Portable/sysinternals/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "PDFsam Basic Portable",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "github_latest",
-                                      "repo":  "torakiki/pdfsam",
-                                      "asset_regex":  "pdfsam-basic-.*-windows-x64\\.zip$"
-                                  },
-                      "source_url":  "",
-                      "dest":  "UTILS:/Portable/pdfsam/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "qBittorrent Portable",
-                      "category":  "portable",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "qBittorrentPortable.paf.exe",
-                                      "note":  "Official qBittorrent portable (PortableApps format)"
-                                  },
-                      "source_url":  "https://sourceforge.net/projects/portableapps/files/qBittorrent%20Portable/qBittorrentPortable_5.1.1.paf.exe/download",
-                      "dest":  "UTILS:/Portable/qbittorrent/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "VLC Media Player Portable",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "vlc-portable.zip",
-                                      "note":  "Official VLC portable from videolan.org"
-                                  },
-                      "source_url":  "https://get.videolan.org/vlc/3.0.21/win64/vlc-3.0.21-win64.zip",
-                      "dest":  "UTILS:/Portable/vlc/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Angry IP Scanner",
-                      "category":  "portable",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "github_latest",
-                                      "repo":  "angryip/ipscan",
-                                      "asset_regex":  "ipscan-win64-.*\\.exe$"
-                                  },
-                      "source_url":  "",
-                      "dest":  "UTILS:/Portable/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Advanced Port Scanner",
-                      "category":  "portable",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "advanced_port_scanner.exe",
-                                      "note":  "Fast network scanner with remote control features"
-                                  },
-                      "source_url":  "https://download.advanced-port-scanner.com/download/files/Advanced_Port_Scanner_2.5.3869.exe",
-                      "dest":  "UTILS:/Portable/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "TreeSize Free",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "TreeSizeFree-Portable.zip",
-                                      "note":  "Professional disk space analyzer"
-                                  },
-                      "source_url":  "https://downloads.jam-software.de/treesize_free/TreeSizeFree-Portable.zip",
-                      "dest":  "UTILS:/Portable/treesize/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "WinMTR",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "winmtr.zip",
-                                      "note":  "Network diagnostic tool combining ping and traceroute"
-                                  },
-                      "source_url":  "https://github.com/White-Tiger/WinMTR/releases/download/v1.0/WinMTR_x64.zip",
-                      "dest":  "UTILS:/Portable/winmtr/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "HxD Hex Editor",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "HxD.zip",
-                                      "note":  "Hex editor for binary files"
-                                  },
-                      "source_url":  "https://mh-nexus.de/downloads/HxDPortableSetup.zip",
-                      "dest":  "UTILS:/Portable/hxd/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Recuva",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "rcsetup.exe",
-                                      "note":  "File recovery tool by Piriform/CCleaner"
-                                  },
-                      "source_url":  "https://download.ccleaner.com/rcsetup153.exe",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Speccy",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "spsetup.exe",
-                                      "note":  "System information tool by Piriform"
-                                  },
-                      "source_url":  "https://download.ccleaner.com/spsetup132.exe",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Nmap",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "nmap-setup.exe",
-                                      "note":  "Network scanner and security auditing tool"
-                                  },
-                      "source_url":  "https://nmap.org/dist/nmap-7.98-setup.exe",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "WinSCP Portable",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "winscp_portable.zip",
-                                      "note":  "SFTP/SCP client for file transfers"
-                                  },
-                      "source_url":  "https://winscp.net/download/WinSCP-6.5.4-Portable.zip",
-                      "dest":  "UTILS:/Portable/winscp/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Process Hacker",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "processhacker.zip",
-                                      "note":  "Advanced process viewer and system monitor"
-                                  },
-                      "source_url":  "https://github.com/processhacker/processhacker/releases/download/v2.39/processhacker-2.39-bin.zip",
-                      "dest":  "UTILS:/Portable/processhacker/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "ImDisk Toolkit",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "imdisk.zip",
-                                      "note":  "Virtual disk driver - mount ISOs/IMGs"
-                                  },
-                      "source_url":  "https://sourceforge.net/projects/imdisk-toolkit/files/latest/download",
-                      "dest":  "UTILS:/Portable/imdisk/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "WinDirStat",
-                      "category":  "portable",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "windirstat.exe",
-                                      "note":  "Disk usage analyzer - portable exe"
-                                  },
-                      "source_url":  "https://sourceforge.net/projects/windirstat/files/windirstat/1.1.2%20installer%20re-release%20%28more%20languages%21%29/windirstat1_1_2_setup.exe/download",
-                      "dest":  "UTILS:/Portable/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "KeePassXC Portable",
-                      "category":  "portable",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "github_latest",
-                                      "repo":  "keepassxreboot/keepassxc",
-                                      "asset_regex":  "KeePassXC-.*-Win64-Portable\\.zip$"
-                                  },
-                      "source_url":  "",
-                      "dest":  "UTILS:/Portable/keepassxc/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Wireshark Portable",
-                      "category":  "portable",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "WiresharkPortable64.paf.exe",
-                                      "note":  "Network protocol analyzer - PortableApps format"
-                                  },
-                      "source_url":  "https://www.wireshark.org/download/win64/WiresharkPortable64_4.6.0.paf.exe",
-                      "dest":  "UTILS:/Portable/wireshark/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "7-Zip Installer",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Official 7-zip installer"
-                                  },
-                      "source_url":  "https://www.7-zip.org/a/7z2501-x64.exe",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Git for Windows",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "github_latest",
-                                      "repo":  "git-for-windows/git",
-                                      "asset_regex":  "Git-.*-64-bit\\.exe$"
-                                  },
-                      "source_url":  "",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "BullCrapUninstaller",
-                      "category":  "installer",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "github_latest",
-                                      "repo":  "Klocman/Bulk-Crap-Uninstaller",
-                                      "asset_regex":  "BCUninstaller_.*\\.zip$"
-                                  },
-                      "source_url":  "",
-                      "dest":  "UTILS:/Installers/BCUninstaller/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Rufus Installer",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "github_latest",
-                                      "repo":  "pbatard/rufus",
-                                      "asset_regex":  "rufus-.*\\.exe$"
-                                  },
-                      "source_url":  "",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "HWiNFO64 Installer",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "hw64_832.exe",
-                                      "note":  "Official HWiNFO installer from hwinfo.com"
-                                  },
-                      "source_url":  "https://sourceforge.net/projects/hwinfo/files/latest/download",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Android Platform Tools",
-                      "category":  "installer",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Official Google SDK platform tools"
-                                  },
-                      "source_url":  "https://dl.google.com/android/repository/platform-tools-latest-windows.zip",
-                      "dest":  "UTILS:/Installers/AndroidPlatformTools/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Proton VPN",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "ProtonVPN_Setup.exe",
-                                      "note":  "Official Proton VPN download"
-                                  },
-                      "source_url":  "https://vpn.protondownload.com/download/ProtonVPN_v4.3.5_x64.exe",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "LibreOffice",
-                      "category":  "installer",
-                      "type":  "msi",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "LibreOffice_25.8.2_Win_x86-64.msi",
-                                      "note":  "Official LibreOffice download"
-                                  },
-                      "source_url":  "https://download.documentfoundation.org/libreoffice/stable/25.8.2/win/x86_64/LibreOffice_25.8.2_Win_x86-64.msi",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "ONLYOFFICE Desktop Editors",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "ONLYOFFICEDesktopInstaller.exe",
-                                      "note":  "Online installer - auto-detects x64/x86"
-                                  },
-                      "source_url":  "https://github.com/ONLYOFFICE/desktop-onlineinstaller/releases/latest/download/ONLYOFFICEDesktopInstaller.exe",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Microsoft Office Deployment Tool",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "officedeploymenttool_19029-20278.exe",
-                                      "note":  "Official ODT for downloading/installing Office LTSC 2024/2021/365"
-                                  },
-                      "source_url":  "https://download.microsoft.com/download/6c1eeb25-cf8b-41d9-8d0d-cc1dbc032140/officedeploymenttool_19029-20278.exe",
-                      "dest":  "UTILS:/Installers/Office/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Discord",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "api_redirect",
-                                      "filename":  "DiscordSetup.exe",
-                                      "note":  "Official Discord setup with API redirect"
-                                  },
-                      "source_url":  "https://discord.com/api/downloads/distributions/app/installers/latest?channel=stable\u0026platform=win\u0026arch=x64",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Steam",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "SteamSetup.exe",
-                                      "note":  "Official Steam installer"
-                                  },
-                      "source_url":  "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Node.js LTS",
-                      "category":  "installer",
-                      "type":  "msi",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "node-v22.21.0-x64.msi",
-                                      "note":  "Official Node.js LTS installer"
-                                  },
-                      "source_url":  "https://nodejs.org/dist/v22.21.0/node-v22.21.0-x64.msi",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "qBittorrent Installer",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "qbittorrent_setup.exe",
-                                      "note":  "Official qBittorrent installer"
-                                  },
-                      "source_url":  "https://sourceforge.net/projects/qbittorrent/files/qbittorrent-win32/qbittorrent-5.1.2/qbittorrent_5.1.2_x64_setup.exe/download",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "VLC Media Player Installer",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "vlc-setup.exe",
-                                      "note":  "Official VLC installer from videolan.org"
-                                  },
-                      "source_url":  "https://get.videolan.org/vlc/3.0.21/win64/vlc-3.0.21-win64.exe",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Python",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "python-installer.exe",
-                                      "note":  "Python 3.13 installer"
-                                  },
-                      "source_url":  "https://www.python.org/ftp/python/3.13.1/python-3.13.1-amd64.exe",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "VirtualBox",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "VirtualBox-setup.exe",
-                                      "note":  "VM software for testing and development"
-                                  },
-                      "source_url":  "https://download.virtualbox.org/virtualbox/7.1.4/VirtualBox-7.1.4-165100-Win.exe",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "TeamViewer",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "TeamViewer_Setup.exe",
-                                      "note":  "Remote support software - free for personal use"
-                                  },
-                      "source_url":  "https://download.teamviewer.com/download/TeamViewer_Setup_x64.exe",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "AnyDesk",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "AnyDesk_Setup.exe",
-                                      "note":  "Fast remote desktop - free for personal use"
-                                  },
-                      "source_url":  "https://download.anydesk.com/AnyDesk.exe",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Revo Uninstaller Free",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "RevoUninstaller_Setup.exe",
-                                      "note":  "Advanced uninstaller with leftover removal"
-                                  },
-                      "source_url":  "https://download.revouninstaller.com/download/revosetup.exe",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Wireshark Installer",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "Wireshark-setup.exe",
-                                      "note":  "Network protocol analyzer installer"
-                                  },
-                      "source_url":  "https://2.na.dl.wireshark.org/win64/Wireshark-4.6.0-x64.exe",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Mozilla Firefox",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "Firefox_Setup.exe",
-                                      "note":  "Official Firefox installer"
-                                  },
-                      "source_url":  "https://download.mozilla.org/?product=firefox-latest-ssl\u0026os=win64\u0026lang=en-US",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Brave Browser",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "BraveBrowserSetup.exe",
-                                      "note":  "Official Brave browser installer"
-                                  },
-                      "source_url":  "https://laptop-updates.brave.com/latest/winx64",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "VS Code",
-                      "category":  "installer",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "filename":  "VSCodeSetup.exe",
-                                      "note":  "Official VS Code installer"
-                                  },
-                      "source_url":  "https://code.visualstudio.com/sha/download?build=stable\u0026os=win32-x64-user",
-                      "dest":  "UTILS:/Installers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "uBlock Origin (Firefox)",
-                      "category":  "extension",
-                      "type":  "xpi",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Direct download from GitHub - latest Firefox extension"
-                                  },
-                      "source_url":  "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/addon-607454-latest.xpi",
-                      "dest":  "UTILS:/Extensions/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Intel RST Driver",
-                      "category":  "driver",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Intel Rapid Storage Technology driver - Needs extraction with SetupRST.exe -extractdrivers SetupRST_extracted"
-                                  },
-                      "source_url":  "https://downloadmirror.intel.com/773229/SetupRST.exe",
-                      "dest":  "UTILS:/Drivers/Storage/",
-                      "post":  [
-                                   "extract_rst"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Intel Wi-Fi 6E/7 Driver",
-                      "category":  "driver",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Intel Wi-Fi drivers from intel.com"
-                                  },
-                      "source_url":  "https://downloadmirror.intel.com/863003/WiFi-23.160.0-Driver64-Win10-Win11.exe",
-                      "dest":  "UTILS:/Drivers/Networking/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Intel 2.5GbE Driver",
-                      "category":  "driver",
-                      "type":  "zip",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Intel Ethernet drivers from intel.com - Complete ethernet driver pack"
-                                  },
-                      "source_url":  "https://downloadmirror.intel.com/867466/Release_30.5.zip",
-                      "dest":  "UTILS:/Drivers/Networking/",
-                      "post":  [
-                                   "unzip"
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "Intel Bluetooth Driver",
-                      "category":  "driver",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "Intel Bluetooth drivers from intel.com"
-                                  },
-                      "source_url":  "https://downloadmirror.intel.com/862107/BT-23.160.0-64UWD-Win10-Win11.exe",
-                      "dest":  "UTILS:/Drivers/Bluetooth/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "NVIDIA App",
-                      "category":  "driver",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "NVIDIA App - Replaces GeForce Experience with unified driver and GPU management"
-                                  },
-                      "source_url":  "https://us.download.nvidia.com/nvapp/client/11.0.5.420/NVIDIA_app_v11.0.5.420.exe",
-                      "dest":  "UTILS:/Drivers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  },
-                  {
-                      "name":  "AMD Adrenalin Software",
-                      "category":  "driver",
-                      "type":  "exe",
-                      "resolve":  {
-                                      "strategy":  "direct",
-                                      "note":  "AMD Software Adrenalin Edition - Graphics driver and control panel"
-                                  },
-                      "source_url":  "https://drivers.amd.com/drivers/installer/25.20/whql/amd-software-adrenalin-edition-25.10.2-minimalsetup-251027_web.exe",
-                      "dest":  "UTILS:/Drivers/",
-                      "post":  [
-
-                               ],
-                      "flags":  {
-                                    "require_consent":  false,
-                                    "manual":  false
-                                }
-                  }
-              ]
+    "_license": {
+        "name": "GNU General Public License v3.0",
+        "url": "https://www.gnu.org/licenses/gpl-3.0.html",
+        "copyright": "Copyright (C) 2025 Brando",
+        "notice": "This configuration file is part of Brando's Toolkit. This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See https://www.gnu.org/licenses/ for details.",
+        "updated": "2025-10-30T08:50:00Z"
+    },
+    "settings": {
+        "ventoy_iso_gb": "auto",
+        "utils_gb": "auto",
+        "partition_rules": {
+            "small_drive_threshold_gb": 100,
+            "small_drive": {
+                "ventoy_gb": 55,
+                "utils_gb": 3
+            },
+            "large_drive": {
+                "ventoy_gb": 70,
+                "utils_gb": 20
+            }
+        },
+        "include_optional": {
+            "stress_tools": true,
+            "wordlists": false
+        }
+    },
+    "items": [
+        {
+            "name": "01 - OS - Windows 11 Pro 24H2 (Modded - No TPM Required)",
+            "category": "iso",
+            "type": "iso",
+            "resolve": {
+                "strategy": "fido_with_mods",
+                "edition": "Win11Pro",
+                "language": "English",
+                "note": "Downloads official Win11 Pro, creates modded version with TPM/SecureBoot/RAM bypasses. Both ISOs saved."
+            },
+            "source_url": "https://raw.githubusercontent.com/pbatard/Fido/master/Fido.ps1",
+            "dest": "VENTOY:/ISO/Windows/",
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "02 - OS - Windows 10 Pro 22H2 (Official)",
+            "category": "iso",
+            "type": "iso",
+            "resolve": {
+                "strategy": "fido_automated",
+                "edition": "Win10Pro",
+                "language": "English",
+                "note": "Official Microsoft ISO - TPM not required for Win10"
+            },
+            "source_url": "https://raw.githubusercontent.com/pbatard/Fido/master/Fido.ps1",
+            "dest": "VENTOY:/ISO/Windows/",
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "03 - OS - Windows 11 Enterprise LTSC 2024",
+            "category": "iso",
+            "type": "iso",
+            "resolve": {
+                "strategy": "direct_rename_iso",
+                "edition": "Win11LTSC",
+                "filename": "Win11_Enterprise_LTSC_2024_x64.iso",
+                "modifications": "None - LTSC already has relaxed requirements",
+                "note": "Official Microsoft OEM download - file extension auto-renamed to .iso"
+            },
+            "source_url": "https://oemsoc.download.prss.microsoft.com/dbazure/X23-81951_26100.1742.240906-0331.ge_release_svc_refresh_CLIENT_ENTERPRISES_OEM_x64FRE_en-us.iso_640de540-87c4-427f-be87-e6d53a3a60b4?t=2c3b664b-b119-4088-9db1-ccff72c6d22e&P1=102816950270&P2=601&P3=2&P4=OC448onxqdmdUsBUApAiE8pj1FZ%2bEPTU3%2bC6Quq29MVwMyyDUtR%2fsbiy7RdVoZOHaZRndvzeOOnIwJZ2x3%2bmP6YK9cjJSP41Lvs0SulF4SVyL5C0DdDmiWqh2QW%2bcDPj2Xp%2bMrI9NOeElSBS5kkOWP8Eiyf2VkkQFM3g5vIk3HJVvu5sWo6pFKpFv4lML%2bHaIiTSuwbPMs5xwEQTfScuTKfigNlUZPdHRMp1B3uKLgIA3r0IbRpZgHYMXEwXQ%2fSLMdDNQthpqQvz1PThVkx7ObD55CXgt0GNSAWRfjdURWb8ywWk1gT7ozAgpP%2fKNm56U5nh33WZSuMZIuO1SBM2vw%3d%3d",
+            "dest": "VENTOY:/ISO/Windows/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "04 - OS - Tiny11 (Lightweight Win11)",
+            "category": "iso",
+            "type": "iso",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Check releases page for latest ISO"
+            },
+            "source_url": "https://archive.org/download/tiny11_25H2/tiny11_25H2_Oct25.iso",
+            "dest": "VENTOY:/ISO/Windows/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "10 - TOOL - GParted Live (Partition Editor)",
+            "category": "iso",
+            "type": "iso",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Latest stable from gparted.org downloads"
+            },
+            "source_url": "https://downloads.sourceforge.net/gparted/gparted-live-1.7.0-8-amd64.iso",
+            "dest": "VENTOY:/ISO/Tools/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "09 - OS - Tails (Privacy/Anonymous)",
+            "category": "iso",
+            "type": "img",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Official Tails download"
+            },
+            "source_url": "https://download.tails.net/tails/stable/tails-amd64-7.1/tails-amd64-7.1.img",
+            "dest": "VENTOY:/ISO/Linux/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "06 - OS - Kali Linux 2025.3 (Penetration Testing)",
+            "category": "iso",
+            "type": "iso",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Latest amd64 live ISO from kali.org"
+            },
+            "source_url": "https://cdimage.kali.org/kali-2025.3/kali-linux-2025.3-live-amd64.iso",
+            "dest": "VENTOY:/ISO/Linux/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "07 - OS - Linux Mint 22.1 (Beginner Friendly)",
+            "category": "iso",
+            "type": "iso",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "linuxmint-22.2-cinnamon-64bit.iso",
+                "note": "Latest stable Mint Cinnamon from linuxmint.com mirrors"
+            },
+            "source_url": "https://mirrors.layeronline.com/linuxmint/stable/22.1/linuxmint-22.1-cinnamon-64bit.iso",
+            "dest": "VENTOY:/ISO/Linux/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "08 - OS - Fedora 42 Workstation",
+            "category": "iso",
+            "type": "iso",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Latest Fedora Workstation x86_64 live ISO"
+            },
+            "source_url": "https://download.fedoraproject.org/pub/fedora/linux/releases/42/Workstation/x86_64/iso/Fedora-Workstation-Live-42-1.1.x86_64.iso",
+            "dest": "VENTOY:/ISO/Linux/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "05 - OS - Live11 (Portable Win11)",
+            "category": "iso",
+            "type": "iso",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Live Windows 11 ISO from archive.org"
+            },
+            "source_url": "https://archive.org/download/live-11-mbr/live11%20mbr%20alpha%200.iso",
+            "dest": "VENTOY:/ISO/Windows/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "11 - TOOL - Hiren's BootCD PE (Recovery Suite)",
+            "category": "iso",
+            "type": "iso",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Official Hiren's BootCD PE"
+            },
+            "source_url": "https://www.hirensbootcd.org/files/HBCD_PE_x64.iso",
+            "dest": "VENTOY:/ISO/Tools/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "13 - TOOL - Rescuezilla (Easy Backup/Restore)",
+            "category": "iso",
+            "type": "iso",
+            "resolve": {
+                "strategy": "github_latest",
+                "repo": "rescuezilla/rescuezilla",
+                "asset_regex": "rescuezilla-.*-64bit\\.oracular\\.iso$"
+            },
+            "source_url": "",
+            "dest": "VENTOY:/ISO/Tools/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "14 - TOOL - Memtest86+ (RAM Testing)",
+            "category": "iso",
+            "type": "iso",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Official memtest.org (not PassMark)"
+            },
+            "source_url": "https://memtest.org/download/v7.20/mt86plus_7.20_64.grub.iso.zip",
+            "dest": "VENTOY:/ISO/Tools/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "12 - TOOL - Clonezilla (Disk Cloning/Backup)",
+            "category": "iso",
+            "type": "iso",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Stable release from clonezilla.org"
+            },
+            "source_url": "https://sourceforge.net/projects/clonezilla/files/clonezilla_live_stable/3.3.0-33/clonezilla-live-3.3.0-33-amd64.iso/download",
+            "dest": "VENTOY:/ISO/Tools/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Macrium Reflect Free",
+            "category": "iso",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "Macrium.exe",
+                "note": "Macrium Reflect Free v8.0.7783 from archive.org"
+            },
+            "source_url": "https://archive.org/download/Macrium_Reflect_Free_Latest/v8.0.7783_reflect_setup_free_x64.exe",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "7-Zip",
+            "category": "portable",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Official 7-zip.org download"
+            },
+            "source_url": "https://www.7-zip.org/a/7z2501-x64.exe",
+            "dest": "UTILS:/Portable/7zip/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Rufus",
+            "category": "portable",
+            "type": "exe",
+            "resolve": {
+                "strategy": "github_latest",
+                "repo": "pbatard/rufus",
+                "asset_regex": "rufus-.*\\.exe$"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Portable/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Balena Etcher",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "github_latest",
+                "repo": "balena-io/etcher",
+                "asset_regex": "balenaEtcher-win32-x64-.*\\.zip$"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Portable/etcher/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "CPU-Z",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Official cpuid.com download"
+            },
+            "source_url": "https://download.cpuid.com/cpu-z/cpu-z_2.17-en.zip",
+            "dest": "UTILS:/Portable/cpuz/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "HWiNFO",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "hw64_832.zip",
+                "note": "Official HWiNFO portable"
+            },
+            "source_url": "https://sourceforge.net/projects/hwinfo/files/latest/download",
+            "dest": "UTILS:/Portable/hwinfo/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "CrystalDiskInfo",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "CrystalDiskInfo9_5_0.zip",
+                "note": "Official CrystalDiskInfo portable"
+            },
+            "source_url": "https://sourceforge.net/projects/crystaldiskinfo/files/9.5.0/CrystalDiskInfo9_5_0.zip/download",
+            "dest": "UTILS:/Portable/crystaldiskinfo/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "CrystalDiskMark",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "CrystalDiskMark8_0_5.zip",
+                "note": "Official CrystalDiskMark portable"
+            },
+            "source_url": "https://sourceforge.net/projects/crystaldiskmark/files/8.0.5/CrystalDiskMark8_0_5.zip/download",
+            "dest": "UTILS:/Portable/crystaldiskmark/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "NirSoft Suite",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "nirsoft_package_1.30.66.zip",
+                "note": "Official NirSoft utilities package"
+            },
+            "source_url": "https://www.nirsoft.net/packages/nirsoft_package_1.30.66.zip",
+            "dest": "UTILS:/Portable/NirSoft/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "John the Ripper",
+            "category": "portable",
+            "type": "7z",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Official Openwall build"
+            },
+            "source_url": "https://www.openwall.com/john/k/john-1.9.0-jumbo-1-win64.7z",
+            "dest": "UTILS:/Portable/john/",
+            "post": [
+                "extract7z"
+            ],
+            "flags": {
+                "require_consent": true,
+                "manual": false
+            }
+        },
+        {
+            "name": "Hashcat",
+            "category": "portable",
+            "type": "7z",
+            "resolve": {
+                "strategy": "github_latest",
+                "repo": "hashcat/hashcat",
+                "asset_regex": "hashcat-.*\\.7z$"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Portable/hashcat/",
+            "post": [
+                "extract7z"
+            ],
+            "flags": {
+                "require_consent": true,
+                "manual": false
+            }
+        },
+        {
+            "name": "DDU (Display Driver Uninstaller)",
+            "category": "portable",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "DDU_v18.1.3.7.exe",
+                "note": "Official Wagnardsoft download"
+            },
+            "source_url": "https://www.wagnardsoft.com/DDU/download/DDU%20v18.1.3.7.exe",
+            "dest": "UTILS:/Portable/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "CRU (Custom Resolution Utility)",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Official Monitor Tests download"
+            },
+            "source_url": "https://www.monitortests.com/download/cru/cru-1.5.2.zip",
+            "dest": "UTILS:/Portable/cru/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "PuTTY",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Official PuTTY download"
+            },
+            "source_url": "https://the.earth.li/~sgtatham/putty/latest/w64/putty.zip",
+            "dest": "UTILS:/Portable/putty/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "TestDisk & PhotoRec",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "testdisk-7.2-WIP.win.zip",
+                "note": "Official CGSecurity download"
+            },
+            "source_url": "https://www.cgsecurity.org/testdisk-7.1.win.zip",
+            "dest": "UTILS:/Portable/testdisk/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Everything (Search)",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Official voidtools download"
+            },
+            "source_url": "https://www.voidtools.com/Everything-1.4.1.1029.x64.zip",
+            "dest": "UTILS:/Portable/everything/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Notepad++",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "github_latest",
+                "repo": "notepad-plus-plus/notepad-plus-plus",
+                "asset_regex": "npp\\..*\\.portable\\.x64\\.zip$"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Portable/notepadpp/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Sysinternals Suite",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Official Microsoft download"
+            },
+            "source_url": "https://download.sysinternals.com/files/SysinternalsSuite.zip",
+            "dest": "UTILS:/Portable/sysinternals/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "PDFsam Basic Portable",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "github_latest",
+                "repo": "torakiki/pdfsam",
+                "asset_regex": "pdfsam-basic-.*-windows-x64\\.zip$"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Portable/pdfsam/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "qBittorrent Portable",
+            "category": "portable",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "qBittorrentPortable.paf.exe",
+                "note": "Official qBittorrent portable (PortableApps format)"
+            },
+            "source_url": "https://sourceforge.net/projects/portableapps/files/qBittorrent%20Portable/qBittorrentPortable_5.1.1.paf.exe/download",
+            "dest": "UTILS:/Portable/qbittorrent/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "VLC Media Player Portable",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "vlc-portable.zip",
+                "note": "Official VLC portable from videolan.org"
+            },
+            "source_url": "https://get.videolan.org/vlc/3.0.21/win64/vlc-3.0.21-win64.zip",
+            "dest": "UTILS:/Portable/vlc/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Angry IP Scanner",
+            "category": "portable",
+            "type": "exe",
+            "resolve": {
+                "strategy": "github_latest",
+                "repo": "angryip/ipscan",
+                "asset_regex": "ipscan-win64-.*\\.exe$"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Portable/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Advanced Port Scanner",
+            "category": "portable",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "advanced_port_scanner.exe",
+                "note": "Fast network scanner with remote control features"
+            },
+            "source_url": "https://download.advanced-port-scanner.com/download/files/Advanced_Port_Scanner_2.5.3869.exe",
+            "dest": "UTILS:/Portable/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "TreeSize Free",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "TreeSizeFree-Portable.zip",
+                "note": "Professional disk space analyzer"
+            },
+            "source_url": "https://downloads.jam-software.de/treesize_free/TreeSizeFree-Portable.zip",
+            "dest": "UTILS:/Portable/treesize/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "WinMTR",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "winmtr.zip",
+                "note": "Network diagnostic tool combining ping and traceroute"
+            },
+            "source_url": "https://github.com/White-Tiger/WinMTR/releases/download/v1.0/WinMTR_x64.zip",
+            "dest": "UTILS:/Portable/winmtr/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "HxD Hex Editor",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "HxD.zip",
+                "note": "Hex editor for binary files"
+            },
+            "source_url": "https://mh-nexus.de/downloads/HxDPortableSetup.zip",
+            "dest": "UTILS:/Portable/hxd/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Recuva",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "rcsetup.exe",
+                "note": "File recovery tool by Piriform/CCleaner"
+            },
+            "source_url": "https://download.ccleaner.com/rcsetup153.exe",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Speccy",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "spsetup.exe",
+                "note": "System information tool by Piriform"
+            },
+            "source_url": "https://download.ccleaner.com/spsetup132.exe",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Nmap",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "nmap-setup.exe",
+                "note": "Network scanner and security auditing tool"
+            },
+            "source_url": "https://nmap.org/dist/nmap-7.98-setup.exe",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "WinSCP Portable",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "winscp_portable.zip",
+                "note": "SFTP/SCP client for file transfers"
+            },
+            "source_url": "https://winscp.net/download/WinSCP-6.5.4-Portable.zip",
+            "dest": "UTILS:/Portable/winscp/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Process Hacker",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "processhacker.zip",
+                "note": "Advanced process viewer and system monitor"
+            },
+            "source_url": "https://github.com/processhacker/processhacker/releases/download/v2.39/processhacker-2.39-bin.zip",
+            "dest": "UTILS:/Portable/processhacker/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "ImDisk Toolkit",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "imdisk.zip",
+                "note": "Virtual disk driver - mount ISOs/IMGs"
+            },
+            "source_url": "https://sourceforge.net/projects/imdisk-toolkit/files/latest/download",
+            "dest": "UTILS:/Portable/imdisk/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "WinDirStat",
+            "category": "portable",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "windirstat.exe",
+                "note": "Disk usage analyzer - portable exe"
+            },
+            "source_url": "https://sourceforge.net/projects/windirstat/files/windirstat/1.1.2%20installer%20re-release%20%28more%20languages%21%29/windirstat1_1_2_setup.exe/download",
+            "dest": "UTILS:/Portable/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "KeePassXC Portable",
+            "category": "portable",
+            "type": "zip",
+            "resolve": {
+                "strategy": "github_latest",
+                "repo": "keepassxreboot/keepassxc",
+                "asset_regex": "KeePassXC-.*-Win64-Portable\\.zip$"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Portable/keepassxc/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Wireshark Portable",
+            "category": "portable",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "WiresharkPortable64.paf.exe",
+                "note": "Network protocol analyzer - PortableApps format"
+            },
+            "source_url": "https://www.wireshark.org/download/win64/WiresharkPortable64_4.6.0.paf.exe",
+            "dest": "UTILS:/Portable/wireshark/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "7-Zip Installer",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Official 7-zip installer"
+            },
+            "source_url": "https://www.7-zip.org/a/7z2501-x64.exe",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Git for Windows",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "github_latest",
+                "repo": "git-for-windows/git",
+                "asset_regex": "Git-.*-64-bit\\.exe$"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "BullCrapUninstaller",
+            "category": "installer",
+            "type": "zip",
+            "resolve": {
+                "strategy": "github_latest",
+                "repo": "Klocman/Bulk-Crap-Uninstaller",
+                "asset_regex": "BCUninstaller_.*\\.zip$"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Installers/BCUninstaller/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Rufus Installer",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "github_latest",
+                "repo": "pbatard/rufus",
+                "asset_regex": "rufus-.*\\.exe$"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "HWiNFO64 Installer",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "hw64_832.exe",
+                "note": "Official HWiNFO installer from hwinfo.com"
+            },
+            "source_url": "https://sourceforge.net/projects/hwinfo/files/latest/download",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Android Platform Tools",
+            "category": "installer",
+            "type": "zip",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Official Google SDK platform tools"
+            },
+            "source_url": "https://dl.google.com/android/repository/platform-tools-latest-windows.zip",
+            "dest": "UTILS:/Installers/AndroidPlatformTools/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Proton VPN",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "ProtonVPN_Setup.exe",
+                "note": "Official Proton VPN download"
+            },
+            "source_url": "https://vpn.protondownload.com/download/ProtonVPN_v4.3.5_x64.exe",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "LibreOffice",
+            "category": "installer",
+            "type": "msi",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "LibreOffice_25.8.2_Win_x86-64.msi",
+                "note": "Official LibreOffice download"
+            },
+            "source_url": "https://download.documentfoundation.org/libreoffice/stable/25.8.2/win/x86_64/LibreOffice_25.8.2_Win_x86-64.msi",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "ONLYOFFICE Desktop Editors",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "ONLYOFFICEDesktopInstaller.exe",
+                "note": "Online installer - auto-detects x64/x86"
+            },
+            "source_url": "https://github.com/ONLYOFFICE/desktop-onlineinstaller/releases/latest/download/ONLYOFFICEDesktopInstaller.exe",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Microsoft Office Deployment Tool",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "officedeploymenttool_19029-20278.exe",
+                "note": "Official ODT for downloading/installing Office LTSC 2024/2021/365"
+            },
+            "source_url": "https://download.microsoft.com/download/6c1eeb25-cf8b-41d9-8d0d-cc1dbc032140/officedeploymenttool_19029-20278.exe",
+            "dest": "UTILS:/Installers/Office/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Discord",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "api_redirect",
+                "filename": "DiscordSetup.exe",
+                "note": "Official Discord setup with API redirect"
+            },
+            "source_url": "https://discord.com/api/downloads/distributions/app/installers/latest?channel=stable&platform=win&arch=x64",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Steam",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "SteamSetup.exe",
+                "note": "Official Steam installer"
+            },
+            "source_url": "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Node.js LTS",
+            "category": "installer",
+            "type": "msi",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "node-v22.21.0-x64.msi",
+                "note": "Official Node.js LTS installer"
+            },
+            "source_url": "https://nodejs.org/dist/v22.21.0/node-v22.21.0-x64.msi",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "qBittorrent Installer",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "qbittorrent_setup.exe",
+                "note": "Official qBittorrent installer"
+            },
+            "source_url": "https://sourceforge.net/projects/qbittorrent/files/qbittorrent-win32/qbittorrent-5.1.2/qbittorrent_5.1.2_x64_setup.exe/download",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "VLC Media Player Installer",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "vlc-setup.exe",
+                "note": "Official VLC installer from videolan.org"
+            },
+            "source_url": "https://get.videolan.org/vlc/3.0.21/win64/vlc-3.0.21-win64.exe",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Python",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "python-installer.exe",
+                "note": "Python 3.13 installer"
+            },
+            "source_url": "https://www.python.org/ftp/python/3.13.1/python-3.13.1-amd64.exe",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "VirtualBox",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "VirtualBox-setup.exe",
+                "note": "VM software for testing and development"
+            },
+            "source_url": "https://download.virtualbox.org/virtualbox/7.1.4/VirtualBox-7.1.4-165100-Win.exe",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "TeamViewer",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "TeamViewer_Setup.exe",
+                "note": "Remote support software - free for personal use"
+            },
+            "source_url": "https://download.teamviewer.com/download/TeamViewer_Setup_x64.exe",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "AnyDesk",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "AnyDesk_Setup.exe",
+                "note": "Fast remote desktop - free for personal use"
+            },
+            "source_url": "https://download.anydesk.com/AnyDesk.exe",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Revo Uninstaller Free",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "RevoUninstaller_Setup.exe",
+                "note": "Advanced uninstaller with leftover removal"
+            },
+            "source_url": "https://download.revouninstaller.com/download/revosetup.exe",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Wireshark Installer",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "Wireshark-setup.exe",
+                "note": "Network protocol analyzer installer"
+            },
+            "source_url": "https://2.na.dl.wireshark.org/win64/Wireshark-4.6.0-x64.exe",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Mozilla Firefox",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "Firefox_Setup.exe",
+                "note": "Official Firefox installer"
+            },
+            "source_url": "https://download.mozilla.org/?product=firefox-latest-ssl&os=win64&lang=en-US",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Brave Browser",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "BraveBrowserSetup.exe",
+                "note": "Official Brave browser installer"
+            },
+            "source_url": "https://laptop-updates.brave.com/latest/winx64",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "VS Code",
+            "category": "installer",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "filename": "VSCodeSetup.exe",
+                "note": "Official VS Code installer"
+            },
+            "source_url": "https://code.visualstudio.com/sha/download?build=stable&os=win32-x64-user",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "uBlock Origin (Firefox)",
+            "category": "extension",
+            "type": "xpi",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Direct download from GitHub - latest Firefox extension"
+            },
+            "source_url": "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/addon-607454-latest.xpi",
+            "dest": "UTILS:/Extensions/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Intel RST Driver",
+            "category": "driver",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Intel Rapid Storage Technology driver - Needs extraction with SetupRST.exe -extractdrivers SetupRST_extracted"
+            },
+            "source_url": "https://downloadmirror.intel.com/773229/SetupRST.exe",
+            "dest": "UTILS:/Drivers/Storage/",
+            "post": [
+                "extract_rst"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Intel Wi-Fi 6E/7 Driver",
+            "category": "driver",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Intel Wi-Fi drivers from intel.com"
+            },
+            "source_url": "https://downloadmirror.intel.com/863003/WiFi-23.160.0-Driver64-Win10-Win11.exe",
+            "dest": "UTILS:/Drivers/Networking/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Intel 2.5GbE Driver",
+            "category": "driver",
+            "type": "zip",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Intel Ethernet drivers from intel.com - Complete ethernet driver pack"
+            },
+            "source_url": "https://downloadmirror.intel.com/867466/Release_30.5.zip",
+            "dest": "UTILS:/Drivers/Networking/",
+            "post": [
+                "unzip"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Intel Bluetooth Driver",
+            "category": "driver",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Intel Bluetooth drivers from intel.com"
+            },
+            "source_url": "https://downloadmirror.intel.com/862107/BT-23.160.0-64UWD-Win10-Win11.exe",
+            "dest": "UTILS:/Drivers/Bluetooth/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "NVIDIA App",
+            "category": "driver",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "note": "NVIDIA App - Replaces GeForce Experience with unified driver and GPU management"
+            },
+            "source_url": "https://us.download.nvidia.com/nvapp/client/11.0.5.420/NVIDIA_app_v11.0.5.420.exe",
+            "dest": "UTILS:/Drivers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "AMD Adrenalin Software",
+            "category": "driver",
+            "type": "exe",
+            "resolve": {
+                "strategy": "direct",
+                "note": "AMD Software Adrenalin Edition - Graphics driver and control panel"
+            },
+            "source_url": "https://drivers.amd.com/drivers/installer/25.20/whql/amd-software-adrenalin-edition-25.10.2-minimalsetup-251027_web.exe",
+            "dest": "UTILS:/Drivers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        }
+    ]
 }
