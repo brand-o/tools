@@ -25,7 +25,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     - Ventoy bootloader (GPT, Secure Boot enabled)
     - VENTOY partition (NTFS) for ISO files
     - UTILS partition (exFAT) for portable tools and installers
-    - BACKUP partition (exFAT) for large backups
+    - FILES partition (exFAT) for large FILESs
 
     It downloads official tools, ISOs, and utilities with SHA-256 verification,
     creates organized folder structures, and generates a Ventoy menu configuration.
@@ -947,30 +947,30 @@ function Get-DynamicPartitionSizes {
     $driveSizeGB = [math]::Round($DriveSizeBytes / 1GB, 2)
     
     # Smart partitioning based on actual drive size
-    # Reserve ~10GB for Ventoy overhead and leave minimum 5GB for BACKUP
-    $minBackupGB = 5
+    # Reserve ~10GB for Ventoy overhead and leave minimum 5GB for FILES
+    $minFILESGB = 5
     $ventoyOverheadGB = 10
-    $availableGB = $driveSizeGB - $ventoyOverheadGB - $minBackupGB
+    $availableGB = $driveSizeGB - $ventoyOverheadGB - $minFILESGB
     
     if ($driveSizeGB -lt 64) {
         throw "Drive too small. Minimum 64GB required, found $driveSizeGB GB"
     }
     elseif ($driveSizeGB -lt 150) {
         # Small drives (64-149GB): Conservative allocation
-        # 64GB drive: ~35GB Ventoy, ~5GB Utils, ~14GB Backup
-        # 128GB drive: ~35GB Ventoy, ~5GB Utils, ~78GB Backup
+        # 64GB drive: ~35GB Ventoy, ~5GB Utils, ~14GB FILES
+        # 128GB drive: ~35GB Ventoy, ~5GB Utils, ~78GB FILES
         $ventoyGB = 35
         $utilsGB = 5
     }
     elseif ($driveSizeGB -lt 300) {
         # Medium drives (150-299GB): Moderate allocation
-        # 256GB drive: ~50GB Ventoy, ~10GB Utils, ~186GB Backup
+        # 256GB drive: ~50GB Ventoy, ~10GB Utils, ~186GB FILES
         $ventoyGB = 50
         $utilsGB = 10
     }
     else {
         # Large drives (300GB+): Generous allocation
-        # 512GB+ drive: ~100GB Ventoy, ~20GB Utils, rest for Backup
+        # 512GB+ drive: ~100GB Ventoy, ~20GB Utils, rest for FILES
         $ventoyGB = 100
         $utilsGB = 20
     }
@@ -979,11 +979,11 @@ function Get-DynamicPartitionSizes {
     if (($ventoyGB + $utilsGB) -gt $availableGB) {
         Write-Log "Warning: Calculated partitions too large, adjusting..." -Level WARNING
         $ventoyGB = [math]::Floor($availableGB * 0.7)  # 70% for Ventoy
-        $utilsGB = [math]::Floor($availableGB * 0.15)  # 15% for Utils (leaving 15% for Backup)
+        $utilsGB = [math]::Floor($availableGB * 0.15)  # 15% for Utils (leaving 15% for FILES)
     }
 
     Write-Log ('  Drive size: {0} GB' -f $driveSizeGB) -Level INFO
-    Write-Log ('  Partition scheme: Ventoy {0} GB, Utils {1} GB, Backup (remaining)' -f $ventoyGB, $utilsGB) -Level INFO
+    Write-Log ('  Partition scheme: Ventoy {0} GB, Utils {1} GB, FILES (remaining)' -f $ventoyGB, $utilsGB) -Level INFO
 
     return @{
         ventoy_gb = $ventoyGB
@@ -1528,22 +1528,22 @@ function Test-ExistingBrandoToolkit {
         }
     }
 
-    # Look for characteristic brando's toolkit volumes (VENTOY, UTILS, BACKUP)
+    # Look for characteristic brando's toolkit volumes (VENTOY, UTILS, FILES)
     $hasVentoy = $volumes | Where-Object { $_.FileSystemLabel -eq "VENTOY" }
     $hasUtils = $volumes | Where-Object { $_.FileSystemLabel -eq "UTILS" }
-    $hasBackup = $volumes | Where-Object { $_.FileSystemLabel -eq "BACKUP" }
+    $hasFILES = $volumes | Where-Object { $_.FileSystemLabel -eq "FILES" }
 
-    if ($hasVentoy -or $hasUtils -or $hasBackup) {
+    if ($hasVentoy -or $hasUtils -or $hasFILES) {
         Write-Log "  Found existing brando's toolkit partitions:" -Level WARN
         if ($hasVentoy) { Write-Log "    - VENTOY: $($hasVentoy.DriveLetter):\" -Level WARN }
         if ($hasUtils) { Write-Log "    - UTILS: $($hasUtils.DriveLetter):\" -Level WARN }
-        if ($hasBackup) { Write-Log "    - BACKUP: $($hasBackup.DriveLetter):\" -Level WARN }
+        if ($hasFILES) { Write-Log "    - FILES: $($hasFILES.DriveLetter):\" -Level WARN }
 
         return @{
             Exists = $true
             Ventoy = $hasVentoy
             Utils = $hasUtils
-            Backup = $hasBackup
+            FILES = $hasFILES
         }
     }
 
@@ -1650,25 +1650,25 @@ convert gpt
         throw
     }
 
-    # Step 5: Create BACKUP partition (use remaining space)
-    Write-Log "Step 5/5: Creating BACKUP partition..."
+    # Step 5: Create FILES partition (use remaining space)
+    Write-Log "Step 5/5: Creating FILES partition..."
 
     try {
-        $backupPartition = New-Partition -DiskNumber $diskNumber -UseMaximumSize -AssignDriveLetter -ErrorAction Stop
+        $FILESPartition = New-Partition -DiskNumber $diskNumber -UseMaximumSize -AssignDriveLetter -ErrorAction Stop
         Start-Sleep -Seconds 2
 
-        $backupVolume = Format-Volume -Partition $backupPartition -FileSystem exFAT -NewFileSystemLabel "BACKUP" -Confirm:$false -ErrorAction Stop
+        $FILESVolume = Format-Volume -Partition $FILESPartition -FileSystem exFAT -NewFileSystemLabel "FILES" -Confirm:$false -ErrorAction Stop
         Start-Sleep -Seconds 2
 
         # Refresh partition info to get the assigned drive letter
-        $backupPartition = Get-Partition -DiskNumber $diskNumber -PartitionNumber $backupPartition.PartitionNumber
-        $backupLetter = $backupPartition.DriveLetter
+        $FILESPartition = Get-Partition -DiskNumber $diskNumber -PartitionNumber $FILESPartition.PartitionNumber
+        $FILESLetter = $FILESPartition.DriveLetter
 
-        $friendlySize = Get-FriendlySize $backupPartition.Size
-        Write-Log "  BACKUP partition created: ${backupLetter}:\ ($friendlySize)" -Level SUCCESS
+        $friendlySize = Get-FriendlySize $FILESPartition.Size
+        Write-Log "  FILES partition created: ${FILESLetter}:\ ($friendlySize)" -Level SUCCESS
     }
     catch {
-        Write-Log "  Failed to create BACKUP partition: $($_.Exception.Message)" -Level ERROR
+        Write-Log "  Failed to create FILES partition: $($_.Exception.Message)" -Level ERROR
         throw
     }
 
@@ -1678,10 +1678,10 @@ convert gpt
         DiskNumber = $diskNumber
         VentoyLetter = $ventoyInfo.Letter
         UtilsLetter = $utilsLetter
-        BackupLetter = $backupLetter
+        FILESLetter = $FILESLetter
         VentoySize = $ventoyInfo.Size
         UtilsSize = $utilsSizeBytes
-        BackupSize = $backupPartition.Size
+        FILESSize = $FILESPartition.Size
     }
 }
 
@@ -1730,11 +1730,11 @@ function Install-Ventoy {
         }
     }
 
-    # Calculate reserve space (UTILS + BACKUP combined, in MB)
-    # Reserve space = Utils + minimum 10GB for Backup
+    # Calculate reserve space (UTILS + FILES combined, in MB)
+    # Reserve space = Utils + minimum 10GB for FILES
     # This leaves rest of drive for Ventoy partition
-    $minBackupGB = 10
-    $reserveMB = [int](($Settings.utils_gb + $minBackupGB) * 1024)
+    $minFILESGB = 10
+    $reserveMB = [int](($Settings.utils_gb + $minFILESGB) * 1024)
 
     # Install Ventoy
     Write-Log "Installing Ventoy to \\.\PhysicalDrive${DiskNumber}..."
@@ -1885,7 +1885,7 @@ function Initialize-FolderStructure {
     return @{
         VentoyRoot = $ventoyRoot
         UtilsRoot = $utilsRoot
-        BackupRoot = "$($DriveInfo.BackupLetter):\"
+        FILESRoot = "$($DriveInfo.FILESLetter):\"
     }
 }
 
@@ -2446,7 +2446,7 @@ function Main {
         $Folders = @{
             VentoyRoot = Join-Path $testRoot "VENTOY"
             UtilsRoot = Join-Path $testRoot "UTILS"
-            BackupRoot = Join-Path $testRoot "BACKUP"
+            FILESRoot = Join-Path $testRoot "FILES"
         }
 
         foreach ($folder in $Folders.Values) {
@@ -2492,7 +2492,7 @@ function Main {
             $driveInfo = @{
                 VentoyLetter = if ($existingDrive.Ventoy) { $existingDrive.Ventoy.DriveLetter } else { $null }
                 UtilsLetter = if ($existingDrive.Utils) { $existingDrive.Utils.DriveLetter } else { $null }
-                BackupLetter = if ($existingDrive.Backup) { $existingDrive.Backup.DriveLetter } else { $null }
+                FILESLetter = if ($existingDrive.FILES) { $existingDrive.FILES.DriveLetter } else { $null }
             }
 
             if (-not $driveInfo.VentoyLetter -or -not $driveInfo.UtilsLetter) {
@@ -2583,10 +2583,10 @@ function Main {
     Write-Host "Drive Layout:" -ForegroundColor Cyan
     $ventoySize = Get-FriendlySize $driveInfo.VentoySize
     $utilsSize = Get-FriendlySize $driveInfo.UtilsSize
-    $backupSize = Get-FriendlySize $driveInfo.BackupSize
+    $FILESSize = Get-FriendlySize $driveInfo.FILESSize
     Write-Host "  VENTOY:  $($folders.VentoyRoot)  ($ventoySize)" -ForegroundColor White
     Write-Host "  UTILS:   $($folders.UtilsRoot)  ($utilsSize)" -ForegroundColor White
-    Write-Host "  BACKUP:  $($folders.BackupRoot)  ($backupSize)" -ForegroundColor White
+    Write-Host "  FILES:  $($folders.FILESRoot)  ($FILESSize)" -ForegroundColor White
     Write-Host ""
     Write-Host "Next steps:" -ForegroundColor Yellow
     Write-Host "  1. Review the manifest: $($folders.UtilsRoot)_Meta\manifest.json" -ForegroundColor Gray
