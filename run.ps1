@@ -24,5 +24,13 @@ catch {
     if (Test-Path $tempFile) {
         Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
     }
+    Write-Host ""
+    Write-Host "Press any key to exit..." -ForegroundColor Yellow
+    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     exit 1
 }
+
+# Pause at the end when run from RUN_ME.bat
+Write-Host ""
+Write-Host "Script completed. Press any key to exit..." -ForegroundColor Green
+$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
