@@ -63,12 +63,12 @@ echo.
 pause
 
 :: Use PowerShell to elevate and run the online script
-powershell -NoProfile -Command "Start-Process PowerShell -Verb RunAs -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-Command','irm https://brando.tools/run | iex; Write-Host """"; Write-Host ""Press any key to exit...""; $null = $Host.UI.RawUI.ReadKey(""NoEcho,IncludeKeyDown"")'"
+powershell -NoProfile -Command "$code = 'try { irm https://brando.tools/run -UseBasicParsing | iex } catch { Write-Host \"Error: $_\" -ForegroundColor Red; Start-Sleep -Seconds 5 }; Write-Host \"\"; Write-Host \"Press any key to exit...\" -ForegroundColor Yellow; $null = $Host.UI.RawUI.ReadKey(\"NoEcho,IncludeKeyDown\")'; Start-Process PowerShell -Verb RunAs -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-Command',$code"
 
 :: Exit this window since we spawned an elevated one
 exit /b
 
 :RunScript
 :: If we're already admin, run the script directly
-powershell -NoProfile -ExecutionPolicy Bypass -Command "irm brando.tools/run | iex; Write-Host ''; Write-Host 'Press any key to exit...'; $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "try { irm brando.tools/run -UseBasicParsing | iex } catch { Write-Host \"Error: $_\" -ForegroundColor Red; Start-Sleep -Seconds 5 }; Write-Host ''; Write-Host 'Press any key to exit...' -ForegroundColor Yellow; $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')"
 exit /b
