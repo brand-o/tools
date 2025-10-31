@@ -113,6 +113,22 @@
             }
         },
         {
+            "name": "06 - OS - Live11 (Win11 PE Live USB)",
+            "category": "iso",
+            "type": "iso",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Windows 11 PE live environment (testing re-added)"
+            },
+            "source_url": "https://github.com/JoshuaFarrell/Live11/releases/download/0.3.0/Live11_v0.3.0.iso",
+            "dest": "VENTOY:/ISO/Windows/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
             "name": "10 - TOOL - GParted Live (Partition Editor)",
             "category": "iso",
             "type": "iso",

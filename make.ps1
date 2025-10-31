@@ -978,7 +978,7 @@ function Get-DynamicPartitionSizes {
     $driveSizeGB = [math]::Round($DriveSizeBytes / 1GB, 2)
     
     # Fixed partitioning scheme for all drives (128GB+ required)
-    # VENTOY: 55GB (45.7GB ISOs + 20% buffer for modding temp space)
+    # VENTOY: 65GB (55GB ISOs + 10GB buffer for Live11 and extra ISOs)
     # UTILS: 8GB (6GB tools/drivers + 20% buffer)
     # FILES: All remaining space (personal files, backups, etc.)
     
@@ -986,7 +986,7 @@ function Get-DynamicPartitionSizes {
         throw "Drive too small. Minimum 128GB drive required (111GB usable), found $driveSizeGB GB"
     }
 
-    $ventoyGB = 55
+    $ventoyGB = 65
     $utilsGB = 8
 
     Write-Log ('  Drive size: {0} GB' -f $driveSizeGB) -Level INFO
@@ -1215,10 +1215,10 @@ function Invoke-WindowsISOFallback {
     )
 
     # Massgrave direct download URLs (updated periodically for latest versions)
-    # These point directly to Microsoft's CDN, bypassing the download page API
+    # These point to Massgrave's CDN mirror, bypassing Microsoft's download page API
     $fallbackUrls = @{
         "Win11Pro" = "https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/26200.6584.250915-1905.25h2_ge_release_svc_refresh_CLIENT_CONSUMER_x64FRE_en-us.iso"
-        "Win10Pro" = "https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/19045.2006.220908-0225.22h2_release_svc_refresh_CLIENTENTERPRISEEVAL_OEMRET_x64FRE_en-us.iso"
+        "Win10Pro" = "https://drive.massgrave.dev/en-us_windows_10_consumer_editions_version_22h2_updated_oct_2025_x64_dvd_38efd00d.iso"
     }
 
     # Check if we have a fallback URL for this edition
