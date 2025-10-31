@@ -462,12 +462,29 @@ function Invoke-FileDownload {
         }
     }
 
-    # Detect Microsoft redirect URLs (BITS doesn't handle these well)
+    # Detect URLs incompatible with BITS (requires Content-Length header)
     $useBits = $true
     $finalUrl = $Url
 
-    if ($Url -match 'go\.microsoft\.com|aka\.ms' -or $Url -match 'fwlink') {
+    # Known domains that don't provide Content-Length or have BITS issues
+    $bitsIncompatibleDomains = @(
+        'nirsoft\.net',
+        'winscp\.net',
+        'drivers\.amd\.com',
+        'nodejs\.org',
+        'go\.microsoft\.com',
+        'aka\.ms',
+        'fwlink'
+    )
+
+    $isDomainIncompatible = $bitsIncompatibleDomains | Where-Object { $Url -match $_ }
+
+    if ($isDomainIncompatible) {
         $useBits = $false
+        Write-Log "  Detected BITS-incompatible URL - using WebClient..." -Level INFO
+    }
+
+    if ($Url -match 'go\.microsoft\.com|aka\.ms' -or $Url -match 'fwlink') {
         Write-Log "  Detected redirect URL - resolving actual download URL..." -Level INFO
 
         try {

@@ -704,7 +704,7 @@
                 "filename": "winmtr.zip",
                 "note": "Network diagnostic tool combining ping and traceroute"
             },
-            "source_url": "https://github.com/White-Tiger/WinMTR/releases/download/v1.0/WinMTR_x64.zip",
+            "source_url": "https://github.com/White-Tiger/WinMTR/releases/download/v1.0/WinMTR-v100.zip",
             "dest": "UTILS:/Portable/winmtr/",
             "post": [
                 "unzip"
@@ -865,7 +865,7 @@
             "resolve": {
                 "strategy": "github_latest",
                 "repo": "keepassxreboot/keepassxc",
-                "asset_regex": "KeePassXC-.*-Win64-Portable\\.zip$"
+                "asset_regex": "KeePassXC-.*-Win64\\.zip$"
             },
             "source_url": "",
             "dest": "UTILS:/Portable/keepassxc/",
