@@ -2062,46 +2062,83 @@ function Start-Provisioning {
                         New-Item -ItemType Directory -Path $destBase -Force | Out-Null
                     }
 
-                    # Download using Fido
-                    $lang = if ($resolved.language) { $resolved.language } else { "English" }
-                    $downloadedIso = Invoke-FidoDownload -Edition $resolved.edition -Destination $destBase -Language $lang
+                    # Check if this is a modding request and if stock ISO already exists
+                    $downloadedIso = $null
+                    $standardizedName = Get-StandardizedFilename -OriginalName $resolved.filename -ItemName $item.name
+                    $finalPath = Join-Path $destBase $standardizedName
+                    
+                    if ($resolved.requires_modding -eq $true) {
+                        # For modded ISOs, check if stock ISO already exists
+                        # Look for Win11_OEM*.iso pattern (stock version)
+                        $stockPattern = "Win11_OEM*.iso"
+                        $existingStock = Get-ChildItem -Path $destBase -Filter $stockPattern -ErrorAction SilentlyContinue | Select-Object -First 1
+                        
+                        if ($existingStock) {
+                            Write-Log "  Found existing stock Win11 ISO: $($existingStock.Name)" -Level SUCCESS
+                            Write-Log "  Skipping download, will use existing ISO for modding" -Level INFO
+                            $downloadedIso = $existingStock.FullName
+                            $finalPath = $downloadedIso  # Use the existing file as-is
+                        } else {
+                            Write-Log "  No existing stock Win11 ISO found, will download new one" -Level INFO
+                        }
+                    }
+
+                    # Download using Fido (only if we didn't find existing stock)
+                    if (-not $downloadedIso) {
+                        $lang = if ($resolved.language) { $resolved.language } else { "English" }
+                        $downloadedIso = Invoke-FidoDownload -Edition $resolved.edition -Destination $destBase -Language $lang
+                    }
 
                     if ($downloadedIso -and (Test-Path $downloadedIso)) {
-                        Write-Log "  Windows ISO downloaded successfully!" -Level SUCCESS
+                        # Check if we're reusing an existing ISO (finalPath was already set to existing file)
+                        $isReusingExisting = ($downloadedIso -eq $finalPath)
+                        
+                        if ($isReusingExisting) {
+                            Write-Log "  Using existing Windows ISO: $(Split-Path $downloadedIso -Leaf)" -Level SUCCESS
+                        } else {
+                            Write-Log "  Windows ISO downloaded successfully!" -Level SUCCESS
 
-                        # Apply standardized filename
-                        $standardizedName = Get-StandardizedFilename -OriginalName $resolved.filename -ItemName $item.name
-                        $finalPath = Join-Path $destBase $standardizedName
+                            # Apply standardized filename (only for newly downloaded ISOs)
+                            $standardizedName = Get-StandardizedFilename -OriginalName $resolved.filename -ItemName $item.name
+                            $finalPath = Join-Path $destBase $standardizedName
 
-                        if ($downloadedIso -ne $finalPath) {
-                            if (Test-Path $finalPath) {
-                                Remove-Item $finalPath -Force
+                            if ($downloadedIso -ne $finalPath) {
+                                if (Test-Path $finalPath) {
+                                    Remove-Item $finalPath -Force
+                                }
+                                Move-Item -Path $downloadedIso -Destination $finalPath -Force
                             }
-                            Move-Item -Path $downloadedIso -Destination $finalPath -Force
-                        }
 
-                        Write-Log "  Saved as: $standardizedName" -Level SUCCESS
+                            Write-Log "  Saved as: $standardizedName" -Level SUCCESS
+                        }
 
                         # If this needs modding, create modded version too
                         if ($resolved.requires_modding -eq $true) {
-                            Write-Host ""
-                            Write-Log "  Creating modded version with TPM/SecureBoot bypasses..." -Level INFO
-
-                            $moddedISO = Invoke-ISOModding -SourceISO $finalPath -Destination $destBase
-
-                            if ($moddedISO -and (Test-Path $moddedISO)) {
-                                # Rename modded ISO with standardized name
-                                $moddedStandardName = Get-StandardizedFilename -OriginalName "Win11_Mod.iso" -ItemName ($item.name -replace "Stock.*", "Modded")
-                                $moddedFinalPath = Join-Path $destBase $moddedStandardName
-                                if ($moddedISO -ne $moddedFinalPath) {
-                                    Move-Item -Path $moddedISO -Destination $moddedFinalPath -Force
-                                }
-
-                                Write-Log "  Modded ISO created successfully!" -Level SUCCESS
-                                Write-Log "  Stock: $(Split-Path $finalPath -Leaf)" -Level INFO
-                                Write-Log "  Modded: $(Split-Path $moddedFinalPath -Leaf)" -Level INFO
+                            # Check if modded ISO already exists
+                            $moddedStandardName = Get-StandardizedFilename -OriginalName "Win11_Mod.iso" -ItemName ($item.name -replace "Stock.*", "Modded")
+                            $moddedFinalPath = Join-Path $destBase $moddedStandardName
+                            
+                            if (Test-Path $moddedFinalPath) {
+                                Write-Log "  Modded ISO already exists: $(Split-Path $moddedFinalPath -Leaf)" -Level SUCCESS
+                                Write-Log "  Skipping ISO modification" -Level INFO
                             } else {
-                                Write-Log "  Modded ISO creation failed, but stock ISO is available" -Level WARN
+                                Write-Host ""
+                                Write-Log "  Creating modded version with TPM/SecureBoot bypasses..." -Level INFO
+
+                                $moddedISO = Invoke-ISOModding -SourceISO $finalPath -Destination $destBase
+
+                                if ($moddedISO -and (Test-Path $moddedISO)) {
+                                    # Rename modded ISO with standardized name
+                                    if ($moddedISO -ne $moddedFinalPath) {
+                                        Move-Item -Path $moddedISO -Destination $moddedFinalPath -Force
+                                    }
+
+                                    Write-Log "  Modded ISO created successfully!" -Level SUCCESS
+                                    Write-Log "  Stock: $(Split-Path $finalPath -Leaf)" -Level INFO
+                                    Write-Log "  Modded: $(Split-Path $moddedFinalPath -Leaf)" -Level INFO
+                                } else {
+                                    Write-Log "  Modded ISO creation failed, but stock ISO is available" -Level WARN
+                                }
                             }
                         }
 
