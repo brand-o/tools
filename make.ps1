@@ -474,7 +474,8 @@ function Invoke-FileDownload {
         'nodejs\.org',
         'go\.microsoft\.com',
         'aka\.ms',
-        'fwlink'
+        'fwlink',
+        'drive\.massgrave\.dev'
     )
 
     $isDomainIncompatible = $bitsIncompatibleDomains | Where-Object { $Url -match $_ }
@@ -1217,7 +1218,7 @@ function Invoke-WindowsISOFallback {
     # Massgrave direct download URLs (updated periodically for latest versions)
     # These point to Massgrave's CDN mirror, bypassing Microsoft's download page API
     $fallbackUrls = @{
-        "Win11Pro" = "https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/26200.6584.250915-1905.25h2_ge_release_svc_refresh_CLIENT_CONSUMER_x64FRE_en-us.iso"
+        "Win11Pro" = "https://drive.massgrave.dev/en-us_windows_11_consumer_editions_version_24h2_updated_oct_2025_x64_dvd_d6c33e4f.iso"
         "Win10Pro" = "https://drive.massgrave.dev/en-us_windows_10_consumer_editions_version_22h2_updated_oct_2025_x64_dvd_38efd00d.iso"
     }
 
