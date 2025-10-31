@@ -1199,6 +1199,79 @@ function Reorganize-PortableApp {
     }
 }
 
+function Invoke-WindowsISOFallback {
+    <#
+    .SYNOPSIS
+        Downloads Windows ISO directly from Microsoft CDN using Massgrave links
+        Used as fallback when Fido.ps1 is rate-limited/blocked by Microsoft
+    .NOTES
+        URLs sourced from: https://massgrave.dev/windows_11_links and windows_10_links
+        These are direct Microsoft CDN links that bypass the API rate limiting
+    #>
+    param(
+        [string]$Edition,      # Win10Pro, Win11Pro
+        [string]$Destination,
+        [string]$Language = "English"
+    )
+
+    # Massgrave direct download URLs (updated periodically for latest versions)
+    # These point directly to Microsoft's CDN, bypassing the download page API
+    $fallbackUrls = @{
+        "Win11Pro" = "https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/26200.6584.250915-1905.25h2_ge_release_svc_refresh_CLIENT_CONSUMER_x64FRE_en-us.iso"
+        "Win10Pro" = "https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/19045.2006.220908-0225.22h2_release_svc_refresh_CLIENTENTERPRISEEVAL_OEMRET_x64FRE_en-us.iso"
+    }
+
+    # Check if we have a fallback URL for this edition
+    if (-not $fallbackUrls.ContainsKey($Edition)) {
+        Write-Log "  No fallback URL available for $Edition" -Level WARN
+        return $null
+    }
+
+    $fallbackUrl = $fallbackUrls[$Edition]
+    
+    # Generate temporary filename for download
+    $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+    $tempFilename = "Win_Fallback_$timestamp.iso"
+    $tempDownload = Join-Path $Destination $tempFilename
+    
+    Write-Log "  Using Massgrave direct CDN link (bypasses API rate limiting)" -Level INFO
+    Write-Log "  Source: https://massgrave.dev/windows_11_links" -Level INFO
+    
+    # Download using existing Invoke-FileDownload function
+    # ExpectedSize 0 = don't validate size (we don't know exact size)
+    $downloadSuccess = Invoke-FileDownload -Url $fallbackUrl -Destination $tempDownload -DisplayName "$Edition ISO (Fallback)" -ExpectedSize 0
+    
+    if ($downloadSuccess -and (Test-Path $tempDownload)) {
+        # Rename to match expected naming convention for reuse detection
+        $finalName = switch ($Edition) {
+            "Win11Pro" { "Win11_OEM_24H2_$(Get-Date -Format 'yyyyMMdd').iso" }
+            "Win10Pro" { "Win10_22H2_$(Get-Date -Format 'yyyyMMdd').iso" }
+            default { $tempFilename }
+        }
+        
+        $finalPath = Join-Path $Destination $finalName
+        
+        # Only rename if target doesn't already exist
+        if (Test-Path $finalPath) {
+            Write-Log "  Target name already exists: $finalName" -Level WARN
+            Write-Log "  Using temporary name: $tempFilename" -Level INFO
+            return $tempDownload
+        } else {
+            try {
+                Move-Item -Path $tempDownload -Destination $finalPath -Force -ErrorAction Stop
+                Write-Log "  Renamed to: $finalName" -Level SUCCESS
+                return $finalPath
+            } catch {
+                Write-Log "  Failed to rename, using temp name: $($_.Exception.Message)" -Level WARN
+                return $tempDownload
+            }
+        }
+    } else {
+        Write-Log "  Direct CDN download failed" -Level ERROR
+        return $null
+    }
+}
+
 function Invoke-FidoDownload {
     <#
     .SYNOPSIS
@@ -1280,13 +1353,21 @@ function Invoke-FidoDownload {
             Write-Log "  Fido exited with code: $($fidoProcess.ExitCode)" -Level ERROR
 
             if ($fidoProcess.ExitCode -eq 3) {
-                Write-Log "  Microsoft is blocking the download. This could be due to:" -Level WARN
-                Write-Log "    - VPN/Proxy usage (disable VPN and try again)" -Level WARN
-                Write-Log "    - Rate limiting (wait 10-15 minutes)" -Level WARN
-                Write-Log "    - Geographic restrictions" -Level WARN
-                Write-Log "  " -Level INFO
-                Write-Log "  WORKAROUND: Manually download the ISO and place it in the destination folder" -Level INFO
-                Write-Log "  The script will detect and use existing ISOs automatically" -Level INFO
+                Write-Log "  Microsoft is blocking the download (Error 3 - Rate limit/IP block)" -Level WARN
+                Write-Log "  Attempting fallback: Direct download from Microsoft CDN..." -Level INFO
+                
+                # Try fallback direct download
+                $fallbackIso = Invoke-WindowsISOFallback -Edition $Edition -Destination $Destination -Language $Language
+                
+                if ($fallbackIso -and (Test-Path $fallbackIso)) {
+                    Write-Log "  Fallback download successful!" -Level SUCCESS
+                    return $fallbackIso
+                } else {
+                    Write-Log "  Fallback download also failed." -Level ERROR
+                    Write-Log "  WORKAROUND: Manually download the ISO and place it in the destination folder" -Level INFO
+                    Write-Log "  The script will detect and use existing ISOs automatically" -Level INFO
+                    return $null
+                }
             }
 
             return $null
