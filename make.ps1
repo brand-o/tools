@@ -700,6 +700,20 @@ function Invoke-ISOModding {
     Write-Log "  Creating modded ISO with TPM/SecureBoot bypasses..." -Level INFO
     Write-Log "  This may take 10-20 minutes..." -Level WARN
 
+    # Check disk space on staging drive (needs ~20GB: 6.5GB source + 6.5GB extracted + 6.5GB output + buffer)
+    $stagingDrive = (Get-Item $script:StagingDir).PSDrive.Name + ":"
+    $driveInfo = Get-PSDrive $stagingDrive.TrimEnd(':')
+    $freeSpaceGB = [math]::Round($driveInfo.Free / 1GB, 2)
+    $requiredGB = 20
+    
+    if ($freeSpaceGB -lt $requiredGB) {
+        $errorMsg = "Insufficient disk space on $stagingDrive drive. Required: ${requiredGB}GB, Available: ${freeSpaceGB}GB. Please free up space or skip ISO modding."
+        Write-Log "  $errorMsg" -Level ERROR
+        throw $errorMsg
+    }
+    
+    Write-Log "  Disk space check: ${freeSpaceGB}GB available (${requiredGB}GB required)" -Level SUCCESS
+
     $wimlibExe = Get-WimlibImagex
     $workDir = Join-Path $script:StagingDir "iso_mod_$(Get-Random)"
     $isoExtract = Join-Path $workDir "iso"
