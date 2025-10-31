@@ -689,9 +689,10 @@ function Get-WimlibImagex {
 function Invoke-ISOModding {
     <#
     .SYNOPSIS
-        Creates modded Windows 11 ISO with TPM/SecureBoot/RAM bypasses - pure PowerShell
+        Creates modded Windows 11 ISO with TPM/SecureBoot/RAM bypasses using Get-Win11.cmd method
     .DESCRIPTION
-        Mounts ISO, modifies install.wim registry to add hardware check bypasses, saves as new ISO
+        Uses wimlib-imagex to extract registry hives, modifies them directly, then rebuilds WIM
+        Based on proven Get-Win11.cmd approach: https://github.com/illsk1lls/Win-11-Download-Prep-Tool
     #>
     param(
         [string]$SourceISO,
@@ -716,6 +717,10 @@ function Invoke-ISOModding {
     Write-Log "  Disk space check: ${freeSpaceGB}GB available (${requiredGB}GB required)" -Level SUCCESS
 
     $wimlibExe = Get-WimlibImagex
+    if (-not (Test-Path $wimlibExe)) {
+        throw "wimlib-imagex.exe not found. Cannot mod ISO."
+    }
+
     $workDir = Join-Path $script:StagingDir "iso_mod_$(Get-Random)"
     $isoExtract = Join-Path $workDir "iso"
     $finalISO = Join-Path $Destination "Win11_Mod.iso"
@@ -746,169 +751,129 @@ function Invoke-ISOModding {
             throw "install.wim not found in ISO"
         }
 
-        Write-Log "  Modifying install.wim to bypass hardware checks..." -Level INFO
+        Write-Log "  Modifying install.wim with registry bypasses (Get-Win11.cmd method)..." -Level INFO
 
         # Make writable
         Set-ItemProperty -Path $installWim -Name IsReadOnly -Value $false -ErrorAction SilentlyContinue
 
-        # Get image count
-        $wimInfoRaw = & $wimlibExe info "$installWim"
-        $imageCount = ($wimInfoRaw | Select-String "Index\s+:\s+(\d+)" -AllMatches).Matches.Count
+        # Get image count from WIM
+        $wimInfo = & $wimlibExe info "$installWim" 2>&1
+        $imageCount = 0
+        foreach ($line in $wimInfo) {
+            if ($line -match "Image Count:\s+(\d+)") {
+                $imageCount = [int]$Matches[1]
+                break
+            }
+        }
 
-        # Create autounattend.xml with all Rufus-style bypasses and privacy tweaks
-        $autoUnattendContent = @'
-<?xml version="1.0" encoding="utf-8"?>
-<unattend xmlns="urn:schemas-microsoft-com:unattend">
-    <settings pass="windowsPE">
-        <component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-            <SetupUILanguage>
-                <UILanguage>en-US</UILanguage>
-            </SetupUILanguage>
-            <InputLocale>en-001</InputLocale>
-            <SystemLocale>en-US</SystemLocale>
-            <UILanguage>en-US</UILanguage>
-            <UILanguageFallback>en-US</UILanguageFallback>
-            <UserLocale>en-001</UserLocale>
-        </component>
-        <component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-            <UserData>
-                <AcceptEula>true</AcceptEula>
-                <ProductKey>
-                    <WillShowUI>Never</WillShowUI>
-                </ProductKey>
-            </UserData>
-            <RunSynchronous>
-                <RunSynchronousCommand wcm:action="add">
-                    <Order>1</Order>
-                    <Path>reg add HKLM\SYSTEM\Setup\LabConfig /v BypassTPMCheck /t REG_DWORD /d 1 /f</Path>
-                </RunSynchronousCommand>
-                <RunSynchronousCommand wcm:action="add">
-                    <Order>2</Order>
-                    <Path>reg add HKLM\SYSTEM\Setup\LabConfig /v BypassSecureBootCheck /t REG_DWORD /d 1 /f</Path>
-                </RunSynchronousCommand>
-                <RunSynchronousCommand wcm:action="add">
-                    <Order>3</Order>
-                    <Path>reg add HKLM\SYSTEM\Setup\LabConfig /v BypassRAMCheck /t REG_DWORD /d 1 /f</Path>
-                </RunSynchronousCommand>
-                <RunSynchronousCommand wcm:action="add">
-                    <Order>4</Order>
-                    <Path>reg add HKLM\SYSTEM\Setup\LabConfig /v BypassStorageCheck /t REG_DWORD /d 1 /f</Path>
-                </RunSynchronousCommand>
-                <RunSynchronousCommand wcm:action="add">
-                    <Order>5</Order>
-                    <Path>reg add HKLM\SYSTEM\Setup\LabConfig /v BypassCPUCheck /t REG_DWORD /d 1 /f</Path>
-                </RunSynchronousCommand>
-            </RunSynchronous>
-        </component>
-    </settings>
-    <settings pass="oobeSystem">
-        <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-            <InputLocale>en-001</InputLocale>
-            <SystemLocale>en-US</SystemLocale>
-            <UILanguage>en-US</UILanguage>
-            <UILanguageFallback>en-US</UILanguageFallback>
-            <UserLocale>en-001</UserLocale>
-        </component>
-        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-            <OOBE>
-                <HideEULAPage>true</HideEULAPage>
-                <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
-                <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
-                <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
-                <ProtectYourPC>3</ProtectYourPC>
-                <SkipMachineOOBE>true</SkipMachineOOBE>
-                <SkipUserOOBE>true</SkipUserOOBE>
-            </OOBE>
-        </component>
-    </settings>
-    <settings pass="specialize">
-        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-            <ComputerName>*</ComputerName>
-        </component>
-        <component name="Microsoft-Windows-Security-SPP-UX" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-            <SkipAutoActivation>true</SkipAutoActivation>
-        </component>
-        <component name="Microsoft-Windows-Deployment" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-            <RunSynchronous>
-                <RunSynchronousCommand wcm:action="add">
-                    <Order>1</Order>
-                    <Description>Disable BitLocker auto-encryption</Description>
-                    <Path>reg add "HKLM\SYSTEM\CurrentControlSet\Control\BitLocker" /v "PreventDeviceEncryption" /t REG_DWORD /d 1 /f</Path>
-                </RunSynchronousCommand>
-                <RunSynchronousCommand wcm:action="add">
-                    <Order>2</Order>
-                    <Description>Disable privacy questions</Description>
-                    <Path>reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\OOBE" /v "DisablePrivacyExperience" /t REG_DWORD /d 1 /f</Path>
-                </RunSynchronousCommand>
-                <RunSynchronousCommand wcm:action="add">
-                    <Order>3</Order>
-                    <Description>Disable telemetry</Description>
-                    <Path>reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d 0 /f</Path>
-                </RunSynchronousCommand>
-                <RunSynchronousCommand wcm:action="add">
-                    <Order>4</Order>
-                    <Description>Disable Windows Consumer Features</Description>
-                    <Path>reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v "DisableWindowsConsumerFeatures" /t REG_DWORD /d 1 /f</Path>
-                </RunSynchronousCommand>
-                <RunSynchronousCommand wcm:action="add">
-                    <Order>5</Order>
-                    <Description>Remove Microsoft Account requirement</Description>
-                    <Path>reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\OOBE" /v "BypassNRO" /t REG_DWORD /d 1 /f</Path>
-                </RunSynchronousCommand>
-            </RunSynchronous>
-        </component>
-    </settings>
-</unattend>
-'@
+        if ($imageCount -eq 0) {
+            throw "Could not determine image count in install.wim"
+        }
 
-        # Inject autounattend into ISO root
-        $autoUnattendPath = Join-Path $isoExtract "autounattend.xml"
-        Set-Content -Path $autoUnattendPath -Value $autoUnattendContent -Encoding UTF8
+        Write-Log "  Found $imageCount Windows editions in WIM" -Level INFO
 
-        Write-Log "  Applied all tweaks via autounattend.xml:" -Level SUCCESS
-        Write-Log "    - Bypass TPM/SecureBoot/RAM/Storage/CPU checks" -Level INFO
-        Write-Log "    - Skip product key prompt (activate later)" -Level INFO
-        Write-Log "    - Remove Microsoft Account requirement (local account allowed)" -Level INFO
-        Write-Log "    - Set region to English (World) - en-001" -Level INFO
-        Write-Log "    - Disable telemetry and data collection" -Level INFO
-        Write-Log "    - Disable BitLocker automatic encryption" -Level INFO
-        Write-Log "    - Skip privacy questions and OOBE screens" -Level INFO
+        # Process each image index (Home, Pro, etc.)
+        for ($index = 1; $index -le $imageCount; $index++) {
+            Write-Log "  Processing WIM index $index/$imageCount..." -Level INFO
+            
+            $regDir = Join-Path $isoExtract "sources\$index"
+            New-Item -ItemType Directory -Path $regDir -Force | Out-Null
 
-        # Recreate ISO (simple method - copy back)
-        Write-Log "  Rebuilding ISO..." -Level INFO
+            # Extract registry hives using wimlib-imagex (Get-Win11.cmd method)
+            & $wimlibExe extract "$installWim" $index /Windows/System32/config/SOFTWARE --dest-dir="$regDir" --no-acls 2>&1 | Out-Null
+            & $wimlibExe extract "$installWim" $index /Windows/System32/config/SYSTEM --dest-dir="$regDir" --no-acls 2>&1 | Out-Null
+            & $wimlibExe extract "$installWim" $index /Users/Default/NTUSER.DAT --dest-dir="$regDir" --no-acls 2>&1 | Out-Null
 
-        # Use IMAPI2 COM object to create ISO
-        $fsi = New-Object -ComObject IMAPI2FS.MsftFileSystemImage
-        $fsi.VolumeName = "WIN11_MOD"
-        $fsi.FileSystemsToCreate = 4  # UDF
+            # Load registry hives and modify them
+            reg load HKLM\TMP_SOFTWARE "$regDir\SOFTWARE" | Out-Null
+            reg load HKLM\TMP_SYSTEM "$regDir\SYSTEM" | Out-Null
+            reg load HKLM\TMP_DEFAULT "$regDir\NTUSER.DAT" | Out-Null
+
+            # 1. TPM/SecureBoot/RAM/CPU/Storage bypasses (Get-Win11.cmd method)
+            reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassTPMCheck /t REG_DWORD /d 1 /f | Out-Null
+            reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassSecureBootCheck /t REG_DWORD /d 1 /f | Out-Null
+            reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassRAMCheck /t REG_DWORD /d 1 /f | Out-Null
+            reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassCPUCheck /t REG_DWORD /d 1 /f | Out-Null
+            reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassStorageCheck /t REG_DWORD /d 1 /f | Out-Null
+
+            # 2. Local account allowed (no Microsoft Account required)
+            reg add "HKLM\TMP_SOFTWARE\Microsoft\Windows\CurrentVersion\OOBE" /v BypassNRO /t REG_DWORD /d 1 /f | Out-Null
+
+            # 3. Skip privacy questions and OOBE screens
+            reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\OOBE" /v DisablePrivacyExperience /t REG_DWORD /d 1 /f | Out-Null
+            reg add "HKLM\TMP_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Runonce" /v "UninstallCopilot" /t REG_SZ /d "powershell.exe -NoProfile -Command \"Get-AppxPackage -Name 'Microsoft.Windows.Ai.Copilot.Provider' | Remove-AppxPackage\"" /f | Out-Null
+
+            # 4. Disable telemetry and data collection
+            reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v AllowTelemetry /t REG_DWORD /d 0 /f | Out-Null
+            reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v MaxTelemetryAllowed /t REG_DWORD /d 0 /f | Out-Null
+
+            # 5. Disable BitLocker automatic encryption
+            reg add "HKLM\TMP_SYSTEM\CurrentControlSet\Control\BitLocker" /v PreventDeviceEncryption /t REG_DWORD /d 1 /f | Out-Null
+
+            # 6. Disable Windows Consumer Features (bloatware)
+            reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v DisableWindowsConsumerFeatures /t REG_DWORD /d 1 /f | Out-Null
+
+            # 7. Set English (World) locale - en-001
+            reg add "HKLM\TMP_SYSTEM\ControlSet001\Control\Nls\Language" /v InstallLanguage /t REG_SZ /d "0409" /f | Out-Null
+            reg add "HKLM\TMP_DEFAULT\Control Panel\International" /v LocaleName /t REG_SZ /d "en-001" /f | Out-Null
+
+            # 8. Skip product key prompt (activate later)
+            reg add "HKLM\TMP_SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v SoftwareProtectionPlatform /t REG_DWORD /d 0 /f | Out-Null
+
+            # Unload hives
+            reg unload HKLM\TMP_SOFTWARE | Out-Null
+            reg unload HKLM\TMP_SYSTEM | Out-Null
+            reg unload HKLM\TMP_DEFAULT | Out-Null
+
+            # Update WIM with modified registry hives
+            & $wimlibExe update "$installWim" $index --command="add `"$regDir\SOFTWARE`" /Windows/System32/config/SOFTWARE" 2>&1 | Out-Null
+            & $wimlibExe update "$installWim" $index --command="add `"$regDir\SYSTEM`" /Windows/System32/config/SYSTEM" 2>&1 | Out-Null
+            & $wimlibExe update "$installWim" $index --command="add `"$regDir\NTUSER.DAT`" /Users/Default/NTUSER.DAT" 2>&1 | Out-Null
+
+            # Cleanup temp registry files
+            Remove-Item -Path $regDir -Recurse -Force -ErrorAction SilentlyContinue
+        }
+
+        Write-Log "  Successfully applied all modifications to $imageCount edition(s):" -Level SUCCESS
+        Write-Log "    ✓ TPM 2.0 bypass" -Level INFO
+        Write-Log "    ✓ Secure Boot bypass" -Level INFO
+        Write-Log "    ✓ RAM/CPU/Storage requirement bypasses" -Level INFO
+        Write-Log "    ✓ Local account allowed (no Microsoft Account)" -Level INFO
+        Write-Log "    ✓ Privacy questions skipped" -Level INFO
+        Write-Log "    ✓ Telemetry disabled" -Level INFO
+        Write-Log "    ✓ BitLocker auto-encryption disabled" -Level INFO
+        Write-Log "    ✓ Bloatware/Consumer Features disabled" -Level INFO
+        Write-Log "    ✓ English (World) locale - en-001" -Level INFO
+        Write-Log "    ✓ Product key prompt skipped" -Level INFO
+
+        # Rebuild ISO using oscdimg (Windows ADK) - required for bootable ISO
+        Write-Log "  Rebuilding ISO with oscdimg..." -Level INFO
         
-        # Increase ISO size limit to 8GB (Windows 11 ISOs are ~6.5GB)
-        # Default is 2GB which is too small for Windows 11
-        $fsi.FreeMediaBlocks = 4194304  # 8GB in 2KB blocks (8*1024*1024*1024/2048)
-
-        # Add all files
-        $fsi.Root.AddTree($isoExtract, $false)
-
-        # Create result
-        $result = $fsi.CreateResultImage()
-        $stream = $result.ImageStream
-
-        # Write to file
-        $fileStream = [System.IO.File]::Create($finalISO)
+        # Check for oscdimg (from Windows ADK)
+        $oscdimg = Get-Command oscdimg.exe -ErrorAction SilentlyContinue
+        if (-not $oscdimg) {
+            throw "oscdimg.exe not found. Please install Windows ADK (Assessment and Deployment Kit) from Microsoft."
+        }
         
-        # BinaryReader requires a stream and encoding/leaveOpen parameter
-        # Using IStream COM interface requires special handling
-        $reader = New-Object System.IO.BinaryReader($stream, [System.Text.Encoding]::Default, $false)
-        $buffer = New-Object byte[] 2048
-
-        do {
-            $read = $reader.Read($buffer, 0, $buffer.Length)
-            $fileStream.Write($buffer, 0, $read)
-        } while ($read -gt 0)
-
-        $fileStream.Close()
-        $reader.Close()
-        [System.Runtime.InteropServices.Marshal]::ReleaseComObject($fsi) | Out-Null
+        # Verify boot file exists
+        $bootFile = Join-Path $isoExtract "efi\microsoft\boot\efisys.bin"
+        if (-not (Test-Path $bootFile)) {
+            throw "EFI boot file not found at $bootFile - cannot create bootable ISO"
+        }
+        
+        # Create bootable UEFI ISO
+        # -m: Ignore maximum ISO image size limit
+        # -o: Optimize storage by encoding duplicate files once
+        # -u2: Produce UDF file system in addition to ISO-9660
+        # -udfver102: UDF 1.02 (Windows compatible)
+        # -bootdata: EFI boot specification
+        $oscdimgOutput = & oscdimg.exe -m -o -u2 -udfver102 `
+            -bootdata:2#p0,e,b"$bootFile"#pEF,e,b"$bootFile" `
+            "$isoExtract" "$finalISO" 2>&1
+        
+        if ($LASTEXITCODE -ne 0) {
+            throw "oscdimg failed with exit code $LASTEXITCODE : $($oscdimgOutput -join "`n")"
+        }
 
         if (Test-Path $finalISO) {
             Write-Log "  Modded ISO created!" -Level SUCCESS
@@ -919,16 +884,11 @@ function Invoke-ISOModding {
     }
     catch {
         Write-Log "  ISO modding failed: $($_.Exception.Message)" -Level ERROR
+        Write-Log "  Note: oscdimg.exe requires Windows ADK to be installed" -Level WARN
 
-        # Close any open file handles
-        try {
-            if ($fileStream) { $fileStream.Close(); $fileStream.Dispose() }
-            if ($reader) { $reader.Close(); $reader.Dispose() }
-        } catch {}
-
-        # Fallback to stock ISO
+        # Fallback to stock ISO (unmodded)
         if (Test-Path $SourceISO) {
-            Write-Log "  Falling back to stock ISO" -Level WARN
+            Write-Log "  Falling back to stock (unmodded) ISO" -Level WARN
             $fallback = Join-Path $Destination "Win11_OEM.iso"
             
             # Remove failed modded ISO if it exists
@@ -944,21 +904,15 @@ function Invoke-ISOModding {
         return $null
     }
     finally {
-        # Cleanup - ensure all handles are released
-        try {
-            if ($fileStream) { $fileStream.Close(); $fileStream.Dispose() }
-            if ($reader) { $reader.Close(); $reader.Dispose() }
-            if ($fsi) { [System.Runtime.InteropServices.Marshal]::ReleaseComObject($fsi) | Out-Null }
-        } catch {}
-
-        # Dismount ISO
+        # Dismount ISO if still mounted
         Dismount-DiskImage -ImagePath $SourceISO -ErrorAction SilentlyContinue | Out-Null
         
         # Wait for filesystem to release locks
         Start-Sleep -Seconds 2
         
-        # Cleanup work directory
+        # Cleanup temporary work directory
         if (Test-Path $workDir) {
+            Write-Log "  Cleaning up temporary files..." -Level INFO
             Remove-Item $workDir -Recurse -Force -ErrorAction SilentlyContinue
         }
     }
