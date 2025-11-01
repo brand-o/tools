@@ -553,10 +553,42 @@ function Invoke-FileDownload {
                 try {
                     $webClient.DownloadFileAsync($finalUrl, $tempFile)
 
-                    # Wait for download to complete
+                    # Wait for download to complete with timeout (4 hours for large ISOs)
+                    $timeout = New-TimeSpan -Hours 4
+                    $downloadStart = Get-Date
+                    $lastBytesReceived = 0
+                    $stallTime = Get-Date
+                    $stallTimeout = New-TimeSpan -Minutes 5  # 5 minutes without progress = stalled
+                    
                     while (-not $script:downloadComplete) {
-                        Start-Sleep -Milliseconds 100
+                        Start-Sleep -Milliseconds 500
+                        
+                        # Check for overall timeout (4 hours)
+                        if ((Get-Date) - $downloadStart -gt $timeout) {
+                            $webClient.CancelAsync()
+                            throw "Download exceeded 4-hour timeout"
+                        }
+                        
+                        # Check for stall (no progress for 5 minutes)
+                        if (Test-Path $tempFile) {
+                            $currentBytes = (Get-Item $tempFile).Length
+                            if ($currentBytes -gt $lastBytesReceived) {
+                                # Progress detected, reset stall timer
+                                $lastBytesReceived = $currentBytes
+                                $stallTime = Get-Date
+                            }
+                            elseif ((Get-Date) - $stallTime -gt $stallTimeout) {
+                                # No progress for 5 minutes - download stalled
+                                $webClient.CancelAsync()
+                                throw "Download stalled (no progress for 5 minutes)"
+                            }
+                        }
                     }
+                }
+                catch {
+                    # Cancel download if it's still running
+                    try { $webClient.CancelAsync() } catch {}
+                    throw
                 }
                 finally {
                     $webClient.Dispose()
