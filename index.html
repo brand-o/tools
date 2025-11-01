@@ -25,7 +25,8 @@
     .cmdbar.highlight{box-shadow:0 0 0 4px var(--highlight)!important;border-color:rgba(125,211,252,.4)!important}
     .aff.highlight{box-shadow:0 0 0 4px var(--highlight)!important;border-color:rgba(125,211,252,.4)!important}
     .cmdbar input{flex:1;background:transparent;color:var(--text);border:0;outline:0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px;padding:12px 14px}
-    .btn{border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);border-radius:12px;padding:0 14px;font-size:14px;cursor:pointer;transition:opacity .2s,color .2s}
+    .btn{border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);border-radius:12px;padding:0 14px;font-size:14px;cursor:pointer;transition:opacity .2s,color .2s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;height:38px}
+    .btn:hover{background:rgba(255,255,255,.08)}
     .group-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
     .group{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px}
     .group h4{margin:0 0 10px;font-size:13px;color:var(--muted)}
@@ -66,7 +67,7 @@
       <h1 class="title">brando's toolkit</h1>
       <p class="subtitle">a clean no‑nonsense flash drive installer packed with installers, tools, utilities, and scripts in a nice all‑in‑one automated package.</p>
       <p class="cmdhint">paste into powershell as administrator to get started</p>
-      <div class="cmdbar" id="cmdbar"><input id="cmd" readonly value="iex (irm 'https://brando.tools/run')"><button class="btn" id="copy">copy</button></div>
+      <div class="cmdbar" id="cmdbar"><input id="cmd" readonly value="iex (irm 'https://brando.tools/run')"><button class="btn" id="copy">copy</button><a class="btn" href="https://raw.githubusercontent.com/brand-o/tools/main/RUN_ME.bat" download="RUN_ME.bat">download .bat</a></div>
       <p class="note">requires a <strong>fast 64gb+ flash drive</strong>. <a href="#drives" class="plain" id="flash-link">see my recommendations here</a>.</p>
     </main>
 
