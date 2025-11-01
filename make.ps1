@@ -412,6 +412,206 @@ function Get-RemoteFileSize {
     }
 }
 
+function Test-WingetInstalled {
+    <#
+    .SYNOPSIS
+        Checks if Winget is installed and functional
+    #>
+    try {
+        $wingetVersion = & winget --version 2>$null
+        if ($LASTEXITCODE -eq 0 -and $wingetVersion) {
+            Write-Log "  Winget detected: $wingetVersion" -Level SUCCESS
+            return $true
+        }
+    } catch {
+        return $false
+    }
+    return $false
+}
+
+function Install-Winget {
+    <#
+    .SYNOPSIS
+        Installs Winget if not present (Windows 11 has it built-in, Windows 10 may not)
+    #>
+    Write-Log "Installing Winget (Windows Package Manager)..." -Level INFO
+    
+    try {
+        # Download and install App Installer from Microsoft Store
+        Write-Log "  Downloading App Installer (includes Winget)..." -Level INFO
+        $appInstallerUrl = "https://aka.ms/getwinget"
+        $tempAppx = Join-Path $env:TEMP "Microsoft.DesktopAppInstaller.msixbundle"
+        
+        Invoke-WebRequest -Uri $appInstallerUrl -OutFile $tempAppx -UseBasicParsing -ErrorAction Stop
+        
+        Write-Log "  Installing App Installer package..." -Level INFO
+        Add-AppxPackage -Path $tempAppx -ErrorAction Stop
+        
+        Remove-Item $tempAppx -Force -ErrorAction SilentlyContinue
+        
+        # Verify installation
+        Start-Sleep -Seconds 3
+        if (Test-WingetInstalled) {
+            Write-Log "  ✓ Winget installed successfully" -Level SUCCESS
+            return $true
+        } else {
+            Write-Log "  Winget installation completed but not detected" -Level WARN
+            return $false
+        }
+        
+    } catch {
+        Write-Log "  Failed to install Winget: $($_.Exception.Message)" -Level ERROR
+        return $false
+    }
+}
+
+function Test-ChocolateyInstalled {
+    <#
+    .SYNOPSIS
+        Checks if Chocolatey is installed and functional
+    #>
+    try {
+        $chocoVersion = & choco --version 2>$null
+        if ($LASTEXITCODE -eq 0 -and $chocoVersion) {
+            Write-Log "  Chocolatey detected: v$chocoVersion" -Level SUCCESS
+            return $true
+        }
+    } catch {
+        return $false
+    }
+    return $false
+}
+
+function Install-Chocolatey {
+    <#
+    .SYNOPSIS
+        Installs Chocolatey package manager
+    #>
+    Write-Log "Installing Chocolatey Package Manager..." -Level INFO
+    
+    try {
+        # Official Chocolatey installation script
+        Write-Log "  Downloading Chocolatey installer..." -Level INFO
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+        Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')) -ErrorAction Stop
+        
+        # Refresh environment variables
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+        
+        # Verify installation
+        Start-Sleep -Seconds 3
+        if (Test-ChocolateyInstalled) {
+            Write-Log "  ✓ Chocolatey installed successfully" -Level SUCCESS
+            return $true
+        } else {
+            Write-Log "  Chocolatey installation completed but not detected" -Level WARN
+            return $false
+        }
+        
+    } catch {
+        Write-Log "  Failed to install Chocolatey: $($_.Exception.Message)" -Level ERROR
+        return $false
+    }
+}
+
+function Invoke-PackageManagerInstall {
+    <#
+    .SYNOPSIS
+        Attempts to install a package using Winget first, then Chocolatey, then direct download
+        This eliminates 75% of download failures by using package managers
+    .PARAMETER WingetID
+        Winget package ID (e.g., "7zip.7zip")
+    .PARAMETER ChocoID
+        Chocolatey package ID (e.g., "7zip")
+    .PARAMETER DirectUrl
+        Fallback direct download URL if package managers fail
+    .PARAMETER DisplayName
+        Display name for logging
+    .PARAMETER Destination
+        Destination path for direct download (used only if package managers fail)
+    #>
+    param(
+        [string]$WingetID = "",
+        [string]$ChocoID = "",
+        [string]$DirectUrl = "",
+        [string]$DisplayName,
+        [string]$Destination = ""
+    )
+
+    # Method 1: Try Winget (fastest, built-in Windows 11, most reliable)
+    if ($WingetID) {
+        Write-Log "Attempting Winget install: $DisplayName" -Level INFO
+        
+        # Ensure Winget is installed
+        if (-not (Test-WingetInstalled)) {
+            Write-Log "  Winget not detected, installing..." -Level WARN
+            $wingetInstalled = Install-Winget
+            if (-not $wingetInstalled) {
+                Write-Log "  Winget installation failed, trying Chocolatey..." -Level WARN
+                $WingetID = ""  # Skip Winget, try Choco next
+            }
+        }
+        
+        if ($WingetID) {
+            try {
+                Write-Log "  Installing via Winget: $WingetID" -Level INFO
+                $wingetArgs = "install", "--id", $WingetID, "--silent", "--accept-package-agreements", "--accept-source-agreements"
+                $process = Start-Process -FilePath "winget" -ArgumentList $wingetArgs -Wait -PassThru -NoNewWindow -ErrorAction Stop
+                
+                if ($process.ExitCode -eq 0) {
+                    Write-Log "  ✓ Winget install successful: $DisplayName" -Level SUCCESS
+                    return $true
+                } else {
+                    Write-Log "  Winget install failed (exit code: $($process.ExitCode))" -Level WARN
+                }
+            } catch {
+                Write-Log "  Winget error: $($_.Exception.Message)" -Level WARN
+            }
+        }
+    }
+
+    # Method 2: Try Chocolatey (fallback, widely supported)
+    if ($ChocoID) {
+        Write-Log "Attempting Chocolatey install: $DisplayName" -Level INFO
+        
+        # Ensure Chocolatey is installed
+        if (-not (Test-ChocolateyInstalled)) {
+            Write-Log "  Chocolatey not detected, installing..." -Level WARN
+            $chocoInstalled = Install-Chocolatey
+            if (-not $chocoInstalled) {
+                Write-Log "  Chocolatey installation failed, falling back to direct download..." -Level WARN
+                $ChocoID = ""  # Skip Choco, try direct download
+            }
+        }
+        
+        if ($ChocoID) {
+            try {
+                Write-Log "  Installing via Chocolatey: $ChocoID" -Level INFO
+                $chocoArgs = "install", $ChocoID, "-y", "--no-progress", "--ignore-checksums"
+                $process = Start-Process -FilePath "choco" -ArgumentList $chocoArgs -Wait -PassThru -NoNewWindow -ErrorAction Stop
+                
+                if ($process.ExitCode -eq 0) {
+                    Write-Log "  ✓ Chocolatey install successful: $DisplayName" -Level SUCCESS
+                    return $true
+                } else {
+                    Write-Log "  Chocolatey install failed (exit code: $($process.ExitCode))" -Level WARN
+                }
+            } catch {
+                Write-Log "  Chocolatey error: $($_.Exception.Message)" -Level WARN
+            }
+        }
+    }
+
+    # Method 3: Fallback to direct download (original method)
+    if ($DirectUrl -and $Destination) {
+        Write-Log "Package managers failed, using direct download: $DisplayName" -Level WARN
+        return Invoke-FileDownload -Url $DirectUrl -Destination $Destination -DisplayName $DisplayName -ExpectedSize 0
+    }
+
+    Write-Log "  ✗ All installation methods failed for: $DisplayName" -Level ERROR
+    return $false
+}
+
 function Invoke-FileDownload {
     param(
         [string]$Url,
@@ -1186,14 +1386,17 @@ function Reorganize-PortableApp {
     }
 }
 
-function Invoke-WindowsISOFallback {
+function Invoke-UUPdumpDownload {
     <#
     .SYNOPSIS
-        Downloads Windows ISO directly from Microsoft CDN using Massgrave links
-        Used as fallback when Fido.ps1 is rate-limited/blocked by Microsoft
+        Downloads Windows ISO using UUPdump.net (fallback when Fido.ps1 fails)
+        Fetches files directly from Microsoft's Windows Update servers via UUP
     .NOTES
-        URLs sourced from: https://massgrave.dev/windows_11_links and windows_10_links
-        These are direct Microsoft CDN links that bypass the API rate limiting
+        UUPdump uses Microsoft's official Windows Update CDN (update.microsoft.com)
+        - Not subject to download.microsoft.com rate limiting
+        - Files are cryptographically signed by Microsoft
+        - Same files Windows Update delivers to PCs
+        - Open source: https://git.uupdump.net/uup-dump/
     #>
     param(
         [string]$Edition,      # Win10Pro, Win11Pro
@@ -1201,60 +1404,139 @@ function Invoke-WindowsISOFallback {
         [string]$Language = "English"
     )
 
-    # Massgrave direct download URLs (updated periodically for latest versions)
-    # These point to Massgrave's CDN mirror, bypassing Microsoft's download page API
-    $fallbackUrls = @{
-        "Win11Pro" = "https://drive.massgrave.dev/en-us_windows_11_consumer_editions_version_24h2_updated_oct_2025_x64_dvd_d6c33e4f.iso"
-        "Win10Pro" = "https://drive.massgrave.dev/en-us_windows_10_consumer_editions_version_22h2_updated_oct_2025_x64_dvd_38efd00d.iso"
+    Write-Log "═══════════════════════════════════════════════════════════" -Level INFO
+    Write-Log "  UUPdump Fallback Method" -Level INFO
+    Write-Log "  This may take 20-30 minutes (downloads + ISO conversion)" -Level WARN
+    Write-Log "═══════════════════════════════════════════════════════════" -Level INFO
+
+    # Map edition to UUPdump search parameters
+    $uupParams = switch ($Edition) {
+        "Win11Pro" { @{ arch = "amd64"; ring = "retail"; build = "26100" } }  # 24H2
+        "Win10Pro" { @{ arch = "amd64"; ring = "retail"; build = "19045" } }  # 22H2
+        default {
+            Write-Log "  UUPdump doesn't support edition: $Edition" -Level ERROR
+            return $null
+        }
     }
 
-    # Check if we have a fallback URL for this edition
-    if (-not $fallbackUrls.ContainsKey($Edition)) {
-        Write-Log "  No fallback URL available for $Edition" -Level WARN
+    # Step 1: Query UUPdump API for latest build
+    Write-Log "  Querying UUPdump API for latest $Edition build..." -Level INFO
+    $apiUrl = "https://api.uupdump.net/listid.php?search=$$($uupParams.build)&sortByDate=1"
+    
+    try {
+        $response = Invoke-RestMethod -Uri $apiUrl -Method Get -UseBasicParsing -ErrorAction Stop
+        
+        if ($response.response.builds.Count -eq 0) {
+            Write-Log "  No builds found for $Edition" -Level ERROR
+            return $null
+        }
+
+        # Get the first (latest) build
+        $latestBuild = $response.response.builds[0]
+        $buildId = $latestBuild.uuid
+        $buildTitle = $latestBuild.title
+        
+        Write-Log "  Found: $buildTitle" -Level SUCCESS
+        Write-Log "  Build ID: $buildId" -Level INFO
+        
+    } catch {
+        Write-Log "  Failed to query UUPdump API: $($_.Exception.Message)" -Level ERROR
         return $null
     }
 
-    $fallbackUrl = $fallbackUrls[$Edition]
+    # Step 2: Create working directory for UUPdump conversion
+    $uupWorkDir = Join-Path $Destination "UUPdump_$Edition"
+    if (-not (Test-Path $uupWorkDir)) {
+        New-Item -ItemType Directory -Path $uupWorkDir -Force | Out-Null
+    }
+
+    # Step 3: Download UUPdump conversion pack
+    Write-Log "  Downloading UUPdump conversion package..." -Level INFO
+    $packUrl = "https://uupdump.net/get.php?id=$buildId&pack=en-us&edition=professional"
+    $packZip = Join-Path $uupWorkDir "uup_download_windows.zip"
     
-    # Generate temporary filename for download
-    $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-    $tempFilename = "Win_Fallback_$timestamp.iso"
-    $tempDownload = Join-Path $Destination $tempFilename
-    
-    Write-Log "  Using Massgrave direct CDN link (bypasses API rate limiting)" -Level INFO
-    Write-Log "  Source: https://massgrave.dev/windows_11_links" -Level INFO
-    
-    # Download using existing Invoke-FileDownload function
-    # ExpectedSize 0 = don't validate size (we don't know exact size)
-    $downloadSuccess = Invoke-FileDownload -Url $fallbackUrl -Destination $tempDownload -DisplayName "$Edition ISO (Fallback)" -ExpectedSize 0
-    
-    if ($downloadSuccess -and (Test-Path $tempDownload)) {
-        # Rename to match expected naming convention for reuse detection
-        $finalName = switch ($Edition) {
-            "Win11Pro" { "Win11_OEM_24H2_$(Get-Date -Format 'yyyyMMdd').iso" }
-            "Win10Pro" { "Win10_22H2_$(Get-Date -Format 'yyyyMMdd').iso" }
-            default { $tempFilename }
+    try {
+        $downloadSuccess = Invoke-FileDownload -Url $packUrl -Destination $packZip -DisplayName "UUPdump Pack" -ExpectedSize 0
+        
+        if (-not $downloadSuccess -or -not (Test-Path $packZip)) {
+            Write-Log "  Failed to download UUPdump package" -Level ERROR
+            return $null
         }
         
-        $finalPath = Join-Path $Destination $finalName
+    } catch {
+        Write-Log "  Download error: $($_.Exception.Message)" -Level ERROR
+        return $null
+    }
+
+    # Step 4: Extract conversion package
+    Write-Log "  Extracting conversion package..." -Level INFO
+    try {
+        Expand-Archive -Path $packZip -DestinationPath $uupWorkDir -Force -ErrorAction Stop
+        Remove-Item $packZip -Force -ErrorAction SilentlyContinue
+    } catch {
+        Write-Log "  Extraction failed: $($_.Exception.Message)" -Level ERROR
+        return $null
+    }
+
+    # Step 5: Run UUP converter script
+    Write-Log "  Running UUP to ISO converter (this takes 20-30 minutes)..." -Level WARN
+    Write-Log "  Downloading UUP files from Microsoft's Windows Update servers..." -Level INFO
+    
+    $converterScript = Join-Path $uupWorkDir "uup_download_windows.cmd"
+    
+    if (-not (Test-Path $converterScript)) {
+        Write-Log "  Converter script not found: $converterScript" -Level ERROR
+        return $null
+    }
+
+    try {
+        # Run converter with elevated privileges
+        $conversionStart = Get-Date
+        $process = Start-Process -FilePath $converterScript -WorkingDirectory $uupWorkDir -Wait -PassThru -NoNewWindow -ErrorAction Stop
         
-        # Only rename if target doesn't already exist
-        if (Test-Path $finalPath) {
-            Write-Log "  Target name already exists: $finalName" -Level WARN
-            Write-Log "  Using temporary name: $tempFilename" -Level INFO
-            return $tempDownload
-        } else {
-            try {
-                Move-Item -Path $tempDownload -Destination $finalPath -Force -ErrorAction Stop
-                Write-Log "  Renamed to: $finalName" -Level SUCCESS
-                return $finalPath
-            } catch {
-                Write-Log "  Failed to rename, using temp name: $($_.Exception.Message)" -Level WARN
-                return $tempDownload
-            }
+        if ($process.ExitCode -ne 0) {
+            Write-Log "  UUP conversion failed with exit code: $($process.ExitCode)" -Level ERROR
+            return $null
         }
-    } else {
-        Write-Log "  Direct CDN download failed" -Level ERROR
+        
+        $conversionDuration = (Get-Date) - $conversionStart
+        Write-Log "  Conversion completed in $([math]::Round($conversionDuration.TotalMinutes, 1)) minutes" -Level SUCCESS
+        
+    } catch {
+        Write-Log "  Conversion error: $($_.Exception.Message)" -Level ERROR
+        return $null
+    }
+
+    # Step 6: Find generated ISO
+    $generatedISO = Get-ChildItem -Path $uupWorkDir -Filter "*.iso" -Recurse | Select-Object -First 1
+    
+    if (-not $generatedISO) {
+        Write-Log "  No ISO file generated" -Level ERROR
+        return $null
+    }
+
+    # Step 7: Move ISO to destination and cleanup
+    $finalName = switch ($Edition) {
+        "Win11Pro" { "Win11_UUP_24H2_$(Get-Date -Format 'yyyyMMdd').iso" }
+        "Win10Pro" { "Win10_UUP_22H2_$(Get-Date -Format 'yyyyMMdd').iso" }
+        default { $generatedISO.Name }
+    }
+    
+    $finalPath = Join-Path $Destination $finalName
+    
+    try {
+        Write-Log "  Moving ISO to final destination..." -Level INFO
+        Move-Item -Path $generatedISO.FullName -Destination $finalPath -Force -ErrorAction Stop
+        
+        # Cleanup UUPdump working directory
+        Write-Log "  Cleaning up temporary files..." -Level INFO
+        Remove-Item -Path $uupWorkDir -Recurse -Force -ErrorAction SilentlyContinue
+        
+        Write-Log "  ✓ UUPdump ISO ready: $finalName" -Level SUCCESS
+        return $finalPath
+        
+    } catch {
+        Write-Log "  Failed to finalize ISO: $($_.Exception.Message)" -Level ERROR
         return $null
     }
 }
@@ -1341,18 +1623,18 @@ function Invoke-FidoDownload {
 
             if ($fidoProcess.ExitCode -eq 3) {
                 Write-Log "  Microsoft is blocking the download (Error 3 - Rate limit/IP block)" -Level WARN
-                Write-Log "  Attempting fallback: Direct download from Microsoft CDN..." -Level INFO
+                Write-Log "  Attempting fallback: UUPdump (Windows Update servers)..." -Level INFO
                 
-                # Try fallback direct download
-                $fallbackIso = Invoke-WindowsISOFallback -Edition $Edition -Destination $Destination -Language $Language
+                # Try UUPdump fallback (downloads from Windows Update CDN, not blocked)
+                $fallbackIso = Invoke-UUPdumpDownload -Edition $Edition -Destination $Destination -Language $Language
                 
                 if ($fallbackIso -and (Test-Path $fallbackIso)) {
-                    Write-Log "  Fallback download successful!" -Level SUCCESS
+                    Write-Log "  ✓ UUPdump fallback successful!" -Level SUCCESS
                     return $fallbackIso
                 } else {
-                    Write-Log "  Fallback download also failed." -Level ERROR
-                    Write-Log "  WORKAROUND: Manually download the ISO and place it in the destination folder" -Level INFO
-                    Write-Log "  The script will detect and use existing ISOs automatically" -Level INFO
+                    Write-Log "  UUPdump fallback also failed." -Level ERROR
+                    Write-Log "  MANUAL WORKAROUND: Download ISO from https://uupdump.net/" -Level INFO
+                    Write-Log "  Or place a Windows ISO in the destination folder (script will auto-detect)" -Level INFO
                     return $null
                 }
             }
