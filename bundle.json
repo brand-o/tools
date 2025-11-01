@@ -1435,6 +1435,186 @@
                 "require_consent": false,
                 "manual": false
             }
+        },
+        {
+            "name": "BleachBit",
+            "category": "installer",
+            "type": "package_manager",
+            "winget_id": "BleachBit.BleachBit",
+            "choco_id": "bleachbit",
+            "resolve": {
+                "strategy": "package_manager",
+                "note": "System cleaner - removes junk files, clears privacy traces"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "WizTree",
+            "category": "installer",
+            "type": "package_manager",
+            "winget_id": "AntibodySoftware.WizTree",
+            "choco_id": "wiztree",
+            "resolve": {
+                "strategy": "package_manager",
+                "note": "Fastest disk space analyzer - faster than WinDirStat"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "ShareX",
+            "category": "installer",
+            "type": "package_manager",
+            "winget_id": "ShareX.ShareX",
+            "choco_id": "sharex",
+            "resolve": {
+                "strategy": "package_manager",
+                "note": "Screenshot/screen recording tool with built-in uploader"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "HandBrake",
+            "category": "installer",
+            "type": "package_manager",
+            "winget_id": "HandBrake.HandBrake",
+            "choco_id": "handbrake",
+            "resolve": {
+                "strategy": "package_manager",
+                "note": "Video transcoder - convert videos to modern codecs"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "ImageGlass",
+            "category": "installer",
+            "type": "package_manager",
+            "winget_id": "DuongDieuPhap.ImageGlass",
+            "choco_id": "imageglass",
+            "resolve": {
+                "strategy": "package_manager",
+                "note": "Lightweight, modern image viewer - Windows Photos alternative"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Postman",
+            "category": "installer",
+            "type": "package_manager",
+            "winget_id": "Postman.Postman",
+            "choco_id": "postman",
+            "resolve": {
+                "strategy": "package_manager",
+                "note": "API development and testing platform"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "DBeaver Community",
+            "category": "installer",
+            "type": "package_manager",
+            "winget_id": "dbeaver.dbeaver",
+            "choco_id": "dbeaver",
+            "resolve": {
+                "strategy": "package_manager",
+                "note": "Universal database tool - supports MySQL, PostgreSQL, SQLite, etc."
+            },
+            "source_url": "",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "OBS Studio",
+            "category": "installer",
+            "type": "package_manager",
+            "winget_id": "OBSProject.OBSStudio",
+            "choco_id": "obs-studio",
+            "resolve": {
+                "strategy": "package_manager",
+                "note": "Open source streaming/recording software"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Audacity",
+            "category": "installer",
+            "type": "package_manager",
+            "winget_id": "Audacity.Audacity",
+            "choco_id": "audacity",
+            "resolve": {
+                "strategy": "package_manager",
+                "note": "Audio editor and recorder"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Everything Search",
+            "category": "installer",
+            "type": "package_manager",
+            "winget_id": "voidtools.Everything",
+            "choco_id": "everything",
+            "resolve": {
+                "strategy": "package_manager",
+                "note": "Instant file search for Windows (already have portable, this is installer)"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Installers/",
+            "post": [],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
         }
     ]
 }

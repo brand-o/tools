@@ -17,10 +17,15 @@ _staging/
 *.tmp
 *.bak
 
-# Internal documentation
-BUGFIX_GAMEPLAN.md
-CLOUDFLARE_SETUP.md
-GITHUB_RECOMMENDATIONS_SETUP.md
+# Internal documentation (NOT needed by users)
+*.md
+!README.md
+!LICENSE.md
+brando-*.html
+website-*.html
+
+# Python scripts (not needed - PowerShell does everything)
+*.py
 
 # Test files
 test-*.ps1
