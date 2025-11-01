@@ -2504,6 +2504,55 @@ function Start-Provisioning {
                 continue
             }
 
+            # Special handling for package_manager strategy (Winget/Chocolatey)
+            if ($resolved.strategy -eq "package_manager" -or $item.winget_id -or $item.choco_id) {
+                Write-Log "  Using package manager installation (Winget/Chocolatey)..." -Level INFO
+
+                try {
+                    # Determine destination
+                    $destBase = if ($item.dest.StartsWith("VENTOY:")) {
+                        $item.dest -replace "^VENTOY:", $Folders.VentoyRoot
+                    } else {
+                        $item.dest -replace "^UTILS:", $Folders.UtilsRoot
+                    }
+
+                    # Ensure destination exists
+                    if (-not (Test-Path $destBase)) {
+                        New-Item -ItemType Directory -Path $destBase -Force | Out-Null
+                    }
+
+                    # Call package manager installer
+                    $installSuccess = Invoke-PackageManagerInstall `
+                        -WingetID $item.winget_id `
+                        -ChocoID $item.choco_id `
+                        -DirectUrl $item.source_url `
+                        -DisplayName $item.name `
+                        -Destination $destBase
+
+                    if ($installSuccess) {
+                        Write-Log "  Package manager installation successful!" -Level SUCCESS
+                        $succeeded++
+
+                        # Add to manifest
+                        $script:Manifest += @{
+                            name = $item.name
+                            version = "package_manager"
+                            source_url = "winget:$($item.winget_id) / choco:$($item.choco_id)"
+                            size = 0
+                            placed_path = $destBase
+                            downloaded_at = (Get-Date).ToString("o")
+                            status = "installed_via_package_manager"
+                        }
+                    } else {
+                        throw "Package manager installation failed"
+                    }
+                } catch {
+                    Write-Log "  Failed to install via package manager: $($_.Exception.Message)" -Level ERROR
+                    $failed++
+                }
+                continue
+            }
+
             # Determine destination path
             $destBase = if ($item.dest.StartsWith("VENTOY:")) {
                 if ([string]::IsNullOrWhiteSpace($Folders.VentoyRoot)) {
