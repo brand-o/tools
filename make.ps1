@@ -1666,21 +1666,16 @@ function Invoke-FidoDownload {
             Write-Log "  Fido exited with code: $($fidoProcess.ExitCode)" -Level ERROR
 
             if ($fidoProcess.ExitCode -eq 3) {
-                Write-Log "  Microsoft is blocking the download (Error 3 - Rate limit/IP block)" -Level WARN
-                Write-Log "  Attempting fallback: Fido with browser-style headers..." -Level INFO
-                
-                # Try Fido again with browser headers to bypass detection
-                $fallbackIso = Invoke-FidoDownloadWithBrowserHeaders -Edition $Edition -Destination $Destination -Language $Language
-                
-                if ($fallbackIso -and (Test-Path $fallbackIso)) {
-                    Write-Log "  Browser-header fallback successful!" -Level SUCCESS
-                    return $fallbackIso
-                } else {
-                    Write-Log "  Browser-header fallback also failed." -Level ERROR
-                    Write-Log "  MANUAL WORKAROUND: Download ISO from https://www.microsoft.com/software-download/" -Level INFO
-                    Write-Log "  Or place a Windows ISO in the destination folder (script will auto-detect)" -Level INFO
-                    return $null
-                }
+                Write-Log "  Microsoft is blocking the download (Error 3 - Automation/VPN detection)" -Level WARN
+                Write-Log "  Microsoft uses TLS fingerprinting - PowerShell is detected even with browser headers" -Level WARN
+                Write-Log "" -Level INFO
+                Write-Log "  WORKAROUND OPTIONS:" -Level INFO
+                Write-Log "    1. Download manually: https://www.microsoft.com/software-download/" -Level INFO
+                Write-Log "    2. Try from different network (your IP may be flagged)" -Level INFO
+                Write-Log "    3. Use UUPdump.net to create ISO from Windows Update files" -Level INFO
+                Write-Log "" -Level INFO
+                Write-Log "  Script will auto-detect if you place a Windows ISO in: $Destination" -Level INFO
+                return $null
             }
 
             return $null
@@ -1706,7 +1701,11 @@ function Invoke-FidoDownload {
     }
 }
 
+<#
 function Invoke-FidoDownloadWithBrowserHeaders {
+    # DEPRECATED: This function doesn't work because Microsoft uses TLS fingerprinting
+    # to detect PowerShell even with spoofed User-Agent headers.
+    # Keeping for reference but not used anymore.
     <#
     .SYNOPSIS
         Retries Windows ISO download using browser-style headers to bypass Microsoft's script detection
@@ -1799,6 +1798,7 @@ function Invoke-FidoDownloadWithBrowserHeaders {
         return $null
     }
 }
+#>
 
 function Expand-Archive7z {
     param(
