@@ -1255,33 +1255,62 @@ function Invoke-ISOModding {
             }
 
             # Grant full permissions on registry hive files (fixes "Access is denied")
-            Write-Host "[INFO]   Granting permissions on registry hives..."
+            Write-Host "[INFO]   Inspecting and fixing permissions on registry hives..."
             $currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
-            & icacls "$regDir\SOFTWARE" /grant "${currentUser}:F" /C 2>&1 | Out-Null
-            & icacls "$regDir\SYSTEM" /grant "${currentUser}:F" /C 2>&1 | Out-Null
-            & icacls "$regDir\NTUSER.DAT" /grant "${currentUser}:F" /C 2>&1 | Out-Null
+            $hiveFiles = @("$regDir\SOFTWARE", "$regDir\SYSTEM", "$regDir\NTUSER.DAT")
+            foreach ($hf in $hiveFiles) {
+                if (Test-Path $hf) {
+                    Write-Host "[DEBUG] Inspecting: $hf"
+                    try { Get-Item $hf | Select-Object Name,Length,Attributes | Format-List | Out-Host } catch {}
+                    $icBefore = & icacls $hf 2>&1
+                    Write-Host "[DEBUG] icacls before: $($icBefore -join ' ')"
+                    $attribBefore = & attrib $hf 2>&1
+                    Write-Host "[DEBUG] attrib before: $($attribBefore -join ' ')"
 
-            # Load registry hives and modify them
+                    # Remove read-only and other restrictive attributes
+                    & attrib -r $hf 2>&1 | Out-Null
+
+                    # Try to take ownership (may be required on some WIM extracts)
+                    $takeownOut = & takeown /f $hf 2>&1
+                    Write-Host "[DEBUG] takeown: $($takeownOut -join ' ')"
+
+                    # Grant current user full control
+                    $icGrant = & icacls $hf /grant "${currentUser}:F" /C 2>&1
+                    Write-Host "[DEBUG] icacls grant: $($icGrant -join ' ')"
+
+                    $icAfter = & icacls $hf 2>&1
+                    Write-Host "[DEBUG] icacls after: $($icAfter -join ' ')"
+                }
+                else {
+                    Write-Host "[WARN] Hive file missing: $hf"
+                }
+            }
+
+            # Load registry hives and modify them (capture detailed output)
+            Write-Host "[INFO]   Attempting to load hives..."
             Write-Verbose "Loading SOFTWARE hive from: $regDir\SOFTWARE"
             $regLoadOutput = & reg load HKLM\TMP_SOFTWARE "$regDir\SOFTWARE" 2>&1
             $exitCode = $LASTEXITCODE
-            Write-Verbose "SOFTWARE hive load exit code: $exitCode"
+            Write-Host "[DEBUG] reg load SOFTWARE exit code: $exitCode"
+            Write-Host "[DEBUG] reg load SOFTWARE output: $($regLoadOutput -join ' ')"
             if ($exitCode -ne 0) {
-                throw "Failed to load SOFTWARE hive (exit code: $exitCode). Error: $($regLoadOutput -join ' '). File exists: $(Test-Path "$regDir\SOFTWARE"). Check antivirus/security software."
+                throw "Failed to load SOFTWARE hive (exit code: $exitCode). Error: $($regLoadOutput -join ' '). File exists: $(Test-Path "$regDir\SOFTWARE"). Check antivirus/security software and that file is not open by another process."
             }
-            
+
             Write-Verbose "Loading SYSTEM hive from: $regDir\SYSTEM"
             $regLoadOutput = & reg load HKLM\TMP_SYSTEM "$regDir\SYSTEM" 2>&1
             $exitCode = $LASTEXITCODE
-            Write-Verbose "SYSTEM hive load exit code: $exitCode"
+            Write-Host "[DEBUG] reg load SYSTEM exit code: $exitCode"
+            Write-Host "[DEBUG] reg load SYSTEM output: $($regLoadOutput -join ' ')"
             if ($exitCode -ne 0) {
                 throw "Failed to load SYSTEM hive (exit code: $exitCode). Error: $($regLoadOutput -join ' ')"
             }
-            
+
             Write-Verbose "Loading DEFAULT hive from: $regDir\NTUSER.DAT"
             $regLoadOutput = & reg load HKLM\TMP_DEFAULT "$regDir\NTUSER.DAT" 2>&1
             $exitCode = $LASTEXITCODE
-            Write-Verbose "DEFAULT hive load exit code: $exitCode"
+            Write-Host "[DEBUG] reg load DEFAULT exit code: $exitCode"
+            Write-Host "[DEBUG] reg load DEFAULT output: $($regLoadOutput -join ' ')"
             if ($exitCode -ne 0) {
                 throw "Failed to load DEFAULT hive (exit code: $exitCode). Error: $($regLoadOutput -join ' ')"
             }
