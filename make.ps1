@@ -1333,17 +1333,31 @@ function Invoke-ISOModding {
             }
 
             # 1. TPM/SecureBoot/RAM/CPU/Storage bypasses (Get-Win11.cmd method)
-            reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassTPMCheck /t REG_DWORD /d 1 /f | Out-Null
-            reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassSecureBootCheck /t REG_DWORD /d 1 /f | Out-Null
-            reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassRAMCheck /t REG_DWORD /d 1 /f | Out-Null
-            reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassCPUCheck /t REG_DWORD /d 1 /f | Out-Null
-            reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassStorageCheck /t REG_DWORD /d 1 /f | Out-Null
+            Write-Host "[DEBUG] Adding TPM/SecureBoot/RAM/CPU/Storage bypasses..."
+            & reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassTPMCheck /t REG_DWORD /d 1 /f 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add BypassTPMCheck" }
+            
+            & reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassSecureBootCheck /t REG_DWORD /d 1 /f 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add BypassSecureBootCheck" }
+            
+            & reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassRAMCheck /t REG_DWORD /d 1 /f 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add BypassRAMCheck" }
+            
+            & reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassCPUCheck /t REG_DWORD /d 1 /f 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add BypassCPUCheck" }
+            
+            & reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassStorageCheck /t REG_DWORD /d 1 /f 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add BypassStorageCheck" }
 
             # 2. Local account allowed (no Microsoft Account required)
-            reg add "HKLM\TMP_SOFTWARE\Microsoft\Windows\CurrentVersion\OOBE" /v BypassNRO /t REG_DWORD /d 1 /f | Out-Null
+            Write-Host "[DEBUG] Adding BypassNRO..."
+            & reg add "HKLM\TMP_SOFTWARE\Microsoft\Windows\CurrentVersion\OOBE" /v BypassNRO /t REG_DWORD /d 1 /f 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add BypassNRO" }
 
             # 3. Skip privacy questions and OOBE screens
-            reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\OOBE" /v DisablePrivacyExperience /t REG_DWORD /d 1 /f | Out-Null
+            Write-Host "[DEBUG] Adding DisablePrivacyExperience..."
+            & reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\OOBE" /v DisablePrivacyExperience /t REG_DWORD /d 1 /f 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add DisablePrivacyExperience" }
             
             # Copilot auto-removal on first login (using PowerShell cmdlets for proper quote handling)
             $copilotRunoncePath = 'HKLM:\TMP_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Runonce'
