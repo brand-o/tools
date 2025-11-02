@@ -1,4 +1,4 @@
-<#
+﻿<#
 ================================================================================
 Brando's Toolkit - USB Drive Provisioning Tool
 Copyright (C) 2025  Brando
@@ -440,14 +440,14 @@ function Install-Winget {
         # Download and install App Installer from Microsoft Store
         Write-Log "  Downloading App Installer (includes Winget)..." -Level INFO
         $appInstallerUrl = "https://aka.ms/getwinget"
-        $tempAppx = Join-Path $env:TEMP "Microsoft.DesktopAppInstaller.msixbundle"
+        $tempApp= Join-Path $env:TEMP "Microsoft.DesktopAppInstaller.msixbundle"
         
-        Invoke-WebRequest -Uri $appInstallerUrl -OutFile $tempAppx -UseBasicParsing -ErrorAction Stop
+        Invoke-WebRequest -Uri $appInstallerUrl -OutFile $tempApp-UseBasicParsing -ErrorAction Stop
         
         Write-Log "  Installing App Installer package..." -Level INFO
-        Add-AppxPackage -Path $tempAppx -ErrorAction Stop
+        Add-AppxPackage -Path $tempApp-ErrorAction Stop
         
-        Remove-Item $tempAppx -Force -ErrorAction SilentlyContinue
+        Remove-Item $tempApp-Force -ErrorAction SilentlyContinue
         
         # Verify installation
         Start-Sleep -Seconds 3
@@ -866,10 +866,10 @@ function Get-FidoScript {
     }
 }
 
-function Get-WimlibImagex {
+function Get-WimlibImage{
     <#
     .SYNOPSIS
-        Downloads wimlib-imagex for WIM file manipulation
+        Downloads wimlib-imagefor WIM file manipulation
     #>
     param()
 
@@ -879,7 +879,7 @@ function Get-WimlibImagex {
     $wimlibExe = Join-Path $wimlibDir "wimlib-imagex.exe"
 
     if (Test-Path $wimlibExe) {
-        Write-Log "  wimlib-imagex already exists" -Level INFO
+        Write-Log "  wimlib-imagealready exists" -Level INFO
         return $wimlibExe
     }
 
@@ -906,7 +906,7 @@ function Get-WimlibImagex {
         Remove-Item $wimlibZip -Force -ErrorAction SilentlyContinue
 
         if (Test-Path $wimlibExe) {
-            Write-Log "  wimlib-imagex ready" -Level SUCCESS
+            Write-Log "  wimlib-imageready" -Level SUCCESS
             return $wimlibExe
         } else {
             throw "wimlib-imagex.exe not found after extraction"
@@ -923,7 +923,7 @@ function Invoke-ISOModding {
     .SYNOPSIS
         Creates modded Windows 11 ISO with TPM/SecureBoot/RAM bypasses using Get-Win11.cmd method
     .DESCRIPTION
-        Uses wimlib-imagex to extract registry hives, modifies them directly, then rebuilds WIM
+        Uses wimlib-imageto extract registry hives, modifies them directly, then rebuilds WIM
         Based on proven Get-Win11.cmd approach: https://github.com/illsk1lls/Win-11-Download-Prep-Tool
     #>
     param(
@@ -1004,17 +1004,17 @@ function Invoke-ISOModding {
 
         Write-Log "  Found $imageCount Windows editions in WIM" -Level INFO
 
-        # Process each image index (Home, Pro, etc.)
-        for ($index = 1; $index -le $imageCount; $index++) {
-            Write-Log "  Processing WIM index $index/$imageCount..." -Level INFO
+        # Process each image inde(Home, Pro, etc.)
+        for ($inde= 1; $inde-le $imageCount; $index++) {
+            Write-Log "  Processing WIM inde$index/$imageCount..." -Level INFO
             
             $regDir = Join-Path $isoExtract "sources\$index"
             New-Item -ItemType Directory -Path $regDir -Force | Out-Null
 
-            # Extract registry hives using wimlib-imagex (Get-Win11.cmd method)
-            & $wimlibExe extract "$installWim" $index /Windows/System32/config/SOFTWARE --dest-dir="$regDir" --no-acls 2>&1 | Out-Null
-            & $wimlibExe extract "$installWim" $index /Windows/System32/config/SYSTEM --dest-dir="$regDir" --no-acls 2>&1 | Out-Null
-            & $wimlibExe extract "$installWim" $index /Users/Default/NTUSER.DAT --dest-dir="$regDir" --no-acls 2>&1 | Out-Null
+            # Extract registry hives using wimlib-image(Get-Win11.cmd method)
+            & $wimlibExe extract "$installWim" $inde/Windows/System32/config/SOFTWARE --dest-dir="$regDir" --no-acls 2>&1 | Out-Null
+            & $wimlibExe extract "$installWim" $inde/Windows/System32/config/SYSTEM --dest-dir="$regDir" --no-acls 2>&1 | Out-Null
+            & $wimlibExe extract "$installWim" $inde/Users/Default/NTUSER.DAT --dest-dir="$regDir" --no-acls 2>&1 | Out-Null
 
             # Load registry hives and modify them
             reg load HKLM\TMP_SOFTWARE "$regDir\SOFTWARE" | Out-Null
@@ -1058,9 +1058,9 @@ function Invoke-ISOModding {
             reg unload HKLM\TMP_DEFAULT | Out-Null
 
             # Update WIM with modified registry hives
-            & $wimlibExe update "$installWim" $index --command="add `"$regDir\SOFTWARE`" /Windows/System32/config/SOFTWARE" 2>&1 | Out-Null
-            & $wimlibExe update "$installWim" $index --command="add `"$regDir\SYSTEM`" /Windows/System32/config/SYSTEM" 2>&1 | Out-Null
-            & $wimlibExe update "$installWim" $index --command="add `"$regDir\NTUSER.DAT`" /Users/Default/NTUSER.DAT" 2>&1 | Out-Null
+            & $wimlibExe update "$installWim" $inde--command="add `"$regDir\SOFTWARE`" /Windows/System32/config/SOFTWARE" 2>&1 | Out-Null
+            & $wimlibExe update "$installWim" $inde--command="add `"$regDir\SYSTEM`" /Windows/System32/config/SYSTEM" 2>&1 | Out-Null
+            & $wimlibExe update "$installWim" $inde--command="add `"$regDir\NTUSER.DAT`" /Users/Default/NTUSER.DAT" 2>&1 | Out-Null
 
             # Cleanup temp registry files
             Remove-Item -Path $regDir -Recurse -Force -ErrorAction SilentlyContinue
@@ -1209,7 +1209,7 @@ function Get-StandardizedFilename {
     if ($ItemName -match "GParted") { return "GParted.iso" }
     if ($ItemName -match "Tails") { return "Tails.img" }
     if ($ItemName -match "Kali") { return "Kali.iso" }
-    if ($ItemName -match "Linux Mint") { return "LinuxMint.iso" }
+    if ($ItemName -match "LinuMint") { return "LinuxMint.iso" }
     if ($ItemName -match "Fedora") { return "Fedora.iso" }
     if ($ItemName -match "Rescuezilla") { return "Rescuezilla.iso" }
     if ($ItemName -match "Memtest") { return "Memtest86.iso" }
@@ -1710,7 +1710,7 @@ function Expand-Archive7z {
         New-Item -ItemType Directory -Path $extractDir -Force | Out-Null
     }
 
-    $arguments = "x `"$ArchivePath`" -o`"$extractDir`" -y"
+    $arguments = "`"$ArchivePath`" -o`"$extractDir`" -y"
     $process = Start-Process -FilePath $7zExe -ArgumentList $arguments -Wait -PassThru -NoNewWindow
 
     if ($process.ExitCode -ne 0) {
@@ -1808,9 +1808,9 @@ function Show-DiskSelectionGUI {
                 throw "Operation cancelled by user."
             }
 
-            $index = $null
+            $inde= $null
             if ([int]::TryParse($choice, [ref]$index)) {
-                if ($index -ge 0 -and $index -lt $Candidates.Count) {
+                if ($inde-ge 0 -and $inde-lt $Candidates.Count) {
                     return $Candidates[$index]
                 }
             }
@@ -2132,7 +2132,7 @@ function Install-Ventoy {
 
     try {
         # Use Ventoy CLI mode (documented at https://www.ventoy.net/en/doc_windows_cli.html)
-        # Format: Ventoy2Disk.exe VTOYCLI /I /PhyDrive:X [options]
+        # Format: Ventoy2Disk.exe VTOYCLI /I /PhyDrive:[options]
         $cliArgs = @(
             "VTOYCLI",
             "/I",
@@ -2558,7 +2558,7 @@ function Start-Provisioning {
                 if ([string]::IsNullOrWhiteSpace($Folders.VentoyRoot)) {
                     throw "VentoyRoot is not set - partitions may not be mounted properly"
                 }
-                # Replace prefix and normalize path separators
+                # Replace prefiand normalize path separators
                 $replaced = $item.dest -replace "^VENTOY:", $Folders.VentoyRoot
                 $replaced -replace '/', '\'
             }
@@ -2566,7 +2566,7 @@ function Start-Provisioning {
                 if ([string]::IsNullOrWhiteSpace($Folders.UtilsRoot)) {
                     throw "UtilsRoot is not set - partitions may not be mounted properly"
                 }
-                # Replace prefix and normalize path separators
+                # Replace prefiand normalize path separators
                 $replaced = $item.dest -replace "^UTILS:", $Folders.UtilsRoot
                 $replaced -replace '/', '\'
             }
@@ -2796,7 +2796,7 @@ function New-VentoyMenu {
             }
             @{
                 parent = "/ISO/Linux"
-                title = "Linux ISOs"
+                title = "LinuISOs"
                 class = "group"
             }
             @{
@@ -2811,7 +2811,7 @@ function New-VentoyMenu {
             color = "#ffffff"
             tips = @(
                 @{ image = "/ISO/Windows/*"; tip = "Boot Windows installer" }
-                @{ image = "/ISO/Linux/*"; tip = "Boot Linux live environment" }
+                @{ image = "/ISO/Linux/*"; tip = "Boot Linulive environment" }
                 @{ image = "/ISO/Tools/*"; tip = "Boot rescue or utility tool" }
             )
         }
