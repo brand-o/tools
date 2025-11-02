@@ -1190,7 +1190,24 @@ function Invoke-ISOModding {
 
         Write-Log "  Copying ISO contents..." -Level INFO
         Copy-Item -Path "$isoDrive\*" -Destination $isoExtract -Recurse -Force
-        Dismount-DiskImage -ImagePath $SourceISO | Out-Null
+        
+        # Dismount with retry logic (Windows sometimes holds handles)
+        $dismountAttempts = 0
+        $maxDismountAttempts = 3
+        while ($dismountAttempts -lt $maxDismountAttempts) {
+            try {
+                Dismount-DiskImage -ImagePath $SourceISO -ErrorAction Stop | Out-Null
+                break
+            } catch {
+                $dismountAttempts++
+                if ($dismountAttempts -lt $maxDismountAttempts) {
+                    Write-Log "  Dismount attempt $dismountAttempts failed, retrying in 2 seconds..." -Level WARN
+                    Start-Sleep -Seconds 2
+                } else {
+                    Write-Log "  Could not dismount ISO after $maxDismountAttempts attempts - continuing anyway" -Level WARN
+                }
+            }
+        }
 
         # Find install.wim
         $installWim = Join-Path $isoExtract "sources\install.wim"
