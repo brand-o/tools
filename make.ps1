@@ -1248,20 +1248,35 @@ function Invoke-ISOModding {
             if (Test-Path "HKLM:\TMP_DEFAULT") { reg unload HKLM\TMP_DEFAULT 2>&1 | Out-Null }
             Start-Sleep -Milliseconds 500
 
+            # Verify we're running as admin
+            $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+            if (-not $isAdmin) {
+                throw "Registry hive loading requires Administrator privileges. Current user is not elevated."
+            }
+
             # Load registry hives and modify them
-            $regLoadOutput = reg load HKLM\TMP_SOFTWARE "$regDir\SOFTWARE" 2>&1
-            if ($LASTEXITCODE -ne 0) {
-                throw "Failed to load SOFTWARE hive (exit code: $LASTEXITCODE). Output: $regLoadOutput. Ensure script is running as Administrator and no antivirus is blocking registry access."
+            Write-Verbose "Loading SOFTWARE hive from: $regDir\SOFTWARE"
+            $regLoadOutput = & reg load HKLM\TMP_SOFTWARE "$regDir\SOFTWARE" 2>&1
+            $exitCode = $LASTEXITCODE
+            Write-Verbose "SOFTWARE hive load exit code: $exitCode"
+            if ($exitCode -ne 0) {
+                throw "Failed to load SOFTWARE hive (exit code: $exitCode). Error: $($regLoadOutput -join ' '). File exists: $(Test-Path "$regDir\SOFTWARE"). Check antivirus/security software."
             }
             
-            $regLoadOutput = reg load HKLM\TMP_SYSTEM "$regDir\SYSTEM" 2>&1
-            if ($LASTEXITCODE -ne 0) {
-                throw "Failed to load SYSTEM hive (exit code: $LASTEXITCODE). Output: $regLoadOutput. Ensure script is running as Administrator."
+            Write-Verbose "Loading SYSTEM hive from: $regDir\SYSTEM"
+            $regLoadOutput = & reg load HKLM\TMP_SYSTEM "$regDir\SYSTEM" 2>&1
+            $exitCode = $LASTEXITCODE
+            Write-Verbose "SYSTEM hive load exit code: $exitCode"
+            if ($exitCode -ne 0) {
+                throw "Failed to load SYSTEM hive (exit code: $exitCode). Error: $($regLoadOutput -join ' ')"
             }
             
-            $regLoadOutput = reg load HKLM\TMP_DEFAULT "$regDir\NTUSER.DAT" 2>&1
-            if ($LASTEXITCODE -ne 0) {
-                throw "Failed to load DEFAULT hive (exit code: $LASTEXITCODE). Output: $regLoadOutput. Ensure script is running as Administrator."
+            Write-Verbose "Loading DEFAULT hive from: $regDir\NTUSER.DAT"
+            $regLoadOutput = & reg load HKLM\TMP_DEFAULT "$regDir\NTUSER.DAT" 2>&1
+            $exitCode = $LASTEXITCODE
+            Write-Verbose "DEFAULT hive load exit code: $exitCode"
+            if ($exitCode -ne 0) {
+                throw "Failed to load DEFAULT hive (exit code: $exitCode). Error: $($regLoadOutput -join ' ')"
             }
 
             # 1. TPM/SecureBoot/RAM/CPU/Storage bypasses (Get-Win11.cmd method)
