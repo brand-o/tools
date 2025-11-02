@@ -1435,9 +1435,15 @@ function Invoke-ISOModding {
             Start-Sleep -Milliseconds 200
 
             # Update WIM with modified registry hives
-            & $wimlibExe update "$installWim" $index --command="add `"$regDir\SOFTWARE`" /Windows/System32/config/SOFTWARE" 2>&1 | Out-Null
-            & $wimlibExe update "$installWim" $index --command="add `"$regDir\SYSTEM`" /Windows/System32/config/SYSTEM" 2>&1 | Out-Null
-            & $wimlibExe update "$installWim" $index --command="add `"$regDir\NTUSER.DAT`" /Users/Default/NTUSER.DAT" 2>&1 | Out-Null
+            Write-Host "[DEBUG] Updating WIM with modified registry hives..."
+            $updateOutput = & $wimlibExe update "$installWim" $index --command="add `"$regDir\SOFTWARE`" /Windows/System32/config/SOFTWARE" 2>&1
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to update SOFTWARE in WIM (exit code: $LASTEXITCODE): $($updateOutput -join ' ')" }
+            
+            $updateOutput = & $wimlibExe update "$installWim" $index --command="add `"$regDir\SYSTEM`" /Windows/System32/config/SYSTEM" 2>&1
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to update SYSTEM in WIM (exit code: $LASTEXITCODE): $($updateOutput -join ' ')" }
+            
+            $updateOutput = & $wimlibExe update "$installWim" $index --command="add `"$regDir\NTUSER.DAT`" /Users/Default/NTUSER.DAT" 2>&1
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to update NTUSER.DAT in WIM (exit code: $LASTEXITCODE): $($updateOutput -join ' ')" }
 
             # Cleanup temp registry files
             Remove-Item -Path $regDir -Recurse -Force -ErrorAction SilentlyContinue
