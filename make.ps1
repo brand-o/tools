@@ -1421,7 +1421,7 @@ function Invoke-UUPdumpDownload {
 
     # Step 1: Query UUPdump API for latest build
     Write-Log "  Querying UUPdump API for latest $Edition build..." -Level INFO
-    $apiUrl = "https://api.uupdump.net/listid.php?search=$$($uupParams.build)&sortByDate=1"
+    $apiUrl = "https://api.uupdump.net/listid.php?search=$($uupParams.build)&sortByDate=1"
     
     try {
         $response = Invoke-RestMethod -Uri $apiUrl -Method Get -UseBasicParsing -ErrorAction Stop
