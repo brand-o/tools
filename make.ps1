@@ -1700,6 +1700,7 @@ function Invoke-FidoDownload {
         return $null
     }
 }
+}
 
 function Expand-Archive7z {
     param(
