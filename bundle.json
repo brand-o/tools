@@ -998,14 +998,14 @@
         },
         {
             "name": "Android Platform Tools",
-            "category": "installer",
+            "category": "portable",
             "type": "zip",
             "resolve": {
                 "strategy": "direct",
                 "note": "Official Google SDK platform tools"
             },
             "source_url": "https://dl.google.com/android/repository/platform-tools-latest-windows.zip",
-            "dest": "UTILS:/Installers/AndroidPlatformTools/",
+            "dest": "UTILS:/Portable/android-platform-tools/",
             "post": [
                 "unzip"
             ],

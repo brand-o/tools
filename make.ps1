@@ -1141,17 +1141,17 @@ function Invoke-ISOModding {
 
         Write-Log "  Found $imageCount Windows editions in WIM" -Level INFO
 
-        # Process each image inde(Home, Pro, etc.)
-        for ($inde= 1; $inde-le $imageCount; $index++) {
-            Write-Log "  Processing WIM inde$index/$imageCount..." -Level INFO
+        # Process each image index (Home, Pro, etc.)
+        for ($index = 1; $index -le $imageCount; $index++) {
+            Write-Log "  Processing WIM index $index/$imageCount..." -Level INFO
             
             $regDir = Join-Path $isoExtract "sources\$index"
             New-Item -ItemType Directory -Path $regDir -Force | Out-Null
 
-            # Extract registry hives using wimlib-image(Get-Win11.cmd method)
-            & $wimlibExe extract "$installWim" $inde/Windows/System32/config/SOFTWARE --dest-dir="$regDir" --no-acls 2>&1 | Out-Null
-            & $wimlibExe extract "$installWim" $inde/Windows/System32/config/SYSTEM --dest-dir="$regDir" --no-acls 2>&1 | Out-Null
-            & $wimlibExe extract "$installWim" $inde/Users/Default/NTUSER.DAT --dest-dir="$regDir" --no-acls 2>&1 | Out-Null
+            # Extract registry hives using wimlib-imagex (Get-Win11.cmd method)
+            & $wimlibExe extract "$installWim" $index /Windows/System32/config/SOFTWARE --dest-dir="$regDir" --no-acls 2>&1 | Out-Null
+            & $wimlibExe extract "$installWim" $index /Windows/System32/config/SYSTEM --dest-dir="$regDir" --no-acls 2>&1 | Out-Null
+            & $wimlibExe extract "$installWim" $index /Users/Default/NTUSER.DAT --dest-dir="$regDir" --no-acls 2>&1 | Out-Null
 
             # Load registry hives and modify them
             reg load HKLM\TMP_SOFTWARE "$regDir\SOFTWARE" | Out-Null
@@ -1195,9 +1195,9 @@ function Invoke-ISOModding {
             reg unload HKLM\TMP_DEFAULT | Out-Null
 
             # Update WIM with modified registry hives
-            & $wimlibExe update "$installWim" $inde--command="add `"$regDir\SOFTWARE`" /Windows/System32/config/SOFTWARE" 2>&1 | Out-Null
-            & $wimlibExe update "$installWim" $inde--command="add `"$regDir\SYSTEM`" /Windows/System32/config/SYSTEM" 2>&1 | Out-Null
-            & $wimlibExe update "$installWim" $inde--command="add `"$regDir\NTUSER.DAT`" /Users/Default/NTUSER.DAT" 2>&1 | Out-Null
+            & $wimlibExe update "$installWim" $index --command="add `"$regDir\SOFTWARE`" /Windows/System32/config/SOFTWARE" 2>&1 | Out-Null
+            & $wimlibExe update "$installWim" $index --command="add `"$regDir\SYSTEM`" /Windows/System32/config/SYSTEM" 2>&1 | Out-Null
+            & $wimlibExe update "$installWim" $index --command="add `"$regDir\NTUSER.DAT`" /Users/Default/NTUSER.DAT" 2>&1 | Out-Null
 
             # Cleanup temp registry files
             Remove-Item -Path $regDir -Recurse -Force -ErrorAction SilentlyContinue
@@ -1810,7 +1810,8 @@ function Invoke-FidoDownload {
                 Write-Log "    2. Try from different network (your IP may be flagged)" -Level INFO
                 Write-Log "    3. Use UUPdump.net to create ISO from Windows Update files" -Level INFO
                 Write-Log "" -Level INFO
-                Write-Log "  Script will auto-detect if you place a Windows ISO in: $Destination" -Level INFO
+                Write-Log "  To use a local ISO, place it in: $Destination" -Level INFO
+                Write-Log "  Required filename: Win11_OEM.iso (for Windows 11) or Win10_OEM.iso (for Windows 10)" -Level INFO
                 return $null
             }
 
@@ -2585,19 +2586,33 @@ function Start-Provisioning {
                     $standardizedName = Get-StandardizedFilename -OriginalName $resolved.filename -ItemName $item.name
                     $finalPath = Join-Path $destBase $standardizedName
                     
-                    if ($resolved.requires_modding -eq $true) {
-                        # For modded ISOs, check if stock ISO already exists
-                        # Look for Win11_OEM*.iso pattern (stock version)
-                        $stockPattern = "Win11_OEM*.iso"
-                        $existingStock = Get-ChildItem -Path $destBase -Filter $stockPattern -ErrorAction SilentlyContinue | Select-Object -First 1
+                    # Check if the target ISO already exists (stock or modded)
+                    if (Test-Path $finalPath) {
+                        Write-Log "  ISO already exists: $(Split-Path $finalPath -Leaf)" -Level SUCCESS
+                        Write-Log "  Skipping download" -Level INFO
+                        $downloadedIso = $finalPath
+                    }
+                    else {
+                        # Check for existing Windows ISO with standard naming pattern
+                        # Determine pattern based on edition
+                        $stockPattern = switch ($resolved.edition) {
+                            "Win11Pro" { "Win11_OEM*.iso" }
+                            "Win10Pro" { "Win10_OEM*.iso" }
+                            default { $null }
+                        }
                         
-                        if ($existingStock) {
-                            Write-Log "  Found existing stock Win11 ISO: $($existingStock.Name)" -Level SUCCESS
-                            Write-Log "  Skipping download, will use existing ISO for modding" -Level INFO
-                            $downloadedIso = $existingStock.FullName
-                            $finalPath = $downloadedIso  # Use the existing file as-is
-                        } else {
-                            Write-Log "  No existing stock Win11 ISO found, will download new one" -Level INFO
+                        if ($stockPattern) {
+                            $existingStock = Get-ChildItem -Path $destBase -Filter $stockPattern -ErrorAction SilentlyContinue | Select-Object -First 1
+                            
+                            if ($existingStock) {
+                                $useFor = if ($resolved.requires_modding) { "for modding" } else { "as final ISO" }
+                                Write-Log "  Found existing Windows ISO: $($existingStock.Name)" -Level SUCCESS
+                                Write-Log "  Skipping download, will use existing ISO $useFor" -Level INFO
+                                $downloadedIso = $existingStock.FullName
+                                $finalPath = $downloadedIso  # Use the existing file as-is
+                            } else {
+                                Write-Log "  No existing Windows ISO found (looking for: $stockPattern)" -Level INFO
+                            }
                         }
                     }
 
@@ -2807,7 +2822,22 @@ function Start-Provisioning {
                 Write-Log "  Extracting ZIP archive..."
                 $extractDir = Split-Path -Parent $destFile
                 Expand-Archive -Path $stagingFile -DestinationPath $extractDir -Force
-                $finalDest = $extractDir
+                
+                # Special case: Android Platform Tools - rename 'platform-tools' folder to match parent
+                if ($item.name -eq "Android Platform Tools") {
+                    $platformToolsFolder = Join-Path $extractDir "platform-tools"
+                    if (Test-Path $platformToolsFolder) {
+                        $targetFolder = Join-Path (Split-Path $extractDir -Parent) (Split-Path $extractDir -Leaf)
+                        if ($platformToolsFolder -ne $targetFolder) {
+                            # Move contents up one level to match the dest folder name
+                            Move-Item -Path $platformToolsFolder -Destination $targetFolder -Force
+                            Write-Log "  Renamed 'platform-tools' to '$(Split-Path $targetFolder -Leaf)'" -Level INFO
+                            $finalDest = $targetFolder
+                        }
+                    }
+                } else {
+                    $finalDest = $extractDir
+                }
             }
             elseif ($item.post -contains "extract7z") {
                 Write-Log "  Extracting 7z archive..."
@@ -2885,7 +2915,7 @@ function Start-Provisioning {
                     $extractedItems = Get-ChildItem -Path $finalDest -Directory -ErrorAction SilentlyContinue
 
                     if ($extractedItems.Count -eq 1) {
-                        # Single folder extracted - that's the app
+                        # Single folder extracted - always move to Files and create shortcut
                         Reorganize-PortableApp -AppPath $extractedItems[0].FullName -AppName $item.name -PortableRoot $portableRoot | Out-Null
                     } elseif ($extractedItems.Count -gt 1) {
                         # Multiple folders/files extracted - extraction dir itself is the app
@@ -3163,6 +3193,9 @@ function Main {
                 throw "Cannot resume - missing required partitions (VENTOY or UTILS)"
             }
 
+            # Initialize folder structure from existing partitions
+            $folders = Initialize-FolderStructure -DriveInfo $driveInfo
+            
             # Staging directory stays in temp - used only for temporary processing
             Write-Log "Staging directory (temp processing): $script:StagingDir" -Level INFO
         }
