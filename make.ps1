@@ -1457,13 +1457,50 @@ function Invoke-UUPdumpDownload {
         New-Item -ItemType Directory -Path $uupWorkDir -Force | Out-Null
     }
 
-    # Step 3: Download UUPdump conversion pack
+    # Step 3: Use fetchupd API to generate download package
+    Write-Log "  Generating UUPdump download package via API..." -Level INFO
+    $fetchUrl = "https://api.uupdump.net/get.php"
+    
+    $postData = @{
+        id = $buildId
+        lang = 'en-us'
+        edition = 'professional'
+        autodl = '3'  # aria2 downloader
+    }
+    
+    try {
+        # Use Invoke-WebRequest for POST with form data
+        $response = Invoke-WebRequest -Uri $fetchUrl -Method Post -Body $postData -UseBasicParsing -ErrorAction Stop
+        $apiResult = $response.Content | ConvertFrom-Json
+        
+        if ($apiResult.response.error) {
+            Write-Log "  UUPdump API error: $($apiResult.response.error)" -Level ERROR
+            return $null
+        }
+        
+        # Get the download URL from API response
+        $downloadUrl = $apiResult.response.downloadUrl
+        
+        if (-not $downloadUrl) {
+            Write-Log "  No download URL returned from UUPdump API" -Level ERROR
+            Write-Log "  Manual workaround: Visit https://uupdump.net/selectlang.php?id=$buildId" -Level INFO
+            return $null
+        }
+        
+        Write-Log "  Package generated successfully" -Level SUCCESS
+        
+    } catch {
+        Write-Log "  Failed to generate UUPdump package: $($_.Exception.Message)" -Level ERROR
+        Write-Log "  Manual workaround: Visit https://uupdump.net/selectlang.php?id=$buildId" -Level INFO
+        return $null
+    }
+
+    # Step 4: Download the generated package
     Write-Log "  Downloading UUPdump conversion package..." -Level INFO
-    $packUrl = "https://uupdump.net/get.php?id=$buildId&pack=en-us&edition=professional"
     $packZip = Join-Path $uupWorkDir "uup_download_windows.zip"
     
     try {
-        $downloadSuccess = Invoke-FileDownload -Url $packUrl -Destination $packZip -DisplayName "UUPdump Pack" -ExpectedSize 0
+        $downloadSuccess = Invoke-FileDownload -Url $downloadUrl -Destination $packZip -DisplayName "UUPdump Pack" -ExpectedSize 0
         
         if (-not $downloadSuccess -or -not (Test-Path $packZip)) {
             Write-Log "  Failed to download UUPdump package" -Level ERROR
@@ -1475,7 +1512,7 @@ function Invoke-UUPdumpDownload {
         return $null
     }
 
-    # Step 4: Extract conversion package
+    # Step 5: Extract conversion package
     Write-Log "  Extracting conversion package..." -Level INFO
     try {
         Expand-Archive -Path $packZip -DestinationPath $uupWorkDir -Force -ErrorAction Stop
@@ -1485,7 +1522,7 @@ function Invoke-UUPdumpDownload {
         return $null
     }
 
-    # Step 5: Run UUP converter script
+    # Step 6: Run UUP converter script
     Write-Log "  Running UUP to ISO converter (this takes 20-30 minutes)..." -Level WARN
     Write-Log "  Downloading UUP files from Microsoft's Windows Update servers..." -Level INFO
     
@@ -1514,7 +1551,7 @@ function Invoke-UUPdumpDownload {
         return $null
     }
 
-    # Step 6: Find generated ISO
+    # Step 7: Find generated ISO
     $generatedISO = Get-ChildItem -Path $uupWorkDir -Filter "*.iso" -Recurse | Select-Object -First 1
     
     if (-not $generatedISO) {
@@ -1522,7 +1559,7 @@ function Invoke-UUPdumpDownload {
         return $null
     }
 
-    # Step 7: Move ISO to destination and cleanup
+    # Step 8: Move ISO to destination and cleanup
     $finalName = switch ($Edition) {
         "Win11Pro" { "Win11_UUP_24H2_$(Get-Date -Format 'yyyyMMdd').iso" }
         "Win10Pro" { "Win10_UUP_22H2_$(Get-Date -Format 'yyyyMMdd').iso" }
