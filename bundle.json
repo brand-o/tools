@@ -421,6 +421,43 @@
             }
         },
         {
+            "name": "John the Ripper",
+            "category": "portable",
+            "type": "7z",
+            "resolve": {
+                "strategy": "direct",
+                "note": "Official Openwall build - password recovery tool"
+            },
+            "source_url": "https://www.openwall.com/john/k/john-1.9.0-jumbo-1-win64.7z",
+            "dest": "UTILS:/Portable/john/",
+            "post": [
+                "extract7z"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
+            "name": "Hashcat",
+            "category": "portable",
+            "type": "7z",
+            "resolve": {
+                "strategy": "github_latest",
+                "repo": "hashcat/hashcat",
+                "asset_regex": "hashcat-.*\\.7z$"
+            },
+            "source_url": "",
+            "dest": "UTILS:/Portable/hashcat/",
+            "post": [
+                "extract7z"
+            ],
+            "flags": {
+                "require_consent": false,
+                "manual": false
+            }
+        },
+        {
             "name": "NirSoft Suite",
             "category": "portable",
             "type": "zip",

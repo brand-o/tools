@@ -1804,7 +1804,6 @@ function Invoke-FidoDownload {
 
             if ($fidoProcess.ExitCode -eq 3) {
                 Write-Log "  Microsoft is blocking the download (Error 3 - Automation/VPN detection)" -Level WARN
-                Write-Log "  Microsoft uses TLS fingerprinting - PowerShell is detected even with browser headers" -Level WARN
                 Write-Log "" -Level INFO
                 Write-Log "  WORKAROUND OPTIONS:" -Level INFO
                 Write-Log "    1. Download manually: https://www.microsoft.com/software-download/" -Level INFO
@@ -2536,13 +2535,6 @@ function Start-Provisioning {
         # Check if manual
         if ($item.flags.manual) {
             Write-Log "  Manual item, skipping download (see README)" -Level WARN
-            $skipped++
-            continue
-        }
-
-        # Check if requires consent
-        if ($item.flags.require_consent -and -not $env:TECHDRIVE_CONSENT_DUALUSE) {
-            Write-Log "  Requires consent (dual-use tool). Set `$env:TECHDRIVE_CONSENT_DUALUSE=1 to enable." -Level WARN
             $skipped++
             continue
         }
