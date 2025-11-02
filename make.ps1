@@ -1170,8 +1170,13 @@ function Invoke-ISOModding {
 
             # 3. Skip privacy questions and OOBE screens
             reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\OOBE" /v DisablePrivacyExperience /t REG_DWORD /d 1 /f | Out-Null
-            # Note: Copilot removal via Runonce has been removed due to command-line escaping complexity
-            # Users can manually remove Copilot post-installation if desired
+            
+            # Copilot auto-removal on first login (using PowerShell cmdlets for proper quote handling)
+            $copilotRunoncePath = 'HKLM:\TMP_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Runonce'
+            if (-not (Test-Path $copilotRunoncePath)) {
+                New-Item -Path $copilotRunoncePath -Force | Out-Null
+            }
+            New-ItemProperty -Path $copilotRunoncePath -Name 'UninstallCopilot' -Value 'powershell.exe -NoProfile -WindowStyle Hidden -Command "Get-AppxPackage -Name ''Microsoft.Windows.Ai.Copilot.Provider'' | Remove-AppxPackage"' -PropertyType String -Force | Out-Null
 
             # 4. Disable telemetry and data collection
             reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v AllowTelemetry /t REG_DWORD /d 0 /f | Out-Null
