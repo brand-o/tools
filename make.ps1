@@ -1740,11 +1740,13 @@ function Invoke-FidoDownloadWithBrowserHeaders {
     if ($fidoContent -notmatch "# BROWSER_HEADERS_MOD") {
         Write-Log "  Patching Fido.ps1 with browser headers..." -Level INFO
         
-        # Find Invoke-WebRequest calls and add browser headers IMMEDIATELY after cmdlet name
-        # This handles multi-line Invoke-WebRequest calls properly
+        # Define browser headers to inject
+        $browserHeaders = ' -UserAgent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0" -Headers @{"Accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"; "Accept-Language"="en-US,en;q=0.9"; "Referer"="https://www.microsoft.com/"; "DNT"="1"} # BROWSER_HEADERS_MOD '
+        
+        # Replace each occurrence - inject right before -UseBasicParsing
         $modifiedContent = $fidoContent -replace `
-            '(Invoke-WebRequest)(\s+)', `
-            '$1 -UserAgent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0" -Headers @{"Accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"; "Accept-Language"="en-US,en;q=0.9"; "Referer"="https://www.microsoft.com/"; "DNT"="1"} # BROWSER_HEADERS_MOD$2'
+            '(Invoke-WebRequest)\s+(-UseBasicParsing)', `
+            "`$1$browserHeaders`$2"
         
         # Save modified version
         $modifiedFidoPath = Join-Path $script:StagingDir "Fido_BrowserMode.ps1"
