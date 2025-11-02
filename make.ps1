@@ -1231,10 +1231,25 @@ function Invoke-ISOModding {
             & $wimlibExe extract "$installWim" $index /Windows/System32/config/SYSTEM --dest-dir="$regDir" --no-acls 2>&1 | Out-Null
             & $wimlibExe extract "$installWim" $index /Users/Default/NTUSER.DAT --dest-dir="$regDir" --no-acls 2>&1 | Out-Null
 
+            # Ensure no leftover hives from previous failed runs
+            reg unload HKLM\TMP_SOFTWARE 2>&1 | Out-Null
+            reg unload HKLM\TMP_SYSTEM 2>&1 | Out-Null
+            reg unload HKLM\TMP_DEFAULT 2>&1 | Out-Null
+            Start-Sleep -Milliseconds 500
+
             # Load registry hives and modify them
-            reg load HKLM\TMP_SOFTWARE "$regDir\SOFTWARE" | Out-Null
-            reg load HKLM\TMP_SYSTEM "$regDir\SYSTEM" | Out-Null
-            reg load HKLM\TMP_DEFAULT "$regDir\NTUSER.DAT" | Out-Null
+            reg load HKLM\TMP_SOFTWARE "$regDir\SOFTWARE" 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) {
+                throw "Failed to load SOFTWARE hive. Ensure script is running as Administrator and no antivirus is blocking registry access."
+            }
+            reg load HKLM\TMP_SYSTEM "$regDir\SYSTEM" 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) {
+                throw "Failed to load SYSTEM hive. Ensure script is running as Administrator."
+            }
+            reg load HKLM\TMP_DEFAULT "$regDir\NTUSER.DAT" 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) {
+                throw "Failed to load DEFAULT hive. Ensure script is running as Administrator."
+            }
 
             # 1. TPM/SecureBoot/RAM/CPU/Storage bypasses (Get-Win11.cmd method)
             reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassTPMCheck /t REG_DWORD /d 1 /f | Out-Null
@@ -1346,6 +1361,11 @@ function Invoke-ISOModding {
         return $null
     }
     finally {
+        # Ensure registry hives are unloaded (in case of error)
+        reg unload HKLM\TMP_SOFTWARE 2>&1 | Out-Null
+        reg unload HKLM\TMP_SYSTEM 2>&1 | Out-Null
+        reg unload HKLM\TMP_DEFAULT 2>&1 | Out-Null
+
         # Dismount ISO if still mounted
         Dismount-DiskImage -ImagePath $SourceISO -ErrorAction SilentlyContinue | Out-Null
         
