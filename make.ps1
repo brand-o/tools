@@ -514,6 +514,143 @@ function Install-Chocolatey {
     }
 }
 
+function Invoke-PackageManagerDownload {
+    <#
+    .SYNOPSIS
+        Downloads installer file using Winget download, Chocolatey cache, or direct URL
+        Unlike Invoke-PackageManagerInstall, this DOWNLOADS the installer to USB, doesn't install it
+    .PARAMETER WingetID
+        Winget package ID (e.g., "7zip.7zip")
+    .PARAMETER ChocoID
+        Chocolatey package ID (e.g., "7zip")
+    .PARAMETER DirectUrl
+        Fallback direct download URL if package managers fail
+    .PARAMETER DisplayName
+        Display name for logging
+    .PARAMETER Destination
+        Destination directory for downloaded installer
+    .OUTPUTS
+        Hashtable with success status and file path, or $null on failure
+    #>
+    param(
+        [string]$WingetID = "",
+        [string]$ChocoID = "",
+        [string]$DirectUrl = "",
+        [string]$DisplayName,
+        [string]$Destination
+    )
+
+    # Ensure destination exists
+    if (-not (Test-Path $Destination)) {
+        New-Item -ItemType Directory -Path $Destination -Force | Out-Null
+    }
+
+    # Method 1: Try Winget download (Windows 11+, requires App Installer 1.21+)
+    if ($WingetID) {
+        Write-Log "  Attempting Winget download: $WingetID" -Level INFO
+        
+        # Check if winget supports download command
+        if (Test-WingetInstalled) {
+            try {
+                # Use temp staging directory for winget download
+                $tempDownload = Join-Path $env:TEMP "winget_download_$([guid]::NewGuid().ToString('N').Substring(0,8))"
+                New-Item -ItemType Directory -Path $tempDownload -Force | Out-Null
+                
+                $wingetArgs = "download", "--id", $WingetID, "--download-directory", $tempDownload, "--accept-package-agreements", "--accept-source-agreements"
+                $process = Start-Process -FilePath "winget" -ArgumentList $wingetArgs -Wait -PassThru -NoNewWindow -RedirectStandardError "$tempDownload\stderr.txt" -RedirectStandardOutput "$tempDownload\stdout.txt"
+                
+                if ($process.ExitCode -eq 0) {
+                    # Find downloaded installer (winget downloads to subfolders)
+                    $installers = Get-ChildItem -Path $tempDownload -Recurse -Include "*.exe","*.msi","*.msix" -File | Where-Object { $_.Length -gt 0 }
+                    
+                    if ($installers -and $installers.Count -gt 0) {
+                        $installer = $installers[0]
+                        $destFile = Join-Path $Destination $installer.Name
+                        
+                        Copy-Item -Path $installer.FullName -Destination $destFile -Force
+                        Write-Log "  Downloaded via Winget: $($installer.Name) ($([math]::Round($installer.Length / 1MB, 2)) MB)" -Level SUCCESS
+                        
+                        # Cleanup temp
+                        Remove-Item -Path $tempDownload -Recurse -Force -ErrorAction SilentlyContinue
+                        
+                        return @{
+                            success = $true
+                            path = $destFile
+                            size = $installer.Length
+                            method = "winget"
+                        }
+                    } else {
+                        Write-Log "  Winget download succeeded but no installer found in output" -Level WARN
+                    }
+                } else {
+                    Write-Log "  Winget download failed (exit code: $($process.ExitCode))" -Level WARN
+                }
+                
+                # Cleanup temp on failure
+                Remove-Item -Path $tempDownload -Recurse -Force -ErrorAction SilentlyContinue
+            } catch {
+                Write-Log "  Winget download error: $($_.Exception.Message)" -Level WARN
+            }
+        }
+    }
+
+    # Method 2: Try resolving Chocolatey download URL (doesn't actually download via choco, just gets the URL)
+    if ($ChocoID) {
+        Write-Log "  Attempting to resolve Chocolatey URL: $ChocoID" -Level INFO
+        try {
+            # Query Chocolatey API for package info
+            $chocoApiUrl = "https://community.chocolatey.org/api/v2/package/$ChocoID"
+            $response = Invoke-WebRequest -Uri $chocoApiUrl -Method Head -MaximumRedirection 0 -ErrorAction SilentlyContinue
+            
+            if ($response.StatusCode -eq 302 -or $response.StatusCode -eq 301) {
+                $redirectUrl = $response.Headers.Location
+                Write-Log "  Resolved Chocolatey URL: $redirectUrl" -Level INFO
+                
+                # Download using existing logic
+                $filename = [System.IO.Path]::GetFileName($redirectUrl)
+                if ([string]::IsNullOrWhiteSpace($filename)) { $filename = "$ChocoID-installer.exe" }
+                
+                $destFile = Join-Path $Destination $filename
+                $downloadSuccess = Invoke-FileDownload -Url $redirectUrl -Destination $destFile -DisplayName $DisplayName -ExpectedSize 0
+                
+                if ($downloadSuccess) {
+                    return @{
+                        success = $true
+                        path = $destFile
+                        size = (Get-Item $destFile).Length
+                        method = "chocolatey_url"
+                    }
+                }
+            }
+        } catch {
+            Write-Log "  Chocolatey URL resolution failed: $($_.Exception.Message)" -Level WARN
+        }
+    }
+
+    # Method 3: Fallback to direct URL
+    if ($DirectUrl) {
+        Write-Log "  Falling back to direct download" -Level WARN
+        
+        $filename = [System.IO.Path]::GetFileName($DirectUrl)
+        if ([string]::IsNullOrWhiteSpace($filename)) { $filename = "$DisplayName-installer.exe" }
+        
+        $destFile = Join-Path $Destination $filename
+        $downloadSuccess = Invoke-FileDownload -Url $DirectUrl -Destination $destFile -DisplayName $DisplayName -ExpectedSize 0
+        
+        if ($downloadSuccess) {
+            return @{
+                success = $true
+                path = $destFile
+                size = (Get-Item $destFile).Length
+                method = "direct"
+            }
+        }
+    }
+
+    Write-Log "  All download methods failed for: $DisplayName" -Level ERROR
+    return $null
+}
+
 function Invoke-PackageManagerInstall {
     <#
     .SYNOPSIS
@@ -2545,7 +2682,7 @@ function Start-Provisioning {
 
             # Special handling for package_manager strategy (Winget/Chocolatey)
             if ($resolved.strategy -eq "package_manager" -or $item.winget_id -or $item.choco_id) {
-                Write-Log "  Using package manager installation (Winget/Chocolatey)..." -Level INFO
+                Write-Log "  Using package manager download (Winget/Chocolatey)..." -Level INFO
 
                 try {
                     # Determine destination
@@ -2555,21 +2692,19 @@ function Start-Provisioning {
                         $item.dest -replace "^UTILS:", $Folders.UtilsRoot
                     }
 
-                    # Ensure destination exists
-                    if (-not (Test-Path $destBase)) {
-                        New-Item -ItemType Directory -Path $destBase -Force | Out-Null
-                    }
+                    # Normalize path
+                    $destBase = $destBase -replace '/', '\' -replace '(.)\\\\', '$1\'
 
-                    # Call package manager installer
-                    $installSuccess = Invoke-PackageManagerInstall `
+                    # Call package manager downloader
+                    $downloadResult = Invoke-PackageManagerDownload `
                         -WingetID $item.winget_id `
                         -ChocoID $item.choco_id `
                         -DirectUrl $item.source_url `
                         -DisplayName $item.name `
                         -Destination $destBase
 
-                    if ($installSuccess) {
-                        Write-Log "  Package manager installation successful!" -Level SUCCESS
+                    if ($downloadResult -and $downloadResult.success) {
+                        Write-Log "  Downloaded via $($downloadResult.method): $([math]::Round($downloadResult.size / 1MB, 2)) MB" -Level SUCCESS
                         $succeeded++
 
                         # Add to manifest
@@ -2577,16 +2712,16 @@ function Start-Provisioning {
                             name = $item.name
                             version = "package_manager"
                             source_url = "winget:$($item.winget_id) / choco:$($item.choco_id)"
-                            size = 0
-                            placed_path = $destBase
+                            size = $downloadResult.size
+                            placed_path = $downloadResult.path
                             downloaded_at = (Get-Date).ToString("o")
-                            status = "installed_via_package_manager"
+                            status = "downloaded_via_$($downloadResult.method)"
                         }
                     } else {
-                        throw "Package manager installation failed"
+                        throw "Package manager download failed"
                     }
                 } catch {
-                    Write-Log "  Failed to install via package manager: $($_.Exception.Message)" -Level ERROR
+                    Write-Log "  Failed to download via package manager: $($_.Exception.Message)" -Level ERROR
                     $failed++
                 }
                 continue
