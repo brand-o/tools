@@ -1,4 +1,4 @@
-﻿<#
+<#
 ================================================================================
 Brando's Toolkit - USB Drive Provisioning Tool
 Copyright (C) 2025  Brando
@@ -452,7 +452,7 @@ function Install-Winget {
         # Verify installation
         Start-Sleep -Seconds 3
         if (Test-WingetInstalled) {
-            Write-Log "  ✓ Winget installed successfully" -Level SUCCESS
+            Write-Log "  ? Winget installed successfully" -Level SUCCESS
             return $true
         } else {
             Write-Log "  Winget installation completed but not detected" -Level WARN
@@ -501,7 +501,7 @@ function Install-Chocolatey {
         # Verify installation
         Start-Sleep -Seconds 3
         if (Test-ChocolateyInstalled) {
-            Write-Log "  ✓ Chocolatey installed successfully" -Level SUCCESS
+            Write-Log "  ? Chocolatey installed successfully" -Level SUCCESS
             return $true
         } else {
             Write-Log "  Chocolatey installation completed but not detected" -Level WARN
@@ -559,7 +559,7 @@ function Invoke-PackageManagerInstall {
                 $process = Start-Process -FilePath "winget" -ArgumentList $wingetArgs -Wait -PassThru -NoNewWindow -ErrorAction Stop
                 
                 if ($process.ExitCode -eq 0) {
-                    Write-Log "  ✓ Winget install successful: $DisplayName" -Level SUCCESS
+                    Write-Log "  ? Winget install successful: $DisplayName" -Level SUCCESS
                     return $true
                 } else {
                     Write-Log "  Winget install failed (exit code: $($process.ExitCode))" -Level WARN
@@ -591,7 +591,7 @@ function Invoke-PackageManagerInstall {
                 $process = Start-Process -FilePath "choco" -ArgumentList $chocoArgs -Wait -PassThru -NoNewWindow -ErrorAction Stop
                 
                 if ($process.ExitCode -eq 0) {
-                    Write-Log "  ✓ Chocolatey install successful: $DisplayName" -Level SUCCESS
+                    Write-Log "  ? Chocolatey install successful: $DisplayName" -Level SUCCESS
                     return $true
                 } else {
                     Write-Log "  Chocolatey install failed (exit code: $($process.ExitCode))" -Level WARN
@@ -608,7 +608,7 @@ function Invoke-PackageManagerInstall {
         return Invoke-FileDownload -Url $DirectUrl -Destination $Destination -DisplayName $DisplayName -ExpectedSize 0
     }
 
-    Write-Log "  ✗ All installation methods failed for: $DisplayName" -Level ERROR
+    Write-Log "  ? All installation methods failed for: $DisplayName" -Level ERROR
     return $false
 }
 
@@ -1067,16 +1067,16 @@ function Invoke-ISOModding {
         }
 
         Write-Log "  Successfully applied all modifications to $imageCount edition(s):" -Level SUCCESS
-        Write-Log "    ✓ TPM 2.0 bypass" -Level INFO
-        Write-Log "    ✓ Secure Boot bypass" -Level INFO
-        Write-Log "    ✓ RAM/CPU/Storage requirement bypasses" -Level INFO
-        Write-Log "    ✓ Local account allowed (no Microsoft Account)" -Level INFO
-        Write-Log "    ✓ Privacy questions skipped" -Level INFO
-        Write-Log "    ✓ Telemetry disabled" -Level INFO
-        Write-Log "    ✓ BitLocker auto-encryption disabled" -Level INFO
-        Write-Log "    ✓ Bloatware/Consumer Features disabled" -Level INFO
-        Write-Log "    ✓ English (World) locale - en-001" -Level INFO
-        Write-Log "    ✓ Product key prompt skipped" -Level INFO
+        Write-Log "    ? TPM 2.0 bypass" -Level INFO
+        Write-Log "    ? Secure Boot bypass" -Level INFO
+        Write-Log "    ? RAM/CPU/Storage requirement bypasses" -Level INFO
+        Write-Log "    ? Local account allowed (no Microsoft Account)" -Level INFO
+        Write-Log "    ? Privacy questions skipped" -Level INFO
+        Write-Log "    ? Telemetry disabled" -Level INFO
+        Write-Log "    ? BitLocker auto-encryption disabled" -Level INFO
+        Write-Log "    ? Bloatware/Consumer Features disabled" -Level INFO
+        Write-Log "    ? English (World) locale - en-001" -Level INFO
+        Write-Log "    ? Product key prompt skipped" -Level INFO
 
         # Rebuild ISO using oscdimg (Windows ADK) - required for bootable ISO
         Write-Log "  Rebuilding ISO with oscdimg..." -Level INFO
@@ -1404,10 +1404,10 @@ function Invoke-UUPdumpDownload {
         [string]$Language = "English"
     )
 
-    Write-Log "═══════════════════════════════════════════════════════════" -Level INFO
+    Write-Log "-----------------------------------------------------------" -Level INFO
     Write-Log "  UUPdump Fallback Method" -Level INFO
     Write-Log "  This may take 20-30 minutes (downloads + ISO conversion)" -Level WARN
-    Write-Log "═══════════════════════════════════════════════════════════" -Level INFO
+    Write-Log "-----------------------------------------------------------" -Level INFO
 
     # Map edition to UUPdump search parameters
     $uupParams = switch ($Edition) {
@@ -1576,7 +1576,7 @@ function Invoke-UUPdumpDownload {
         Write-Log "  Cleaning up temporary files..." -Level INFO
         Remove-Item -Path $uupWorkDir -Recurse -Force -ErrorAction SilentlyContinue
         
-        Write-Log "  ✓ UUPdump ISO ready: $finalName" -Level SUCCESS
+        Write-Log "  ? UUPdump ISO ready: $finalName" -Level SUCCESS
         return $finalPath
         
     } catch {
@@ -1700,105 +1700,6 @@ function Invoke-FidoDownload {
         return $null
     }
 }
-
-<#
-function Invoke-FidoDownloadWithBrowserHeaders {
-    # DEPRECATED: This function doesn't work because Microsoft uses TLS fingerprinting
-    # to detect PowerShell even with spoofed User-Agent headers.
-    # Keeping for reference but not used anymore.
-    <#
-    .SYNOPSIS
-        Retries Windows ISO download using browser-style headers to bypass Microsoft's script detection
-        This is a fallback when Fido.ps1 gets blocked (Error 3)
-    .NOTES
-        Microsoft blocks automated scripts but allows browser downloads
-        By mimicking a browser's HTTP headers, we can bypass the detection
-    #>
-    param(
-        [string]$Edition,
-        [string]$Destination,
-        [string]$Language = "English"
-    )
-
-    Write-Log "═══════════════════════════════════════════════════════════" -Level INFO
-    Write-Log "  Browser-Header Fallback Method" -Level INFO
-    Write-Log "  Bypassing Microsoft's script detection..." -Level WARN
-    Write-Log "═══════════════════════════════════════════════════════════" -Level INFO
-
-    # Get Fido script
-    $fidoPath = Get-FidoScript
-    if (-not $fidoPath) {
-        Write-Log "  Could not locate Fido.ps1" -Level ERROR
-        return $null
-    }
-
-    # Modify Fido.ps1 temporarily to add browser headers
-    $fidoContent = Get-Content $fidoPath -Raw
-    
-    # Check if Fido already has our browser header modifications
-    if ($fidoContent -notmatch "BROWSER_UA_MODDED") {
-        Write-Log "  Patching Fido.ps1 with browser headers..." -Level INFO
-        
-        # Define browser User-Agent to inject
-        # Use a marker string without # to avoid comment issues: <# BROWSER_UA_MODDED #>
-        $browserHeaders = ' -UserAgent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0" <# BROWSER_UA_MODDED #> '
-        
-        # Replace each occurrence - inject right before -UseBasicParsing
-        $modifiedContent = $fidoContent -replace `
-            '(Invoke-WebRequest)\s+(-UseBasicParsing)', `
-            "`$1$browserHeaders`$2"
-        
-        # Save modified version
-        $modifiedFidoPath = Join-Path $script:StagingDir "Fido_BrowserMode.ps1"
-        $modifiedContent | Set-Content $modifiedFidoPath -Encoding UTF8 -NoNewline
-        $fidoPath = $modifiedFidoPath
-        
-        Write-Log "  Browser-mode Fido created" -Level SUCCESS
-    }
-
-    # Configure download based on edition
-    $fidoArgs = switch ($Edition) {
-        "Win10Pro" { @("-Win", "10", "-Ed", "Pro", "-Lang", $Language, "-Arch", "x64", "-NoConfirm") }
-        "Win11Pro" { @("-Win", "11", "-Ed", "Pro", "-Lang", $Language, "-Arch", "x64", "-NoConfirm") }
-        default {
-            Write-Log "  Unsupported edition for browser fallback: $Edition" -Level ERROR
-            return $null
-        }
-    }
-
-    Write-Log "  Running Fido with browser headers..." -Level INFO
-    
-    try {
-        $fidoProcess = Start-Process -FilePath "powershell.exe" `
-            -ArgumentList "-ExecutionPolicy Bypass -File `"$fidoPath`" $($fidoArgs -join ' ')" `
-            -WorkingDirectory $Destination `
-            -NoNewWindow -Wait -PassThru
-
-        if ($fidoProcess.ExitCode -ne 0) {
-            Write-Log "  Browser-header Fido failed with exit code: $($fidoProcess.ExitCode)" -Level ERROR
-            return $null
-        }
-
-        # Find the downloaded ISO
-        $isoFiles = Get-ChildItem -Path $Destination -Filter "*.iso" | Sort-Object LastWriteTime -Descending
-
-        if ($isoFiles.Count -eq 0) {
-            Write-Log "  No ISO file found after browser-header download" -Level ERROR
-            return $null
-        }
-
-        $downloadedIso = $isoFiles[0].FullName
-        $sizeGB = [math]::Round($isoFiles[0].Length / 1GB, 2)
-        Write-Log "  Downloaded via browser headers: $($isoFiles[0].Name) ($sizeGB GB)" -Level SUCCESS
-
-        return $downloadedIso
-        
-    } catch {
-        Write-Log "  Browser-header download failed: $($_.Exception.Message)" -Level ERROR
-        return $null
-    }
-}
-#>
 
 function Expand-Archive7z {
     param(
