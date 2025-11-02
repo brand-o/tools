@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>brando's toolkit</title>
+  <style>
+    :root{--bg:#0b0d10;--panel:#0f1216;--muted:#9aa3ad;--text:#e6ebf0;--border:#1a2027;--highlight:rgba(125,211,252,.25);--link-underline:rgba(125,211,252,.7);--link-underline-hover:rgba(147,197,253,.95)}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    html{scroll-behavior:smooth}
+    body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(800px 400px at 50% 180px,rgba(125,211,252,.15),transparent 70%),radial-gradient(600px 300px at 50% 180px,rgba(147,197,253,.08),transparent),radial-gradient(1200px 600px at 70% -10%,rgba(147,197,253,.06),transparent),radial-gradient(900px 500px at -10% 20%,rgba(125,211,252,.05),transparent),var(--bg)}
+    .wrap{max-width:980px;margin:0 auto;padding:64px 20px}
+    .hero{padding:56px 0 40px}
+    .title{font-size:clamp(28px,6vw,56px);margin:0 0 14px;text-transform:lowercase}
+    .subtitle{margin:0 0 32px;color:var(--muted);max-width:60ch}
+    .section-head{margin:0 0 16px;font-size:12px;color:var(--muted)}
+    .cmdhint{margin:48px 0 12px;font-size:12px;color:var(--muted)}
+    .note{color:var(--muted);font-size:13px;margin:12px 0 28px}
+    .cmdbar{display:flex;gap:8px;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:10px;transition:border-color .5s,box-shadow .5s;position:relative}
+    .cmdbar::before{content:"";position:absolute;inset:-40px;background:radial-gradient(closest-side,rgba(125,211,252,.08),transparent);z-index:-1;border-radius:50%;pointer-events:none}
+    .cmdbar.highlight{box-shadow:0 0 0 4px var(--highlight)!important;border-color:rgba(125,211,252,.4)!important}
+    .aff.highlight{box-shadow:0 0 0 4px var(--highlight)!important;border-color:rgba(125,211,252,.4)!important}
+    .cmdbar input{flex:1;background:transparent;color:var(--text);border:0;outline:0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px;padding:12px 14px}
+    .btn{border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);border-radius:12px;padding:0 14px;font-size:14px;cursor:pointer;transition:opacity .2s,color .2s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;height:38px}
+    .btn:hover{background:rgba(255,255,255,.08)}
+    .group-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .group{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px}
+    .group h4{margin:0 0 10px;font-size:13px;color:var(--muted)}
+    .group-feat{padding:20px}
+    .feat-intro{margin:0 0 16px;color:var(--muted);font-size:14px}
+    .feat-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+    .feat-list li{display:flex;gap:12px;align-items:flex-start}
+    .feat-num{color:rgba(125,211,252,.8);font-weight:600;min-width:20px}
+    .feat-text{color:var(--text);font-size:14px}
+    .feat-footer{margin:20px 0 0;color:var(--muted);font-size:13px;border-top:1px solid var(--border);padding-top:16px}
+    .taglist{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+    .taglist li{border:1px solid var(--border);background:rgba(255,255,255,.02);border-radius:10px;padding:6px 10px;font-size:12.5px;color:var(--text)}
+    .plain,.plain:visited{color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--link-underline)}
+    .plain:hover{color:var(--text);border-bottom-color:var(--link-underline-hover)}
+    .rec-hint{font-size:12px;margin:4px 0 8px;color:var(--muted)}
+    .rec-form{display:flex;gap:8px;margin-top:8px}
+    .rec-form input{flex:1;background:rgba(255,255,255,.04);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+    .aff{margin-top:40px;border:1px dashed var(--border);border-radius:12px;padding:16px;color:var(--muted);font-size:13px;transition:box-shadow .2s,border-color .2s}
+    .aff-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px}
+    .aff h4{margin:0;font-size:12px;color:var(--muted);text-transform:lowercase}
+    .fineprint{font-size:10px;color:var(--muted);margin-left:auto}
+    .card-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .linkcard{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:16px;border-radius:12px;border:1px solid var(--border);background:var(--panel);color:var(--text);text-decoration:none;text-align:center;transition:border-color .2s,box-shadow .2s}
+    .linkcard:hover{border-color:rgba(125,211,252,.35);box-shadow:0 0 0 3px rgba(125,211,252,.12)}
+    .credits-line{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .tag{border:1px solid var(--border);border-radius:10px;padding:6px 10px;font-size:12.5px;color:var(--text);background:rgba(255,255,255,.02);text-decoration:none}
+    .footer{text-align:center;padding:48px 20px 32px;color:var(--muted);font-size:11px}
+    .footer a{color:var(--muted);text-decoration:underline;transition:color .2s}
+    .footer a:hover{color:var(--text)}
+    .tooltip-trigger{position:relative;display:inline-flex;align-items:center;gap:4px}
+    .tooltip-icon{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:1px solid var(--border);background:rgba(255,255,255,.05);font-size:9px;color:var(--muted);cursor:help;transition:all .2s}
+    .tooltip-icon:hover{background:rgba(125,211,252,.15);border-color:rgba(125,211,252,.4);color:rgba(125,211,252,.9)}
+    .tooltip-content{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:11px;color:var(--text);line-height:1.5;width:280px;box-shadow:0 4px 12px rgba(0,0,0,.3);opacity:0;pointer-events:none;transition:opacity .2s;z-index:100}
+    .tooltip-content::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--border)}
+    .tooltip-trigger:hover .tooltip-content{opacity:1}
+    .tooltip-content strong{color:rgba(125,211,252,.9);font-weight:600}
+    .tooltip-content ul{margin:6px 0;padding-left:16px;list-style:disc}
+    .tooltip-content li{margin:3px 0}
+    @media(max-width:960px){.card-row{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:720px){.group-grid{grid-template-columns:1fr}}
+    @media(max-width:560px){.card-row{grid-template-columns:1fr}}.tooltip-content{width:240px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <main class="hero">
+      <h1 class="title">brando's toolkit</h1>
+      <p class="subtitle">a clean no‑nonsense flash drive installer packed with installers, tools, utilities, and scripts in a nice all‑in‑one automated package.</p>
+      <p class="cmdhint">paste into powershell as administrator to get started</p>
+      <div class="cmdbar" id="cmdbar"><input id="cmd" readonly value="iex (irm 'https://brando.tools/run')"><button class="btn" id="copy">copy</button><a class="btn" href="https://raw.githubusercontent.com/brand-o/tools/main/RUN_ME.bat" download="RUN_ME.bat">download .bat</a></div>
+      <p class="note">requires a <strong>fast 64gb+ flash drive</strong>. <a href="#drives" class="plain" id="flash-link">see my recommendations here</a>.</p>
+    </main>
+
+    <section id="features" style="margin-top:48px">
+      <h3 class="section-head">how it works</h3>
+      <div class="group group-feat">
+        <p class="feat-intro">the powershell script automates everything. one command, zero hassle.</p>
+        <ul class="feat-list">
+          <li><span class="feat-num">1.</span><span class="feat-text"><strong>auto‑detects</strong> all connected flash drives</span></li>
+          <li><span class="feat-num">2.</span><span class="feat-text"><strong>select</strong> your target drive from the list</span></li>
+          <li><span class="feat-num">3.</span><span class="feat-text"><strong>formats & partitions</strong> the drive automatically</span></li>
+          <li><span class="feat-num">4.</span><span class="feat-text"><strong>downloads</strong> tools, isos, drivers, and scripts from original or reliable sources<br><span style="font-size:10px">(checks hashes where available)</span></span></li>
+          <li><span class="feat-num">5.</span><span class="feat-text"><strong>organizes</strong> everything into a clean folder structure</span></li>
+          <li><span class="feat-num">6.</span><span class="feat-text"><strong>makes bootable via ventoy</strong> — ready to use as your ultimate tech toolkit</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="tools" style="margin-top:22px">
+      <h3 class="section-head">included tools</h3>
+      <div class="group-grid">
+        <section class="group">
+          <h4>isos / boot</h4>
+          <ul class="taglist">
+            <li>Windows 11 Pro (Stock)</li>
+            <li class="tooltip-trigger">Windows 11 Pro (Modded)<span class="tooltip-icon">?</span><div class="tooltip-content"><strong>Uses official Microsoft ISO</strong><br>Downloads the stock Win11 Pro ISO from Microsoft, then applies registry modifications to bypass:<ul><li>TPM 2.0 requirement</li><li>Secure Boot check</li><li>RAM/CPU/Storage checks</li></ul>Also disables telemetry, forced Microsoft account, and BitLocker auto-encryption. Perfect for older hardware or VMs.</div></li>
+            <li>Windows 10 Pro</li>
+            <li>Windows 11 Enterprise LTSC 2024</li>
+            <li>Tiny11</li>
+            <li>Live11</li>
+            <li>Linux Mint Cinnamon</li>
+            <li>Fedora Workstation</li>
+            <li>Kali Linux</li>
+            <li>Tails</li>
+            <li>Hiren's Boot PE</li>
+            <li>GParted Live</li>
+            <li>Rescuezilla</li>
+            <li>Clonezilla</li>
+            <li>MemTest86+</li>
+            <li>Macrium Reflect Free</li>
+          </ul>
+        </section>
+
+        <section class="group">
+          <h4>drivers</h4>
+          <ul class="taglist">
+            <li>Intel RST (Storage)</li>
+            <li>Intel Wi-Fi 6E/7</li>
+            <li>Intel 2.5GbE Ethernet</li>
+            <li>Intel Bluetooth</li>
+            <li>NVIDIA App</li>
+            <li>AMD Adrenalin</li>
+          </ul>
+        </section>
+
+        <section class="group">
+          <h4>installers / programs</h4>
+          <ul class="taglist">
+            <li>7-Zip 25.01</li>
+            <li>AMD Software Adrenalin</li>
+            <li>Android Platform Tools</li>
+            <li>AnyDesk</li>
+            <li>BleachBit</li>
+            <li>Brave Browser</li>
+            <li>Bulk Crap Uninstaller</li>
+            <li>DBeaver Community</li>
+            <li>Discord</li>
+            <li>Everything Search</li>
+            <li>Git for Windows</li>
+            <li>HandBrake</li>
+            <li>HWiNFO64</li>
+            <li>ImageGlass</li>
+            <li>LibreOffice 25.8.2</li>
+            <li>Microsoft Office Deployment Tool</li>
+            <li>Mozilla Firefox</li>
+            <li>Nmap</li>
+            <li>Node.js LTS 22.21.0</li>
+            <li>ONLYOFFICE Desktop Editors</li>
+            <li>Postman</li>
+            <li>ProtonVPN 4.3.5</li>
+            <li>Python 3.13.1</li>
+            <li>qBittorrent 5.1.2</li>
+            <li>Revo Uninstaller Free</li>
+            <li>Rufus</li>
+            <li>ShareX</li>
+            <li>Steam</li>
+            <li>TeamViewer</li>
+            <li>VirtualBox 7.1.4</li>
+            <li>VLC Media Player 3.0.21</li>
+            <li>VS Code</li>
+            <li>Wireshark 4.6.0</li>
+            <li>WizTree</li>
+          </ul>
+        </section>
+
+        <section class="group">
+          <h4>portable tools</h4>
+          <ul class="taglist">
+            <li>7-Zip 25.01</li>
+            <li>Rufus</li>
+            <li>Balena Etcher</li>
+            <li>CPU-Z 2.17</li>
+            <li>HWiNFO</li>
+            <li>CrystalDiskInfo 9.5</li>
+            <li>CrystalDiskMark 8.0.5</li>
+            <li>NirSoft Suite</li>
+            <li>Sysinternals Suite</li>
+            <li>DDU v18.1.3.7</li>
+            <li>CRU 1.5.2</li>
+            <li>Everything 1.4.1</li>
+            <li>TreeSize Free</li>
+            <li>WinDirStat 1.1.2</li>
+            <li>ImDisk Toolkit</li>
+            <li>Process Hacker 2.39</li>
+            <li>Speccy</li>
+            <li>Notepad++</li>
+            <li>PDFsam Basic</li>
+            <li>VLC Media Player 3.0.21</li>
+            <li>PuTTY</li>
+            <li>WinSCP 6.4.2</li>
+            <li>Angry IP Scanner</li>
+            <li>Advanced Port Scanner 2.5</li>
+            <li>WinMTR 0.92</li>
+            <li>Wireshark 4.6.0</li>
+            <li>KeePassXC</li>
+            <li>qBittorrent 5.1.1</li>
+            <li>John the Ripper 1.9.0</li>
+            <li>Hashcat</li>
+            <li>TestDisk & PhotoRec 7.1</li>
+            <li>Recuva</li>
+            <li>HxD (Hex Editor)</li>
+          </ul>
+        </section>
+
+        <section class="group">
+          <h4>scripts / utilities</h4>
+          <ul class="taglist">
+            <li>ChrisTitusTech Windows Utility</li>
+            <li>Activate.cmd (Windows Activation)</li>
+            <li>Fido.ps1 (ISO Downloader)</li>
+            <li>Get-Win11.cmd (TPM Bypass)</li>
+            <li>uBlock Origin (Firefox .xpi)</li>
+          </ul>
+        </section>
+
+        <section class="group">
+          <h4>recommend something</h4>
+          <p class="rec-hint">have a tool or script i should include? drop a quick name below (max 32 chars).</p>
+          <form id="recForm" autocomplete="off" class="rec-form">
+            <input id="recInput" type="text" maxlength="32" placeholder="e.g., wiztree, bleachbit…" required>
+            <button class="btn" type="submit">send</button>
+          </form>
+        </section>
+      </div>
+    </section>
+
+    <div class="aff" id="drives">
+      <div class="aff-head">
+        <h4>flash drive picks</h4>
+        <span class="fineprint">i may earn a small commission if you buy through these links at no extra cost to you.</span>
+      </div>
+      <div class="card-row">
+        <a class="linkcard" href="https://amzn.to/4o9ASpy" target="_blank" rel="noopener">
+          <span class="kicker">budget</span>
+          <span class="size"><strong>64gb</strong></span>
+          <span class="spec">usb‑a • 3.2 gen 1</span>
+        </a>
+        <a class="linkcard" href="https://amzn.to/3Jg0qCa" target="_blank" rel="noopener">
+          <span class="kicker">ultra portable</span>
+          <span class="size"><strong>512gb</strong></span>
+          <span class="spec">usb‑c • 3.2 gen 1</span>
+        </a>
+        <a class="linkcard" href="https://amzn.to/4o8Y8UF" target="_blank" rel="noopener">
+          <span class="kicker">convenient</span>
+          <span class="size"><strong>512gb</strong></span>
+          <span class="spec">usb‑a+c • 3.2 gen 1</span>
+        </a>
+        <a class="linkcard" href="https://amzn.to/4qt4nny" target="_blank" rel="noopener">
+          <span class="kicker">superfast</span>
+          <span class="size"><strong>1tb</strong></span>
+          <span class="spec">usb‑a+c • 3.2 gen 2</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="aff" style="margin-top:16px">
+      <div class="aff-head">
+        <h4>credits</h4>
+        <span class="fineprint">we ❤️ foss. please support these developers and help keep foss alive.</span>
+      </div>
+      <div class="credits-line">
+        <a class="tag" href="https://www.7-zip.org/" target="_blank" rel="noopener">7-Zip</a>
+        <a class="tag" href="https://angryip.org/" target="_blank" rel="noopener">Angry IP Scanner</a>
+        <a class="tag" href="https://www.audacityteam.org/" target="_blank" rel="noopener">Audacity</a>
+        <a class="tag" href="https://github.com/balena-io/etcher" target="_blank" rel="noopener">Balena Etcher</a>
+        <a class="tag" href="https://bleachbit.org/" target="_blank" rel="noopener">BleachBit</a>
+        <a class="tag" href="https://github.com/ChrisTitusTech" target="_blank" rel="noopener">ChristTitusTech</a>
+        <a class="tag" href="https://clonezilla.org/" target="_blank" rel="noopener">Clonezilla</a>
+        <a class="tag" href="https://dbeaver.io/" target="_blank" rel="noopener">DBeaver</a>
+        <a class="tag" href="https://fedoraproject.org/" target="_blank" rel="noopener">Fedora</a>
+        <a class="tag" href="https://filezilla-project.org/" target="_blank" rel="noopener">FileZilla</a>
+        <a class="tag" href="https://gitforwindows.org/" target="_blank" rel="noopener">Git for Windows</a>
+        <a class="tag" href="https://gparted.org/" target="_blank" rel="noopener">GParted</a>
+        <a class="tag" href="https://handbrake.fr/" target="_blank" rel="noopener">HandBrake</a>
+        <a class="tag" href="https://imageglass.org/" target="_blank" rel="noopener">ImageGlass</a>
+        <a class="tag" href="https://sourceforge.net/projects/imdisk-toolkit/" target="_blank" rel="noopener">ImDisk</a>
+        <a class="tag" href="https://www.kali.org/" target="_blank" rel="noopener">Kali Linux</a>
+        <a class="tag" href="https://keepassxc.org/" target="_blank" rel="noopener">KeePassXC</a>
+        <a class="tag" href="https://www.libreoffice.org/" target="_blank" rel="noopener">LibreOffice</a>
+        <a class="tag" href="https://linuxmint.com/" target="_blank" rel="noopener">Linux Mint</a>
+        <a class="tag" href="https://github.com/massgravel/Microsoft-Activation-Scripts" target="_blank" rel="noopener">Massgravel (MAS)</a>
+        <a class="tag" href="https://www.memtest.org/" target="_blank" rel="noopener">MemTest86+</a>
+        <a class="tag" href="https://www.mozilla.org/firefox/" target="_blank" rel="noopener">Firefox</a>
+        <a class="tag" href="https://nmap.org/" target="_blank" rel="noopener">Nmap</a>
+        <a class="tag" href="https://notepad-plus-plus.org/" target="_blank" rel="noopener">Notepad++</a>
+        <a class="tag" href="https://github.com/ntdevlabs/tiny11builder" target="_blank" rel="noopener">NTDEV (Tiny11)</a>
+        <a class="tag" href="https://obsproject.com/" target="_blank" rel="noopener">OBS Studio</a>
+        <a class="tag" href="https://www.onlyoffice.com/" target="_blank" rel="noopener">ONLYOFFICE</a>
+        <a class="tag" href="https://github.com/pbatard" target="_blank" rel="noopener">pbatard (rufus / fido)</a>
+        <a class="tag" href="https://pdfsam.org/" target="_blank" rel="noopener">PDFsam</a>
+        <a class="tag" href="https://processhacker.sourceforge.io/" target="_blank" rel="noopener">Process Hacker</a>
+        <a class="tag" href="https://www.chiark.greenend.org.uk/~sgtatham/putty/" target="_blank" rel="noopener">PuTTY</a>
+        <a class="tag" href="https://www.qbittorrent.org/" target="_blank" rel="noopener">qBittorrent</a>
+        <a class="tag" href="https://rescuezilla.com/" target="_blank" rel="noopener">Rescuezilla</a>
+        <a class="tag" href="https://getsharex.com/" target="_blank" rel="noopener">ShareX</a>
+        <a class="tag" href="https://tails.net/" target="_blank" rel="noopener">Tails</a>
+        <a class="tag" href="https://www.cgsecurity.org/" target="_blank" rel="noopener">TestDisk / PhotoRec</a>
+        <a class="tag" href="https://github.com/gorhill/uBlock" target="_blank" rel="noopener">uBlock Origin</a>
+        <a class="tag" href="https://uupdump.net/" target="_blank" rel="noopener">UUPdump</a>
+        <a class="tag" href="https://github.com/ventoy/Ventoy" target="_blank" rel="noopener">Ventoy</a>
+        <a class="tag" href="https://www.virtualbox.org/" target="_blank" rel="noopener">VirtualBox</a>
+        <a class="tag" href="https://www.videolan.org/" target="_blank" rel="noopener">VLC</a>
+        <a class="tag" href="https://github.com/illsk1lls/Win-11-Download-Prep-Tool" target="_blank" rel="noopener">Win‑11 Download Prep Tool</a>
+        <a class="tag" href="https://windirstat.net/" target="_blank" rel="noopener">WinDirStat</a>
+        <a class="tag" href="https://github.com/White-Tiger/WinMTR" target="_blank" rel="noopener">WinMTR</a>
+        <a class="tag" href="https://winscp.net/" target="_blank" rel="noopener">WinSCP</a>
+        <a class="tag" href="https://www.wireshark.org/" target="_blank" rel="noopener">Wireshark</a>
+      </div>
+    </div>
+  </div>
+  <footer class="footer">
+    this project is foss — licensed under the <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">mit open source license</a><br>
+    <a href="https://github.com/brand-o/tools" target="_blank" rel="noopener" style="margin-top:8px;display:inline-block">view on github</a>
+  </footer>
+  <script>
+    const copyBtn=document.getElementById('copy'),cmdInput=document.getElementById('cmd'),cmdBar=document.getElementById('cmdbar'),flashLink=document.getElementById('flash-link'),drivesSection=document.getElementById('drives');
+    let copyTimeout;
+    copyBtn.addEventListener('click',async()=>{
+      // Try modern clipboard API first, with fallback for Firefox
+      try{
+        await navigator.clipboard.writeText(cmdInput.value);
+      }catch(err){
+        // Fallback for Firefox or non-HTTPS
+        cmdInput.select();
+        document.execCommand('copy');
+      }
+      // Force Firefox to process the transition by triggering a reflow
+      cmdBar.classList.remove('highlight');
+      void cmdBar.offsetWidth; // Force reflow
+      cmdBar.classList.add('highlight');
+      copyBtn.textContent='copied';
+      clearTimeout(copyTimeout);
+      copyTimeout=setTimeout(()=>{
+        cmdBar.classList.remove('highlight');
+        copyBtn.textContent='copy';
+      },5000);
+    });
+    flashLink.addEventListener('click',()=>{setTimeout(()=>{drivesSection.classList.add('highlight');setTimeout(()=>drivesSection.classList.remove('highlight'),1e3)},300)});
+    
+    // Recommendation form handler
+    const recForm=document.getElementById('recForm'),recInput=document.getElementById('recInput');
+    recForm.addEventListener('submit',async(e)=>{
+      e.preventDefault();
+      const tool=recInput.value.trim();
+      if(!tool)return;
+      
+      const btn=recForm.querySelector('button');
+      const originalText=btn.textContent;
+      btn.disabled=true;
+      btn.textContent='sending...';
+      
+      try{
+        // GitHub API endpoint for creating issues in brand-o/tools repo
+        const response=await fetch('https://api.github.com/repos/brand-o/tools/issues',{
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json',
+            'Accept':'application/vnd.github.v3+json',
+            'Authorization':'Bearer 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E' // Replace with actual token
+          },
+          body:JSON.stringify({
+            title:`Tool Recommendation: ${tool}`,
+            body:`A user recommended adding: **${tool}**\n\nSubmitted from: https://brando.tools\nTimestamp: ${new Date().toISOString()}`,
+            labels:['recommendation','user-submitted']
+          })
+        });
+        
+        if(response.ok){
+          btn.textContent='sent!';
+          recInput.value='';
+          setTimeout(()=>{
+            btn.textContent=originalText;
+            btn.disabled=false;
+          },3000);
+        }else{
+          throw new Error(`GitHub API error: ${response.status}`);
+        }
+      }catch(err){
+        console.error('Failed to submit recommendation:',err);
+        btn.textContent='failed';
+        setTimeout(()=>{
+          btn.textContent=originalText;
+          btn.disabled=false;
+        },3000);
+      }
+    });
+  </script>
+</body>
+</html>
