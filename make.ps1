@@ -3243,4 +3243,3 @@ catch {
     Write-Log "Stack trace: $($_.ScriptStackTrace)" -Level ERROR
     exit 1
 }
-} @args
