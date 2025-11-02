@@ -1055,6 +1055,84 @@ function Get-WimlibImage{
     }
 }
 
+function New-IsoFile {
+    <#
+    .SYNOPSIS
+        Creates bootable ISO files using Windows IMAPI2 COM objects (no external dependencies)
+    .DESCRIPTION
+        Pure PowerShell ISO creation using built-in Windows COM objects
+        Source: https://github.com/wikijm/PowerShell-AdminScripts
+    #>
+    [CmdletBinding()]
+    param(
+        [parameter(Mandatory=$true,ValueFromPipeline=$true)]$Source,
+        [parameter(Mandatory=$true)][string]$Path,
+        [string]$BootFile = $null,
+        [string]$Media = 'DVDPLUSRW_DUALLAYER',
+        [string]$Title = 'ModdedWindows',
+        [switch]$Force
+    )
+
+    Begin {
+        ($cp = New-Object System.CodeDom.Compiler.CompilerParameters).CompilerOptions = '/unsafe'
+        if (!('ISOFile' -as [type])) {
+            Add-Type -CompilerParameters $cp -TypeDefinition @'
+public class ISOFile {
+    public unsafe static void Create(string Path, object Stream, int BlockSize, int TotalBlocks) {
+        int bytes = 0;
+        byte[] buf = new byte[BlockSize];
+        var ptr = (System.IntPtr)(&bytes);
+        var o = System.IO.File.OpenWrite(Path);
+        var i = Stream as System.Runtime.InteropServices.ComTypes.IStream;
+        
+        if (o != null) {
+            while (TotalBlocks-- > 0) {
+                i.Read(buf, BlockSize, ptr);
+                o.Write(buf, 0, bytes);
+            }
+            o.Flush();
+            o.Close();
+        }
+    }
+}
+'@
+        }
+
+        if ($BootFile) {
+            ($Stream = New-Object -ComObject ADODB.Stream -Property @{Type=1}).Open()
+            $Stream.LoadFromFile((Get-Item -LiteralPath $BootFile).Fullname)
+            ($Boot = New-Object -ComObject IMAPI2FS.BootOptions).AssignBootImage($Stream)
+        }
+
+        $MediaType = @('UNKNOWN','CDROM','CDR','CDRW','DVDROM','DVDRAM','DVDPLUSR','DVDPLUSRW','DVDPLUSR_DUALLAYER','DVDDASHR','DVDDASHRW','DVDDASHR_DUALLAYER','DISK','DVDPLUSRW_DUALLAYER','HDDVDROM','HDDVDR','HDDVDRAM','BDROM','BDR','BDRE')
+        ($Image = New-Object -ComObject IMAPI2FS.MsftFileSystemImage -Property @{VolumeName=$Title}).ChooseImageDefaultsForMediaType($MediaType.IndexOf($Media))
+
+        if (!($Target = New-Item -Path $Path -ItemType File -Force:$Force -ErrorAction SilentlyContinue)) {
+            throw "Cannot create file $Path. Use -Force parameter to overwrite."
+        }
+    }
+
+    Process {
+        foreach($item in $Source) {
+            if($item -isnot [System.IO.FileInfo] -and $item -isnot [System.IO.DirectoryInfo]) {
+                $item = Get-Item -LiteralPath $item
+            }
+
+            if($item) {
+                try { $Image.Root.AddTree($item.FullName, $true) }
+                catch { throw "Failed to add $($item.FullName): $($_.Exception.Message)" }
+            }
+        }
+    }
+
+    End {
+        if ($Boot) { $Image.BootImageOptions=$Boot }
+        $Result = $Image.CreateResultImage()
+        [ISOFile]::Create($Target.FullName,$Result.ImageStream,$Result.BlockSize,$Result.TotalBlocks)
+        return $Target
+    }
+}
+
 function Invoke-ISOModding {
     <#
     .SYNOPSIS
@@ -1221,14 +1299,8 @@ function Invoke-ISOModding {
         Write-Log "    ? English (World) locale - en-001" -Level INFO
         Write-Log "    ? Product key prompt skipped" -Level INFO
 
-        # Rebuild ISO using oscdimg (Windows ADK) - required for bootable ISO
-        Write-Log "  Rebuilding ISO with oscdimg..." -Level INFO
-        
-        # Check for oscdimg (from Windows ADK)
-        $oscdimg = Get-Command oscdimg.exe -ErrorAction SilentlyContinue
-        if (-not $oscdimg) {
-            throw "oscdimg.exe not found. Please install Windows ADK (Assessment and Deployment Kit) from Microsoft."
-        }
+        # Rebuild ISO using PowerShell IMAPI2 (no external dependencies required!)
+        Write-Log "  Rebuilding ISO with built-in Windows IMAPI2..." -Level INFO
         
         # Verify boot file exists
         $bootFile = Join-Path $isoExtract "efi\microsoft\boot\efisys.bin"
@@ -1236,22 +1308,15 @@ function Invoke-ISOModding {
             throw "EFI boot file not found at $bootFile - cannot create bootable ISO"
         }
         
-        # Create bootable UEFI ISO
-        # -m: Ignore maximum ISO image size limit
-        # -o: Optimize storage by encoding duplicate files once
-        # -u2: Produce UDF file system in addition to ISO-9660
-        # -udfver102: UDF 1.02 (Windows compatible)
-        # -bootdata: EFI boot specification
-        $oscdimgOutput = & oscdimg.exe -m -o -u2 -udfver102 `
-            -bootdata:2#p0,e,b"$bootFile"#pEF,e,b"$bootFile" `
-            "$isoExtract" "$finalISO" 2>&1
+        # Get all files/folders from extracted ISO to re-package
+        $isoContents = Get-ChildItem -Path $isoExtract
         
-        if ($LASTEXITCODE -ne 0) {
-            throw "oscdimg failed with exit code $LASTEXITCODE : $($oscdimgOutput -join "`n")"
-        }
+        # Create bootable ISO using PowerShell (no ADK needed!)
+        $isoResult = $isoContents | New-IsoFile -Path $finalISO -BootFile $bootFile `
+            -Media 'DVDPLUSRW_DUALLAYER' -Title 'Win11Mod' -Force
 
         if (Test-Path $finalISO) {
-            Write-Log "  Modded ISO created!" -Level SUCCESS
+            Write-Log "  Modded ISO created successfully!" -Level SUCCESS
             return $finalISO
         }
 
@@ -1259,7 +1324,6 @@ function Invoke-ISOModding {
     }
     catch {
         Write-Log "  ISO modding failed: $($_.Exception.Message)" -Level ERROR
-        Write-Log "  Note: oscdimg.exe requires Windows ADK to be installed" -Level WARN
 
         # Fallback to stock ISO (unmodded)
         if (Test-Path $SourceISO) {
