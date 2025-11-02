@@ -1085,7 +1085,7 @@ function Invoke-ISOModding {
     
     Write-Log "  Disk space check: ${freeSpaceGB}GB available (${requiredGB}GB required)" -Level SUCCESS
 
-    $wimlibExe = Get-WimlibImagex
+    $wimlibExe = Get-WimlibImage
     if (-not (Test-Path $wimlibExe)) {
         throw "wimlib-imagex.exe not found. Cannot mod ISO."
     }
