@@ -1737,12 +1737,12 @@ function Invoke-FidoDownloadWithBrowserHeaders {
     $fidoContent = Get-Content $fidoPath -Raw
     
     # Check if Fido already has our browser header modifications
-    if ($fidoContent -notmatch "# BROWSER_HEADERS_MOD") {
+    if ($fidoContent -notmatch "BROWSER_UA_MODDED") {
         Write-Log "  Patching Fido.ps1 with browser headers..." -Level INFO
         
-        # Define browser User-Agent to inject (simplified to avoid hashtable parsing issues)
-        # Just add User-Agent - this is usually enough to bypass detection
-        $browserHeaders = ' -UserAgent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0" # BROWSER_HEADERS_MOD '
+        # Define browser User-Agent to inject
+        # Use a marker string without # to avoid comment issues: <# BROWSER_UA_MODDED #>
+        $browserHeaders = ' -UserAgent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0" <# BROWSER_UA_MODDED #> '
         
         # Replace each occurrence - inject right before -UseBasicParsing
         $modifiedContent = $fidoContent -replace `
