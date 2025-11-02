@@ -1272,7 +1272,10 @@ function Invoke-ISOModding {
                 Remove-Item $finalISO -Force -ErrorAction SilentlyContinue
             }
             
-            Copy-Item -Path $SourceISO -Destination $fallback -Force
+            # Only copy if source and destination are different
+            if ($SourceISO -ne $fallback) {
+                Copy-Item -Path $SourceISO -Destination $fallback -Force
+            }
             return $fallback
         }
 
