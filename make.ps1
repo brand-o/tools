@@ -1192,14 +1192,17 @@ function Invoke-ISOModding {
         Copy-Item -Path "$isoDrive\*" -Destination $isoExtract -Recurse -Force
         
         # Dismount with retry logic (Windows sometimes holds handles)
+        Write-Host "[DEBUG] Attempting to dismount ISO: $SourceISO"
         $dismountAttempts = 0
         $maxDismountAttempts = 3
         while ($dismountAttempts -lt $maxDismountAttempts) {
             try {
                 Dismount-DiskImage -ImagePath $SourceISO -ErrorAction Stop | Out-Null
+                Write-Host "[DEBUG] ISO dismounted successfully"
                 break
             } catch {
                 $dismountAttempts++
+                Write-Host "[DEBUG] Dismount attempt $dismountAttempts failed: $($_.Exception.Message)"
                 if ($dismountAttempts -lt $maxDismountAttempts) {
                     Write-Log "  Dismount attempt $dismountAttempts failed, retrying in 2 seconds..." -Level WARN
                     Start-Sleep -Seconds 2
@@ -1210,8 +1213,20 @@ function Invoke-ISOModding {
         }
 
         # Find install.wim
+        Write-Host "[DEBUG] Looking for install.wim in: $isoExtract\sources"
         $installWim = Join-Path $isoExtract "sources\install.wim"
+        Write-Host "[DEBUG] Checking if install.wim exists at: $installWim"
+        Write-Host "[DEBUG] install.wim exists: $(Test-Path $installWim)"
+        
         if (-not (Test-Path $installWim)) {
+            # List what's actually in the sources folder
+            $sourcesDir = Join-Path $isoExtract "sources"
+            if (Test-Path $sourcesDir) {
+                Write-Host "[DEBUG] Contents of sources folder:"
+                Get-ChildItem $sourcesDir | ForEach-Object { Write-Host "[DEBUG]   - $($_.Name)" }
+            } else {
+                Write-Host "[DEBUG] Sources folder does not exist!"
+            }
             throw "install.wim not found in ISO"
         }
 
