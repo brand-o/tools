@@ -1170,7 +1170,7 @@ function Invoke-ISOModding {
 
             # 3. Skip privacy questions and OOBE screens
             reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\OOBE" /v DisablePrivacyExperience /t REG_DWORD /d 1 /f | Out-Null
-            reg add "HKLM\TMP_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Runonce" /v "UninstallCopilot" /t REG_SZ /d "powershell.exe -NoProfile -Command \"Get-AppxPackage -Name 'Microsoft.Windows.Ai.Copilot.Provider' | Remove-AppxPackage\"" /f | Out-Null
+            reg add "HKLM\TMP_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Runonce" /v "UninstallCopilot" /t REG_SZ /d "powershell.exe -NoProfile -Command `"Get-AppxPackage -Name 'Microsoft.Windows.Ai.Copilot.Provider' | Remove-AppxPackage`"" /f | Out-Null
 
             # 4. Disable telemetry and data collection
             reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v AllowTelemetry /t REG_DWORD /d 0 /f | Out-Null
@@ -1886,7 +1886,7 @@ function Expand-Archive7z {
         New-Item -ItemType Directory -Path $extractDir -Force | Out-Null
     }
 
-    $arguments = "`"$ArchivePath`" -o`"$extractDir`" -y"
+    $arguments = "x `"$ArchivePath`" -o`"$extractDir`" -y"
     $process = Start-Process -FilePath $7zExe -ArgumentList $arguments -Wait -PassThru -NoNewWindow
 
     if ($process.ExitCode -ne 0) {
