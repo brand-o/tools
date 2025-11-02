@@ -1375,28 +1375,50 @@ function Invoke-ISOModding {
             if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add DisablePrivacyExperience" }
             
             # Copilot auto-removal on first login (using PowerShell cmdlets for proper quote handling)
-            $copilotRunoncePath = 'HKLM:\TMP_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Runonce'
-            if (-not (Test-Path $copilotRunoncePath)) {
-                New-Item -Path $copilotRunoncePath -Force | Out-Null
+            Write-Host "[DEBUG] Adding Copilot auto-removal..."
+            try {
+                $copilotRunoncePath = 'HKLM:\TMP_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Runonce'
+                if (-not (Test-Path $copilotRunoncePath)) {
+                    Write-Host "[DEBUG] Creating Runonce key..."
+                    New-Item -Path $copilotRunoncePath -Force -ErrorAction Stop | Out-Null
+                }
+                Write-Host "[DEBUG] Adding UninstallCopilot property..."
+                New-ItemProperty -Path $copilotRunoncePath -Name 'UninstallCopilot' -Value 'powershell.exe -NoProfile -WindowStyle Hidden -Command "Get-AppxPackage -Name ''Microsoft.Windows.Ai.Copilot.Provider'' | Remove-AppxPackage"' -PropertyType String -Force -ErrorAction Stop | Out-Null
+                Write-Host "[DEBUG] Copilot auto-removal added successfully"
+            } catch {
+                Write-Host "[WARN] Failed to add Copilot auto-removal: $($_.Exception.Message)"
             }
-            New-ItemProperty -Path $copilotRunoncePath -Name 'UninstallCopilot' -Value 'powershell.exe -NoProfile -WindowStyle Hidden -Command "Get-AppxPackage -Name ''Microsoft.Windows.Ai.Copilot.Provider'' | Remove-AppxPackage"' -PropertyType String -Force | Out-Null
 
             # 4. Disable telemetry and data collection
-            reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v AllowTelemetry /t REG_DWORD /d 0 /f | Out-Null
-            reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v MaxTelemetryAllowed /t REG_DWORD /d 0 /f | Out-Null
+            Write-Host "[DEBUG] Adding telemetry settings..."
+            & reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v AllowTelemetry /t REG_DWORD /d 0 /f 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add AllowTelemetry" }
+            
+            & reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v MaxTelemetryAllowed /t REG_DWORD /d 0 /f 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add MaxTelemetryAllowed" }
 
             # 5. Disable BitLocker automatic encryption
-            reg add "HKLM\TMP_SYSTEM\CurrentControlSet\Control\BitLocker" /v PreventDeviceEncryption /t REG_DWORD /d 1 /f | Out-Null
+            Write-Host "[DEBUG] Adding BitLocker settings..."
+            & reg add "HKLM\TMP_SYSTEM\CurrentControlSet\Control\BitLocker" /v PreventDeviceEncryption /t REG_DWORD /d 1 /f 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add PreventDeviceEncryption" }
 
             # 6. Disable Windows Consumer Features (bloatware)
-            reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v DisableWindowsConsumerFeatures /t REG_DWORD /d 1 /f | Out-Null
+            Write-Host "[DEBUG] Adding Windows Consumer Features settings..."
+            & reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v DisableWindowsConsumerFeatures /t REG_DWORD /d 1 /f 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add DisableWindowsConsumerFeatures" }
 
             # 7. Set English (World) locale - en-001
-            reg add "HKLM\TMP_SYSTEM\ControlSet001\Control\Nls\Language" /v InstallLanguage /t REG_SZ /d "0409" /f | Out-Null
-            reg add "HKLM\TMP_DEFAULT\Control Panel\International" /v LocaleName /t REG_SZ /d "en-001" /f | Out-Null
+            Write-Host "[DEBUG] Adding locale settings..."
+            & reg add "HKLM\TMP_SYSTEM\ControlSet001\Control\Nls\Language" /v InstallLanguage /t REG_SZ /d "0409" /f 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add InstallLanguage" }
+            
+            & reg add "HKLM\TMP_DEFAULT\Control Panel\International" /v LocaleName /t REG_SZ /d "en-001" /f 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add LocaleName" }
 
             # 8. Skip product key prompt (activate later)
-            reg add "HKLM\TMP_SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v SoftwareProtectionPlatform /t REG_DWORD /d 0 /f | Out-Null
+            Write-Host "[DEBUG] Adding product key settings..."
+            & reg add "HKLM\TMP_SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v SoftwareProtectionPlatform /t REG_DWORD /d 0 /f 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add SoftwareProtectionPlatform" }
 
             # Unload hives
             reg unload HKLM\TMP_SOFTWARE | Out-Null
