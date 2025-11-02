@@ -1421,9 +1421,17 @@ function Invoke-ISOModding {
             if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add SoftwareProtectionPlatform" }
 
             # Unload hives
-            reg unload HKLM\TMP_SOFTWARE | Out-Null
-            reg unload HKLM\TMP_SYSTEM | Out-Null
-            reg unload HKLM\TMP_DEFAULT | Out-Null
+            Write-Host "[DEBUG] Unloading registry hives..."
+            & reg unload HKLM\TMP_SOFTWARE 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to unload SOFTWARE hive (exit code: $LASTEXITCODE)" }
+            
+            & reg unload HKLM\TMP_SYSTEM 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to unload SYSTEM hive (exit code: $LASTEXITCODE)" }
+            
+            & reg unload HKLM\TMP_DEFAULT 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to unload DEFAULT hive (exit code: $LASTEXITCODE)" }
+            
+            Write-Host "[DEBUG] Waiting for registry to flush..."
             Start-Sleep -Milliseconds 200
 
             # Update WIM with modified registry hives
