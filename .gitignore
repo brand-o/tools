@@ -24,6 +24,11 @@ _staging/
 brando-*.html
 website-*.html
 
+# Website files (belong in brando.tools repo only)
+index.html
+_headers
+_redirects
+
 # Python scripts (not needed - PowerShell does everything)
 *.py
 
