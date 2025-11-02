@@ -3144,3 +3144,5 @@ catch {
     Write-Host "Stack trace: $($_.ScriptStackTrace)" -ForegroundColor Red
     exit 1
 }
+
+} # Close script block started with & { at line 75
