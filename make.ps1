@@ -1231,6 +1231,17 @@ function Invoke-ISOModding {
             & $wimlibExe extract "$installWim" $index /Windows/System32/config/SYSTEM --dest-dir="$regDir" --no-acls 2>&1 | Out-Null
             & $wimlibExe extract "$installWim" $index /Users/Default/NTUSER.DAT --dest-dir="$regDir" --no-acls 2>&1 | Out-Null
 
+            # Verify extracted files exist
+            if (-not (Test-Path "$regDir\SOFTWARE")) {
+                throw "Failed to extract SOFTWARE hive from WIM index $index"
+            }
+            if (-not (Test-Path "$regDir\SYSTEM")) {
+                throw "Failed to extract SYSTEM hive from WIM index $index"
+            }
+            if (-not (Test-Path "$regDir\NTUSER.DAT")) {
+                throw "Failed to extract NTUSER.DAT from WIM index $index"
+            }
+
             # Ensure no leftover hives from previous failed runs
             reg unload HKLM\TMP_SOFTWARE 2>&1 | Out-Null
             reg unload HKLM\TMP_SYSTEM 2>&1 | Out-Null
@@ -1238,17 +1249,19 @@ function Invoke-ISOModding {
             Start-Sleep -Milliseconds 500
 
             # Load registry hives and modify them
-            reg load HKLM\TMP_SOFTWARE "$regDir\SOFTWARE" 2>&1 | Out-Null
+            $regLoadOutput = reg load HKLM\TMP_SOFTWARE "$regDir\SOFTWARE" 2>&1
             if ($LASTEXITCODE -ne 0) {
-                throw "Failed to load SOFTWARE hive. Ensure script is running as Administrator and no antivirus is blocking registry access."
+                throw "Failed to load SOFTWARE hive (exit code: $LASTEXITCODE). Output: $regLoadOutput. Ensure script is running as Administrator and no antivirus is blocking registry access."
             }
-            reg load HKLM\TMP_SYSTEM "$regDir\SYSTEM" 2>&1 | Out-Null
+            
+            $regLoadOutput = reg load HKLM\TMP_SYSTEM "$regDir\SYSTEM" 2>&1
             if ($LASTEXITCODE -ne 0) {
-                throw "Failed to load SYSTEM hive. Ensure script is running as Administrator."
+                throw "Failed to load SYSTEM hive (exit code: $LASTEXITCODE). Output: $regLoadOutput. Ensure script is running as Administrator."
             }
-            reg load HKLM\TMP_DEFAULT "$regDir\NTUSER.DAT" 2>&1 | Out-Null
+            
+            $regLoadOutput = reg load HKLM\TMP_DEFAULT "$regDir\NTUSER.DAT" 2>&1
             if ($LASTEXITCODE -ne 0) {
-                throw "Failed to load DEFAULT hive. Ensure script is running as Administrator."
+                throw "Failed to load DEFAULT hive (exit code: $LASTEXITCODE). Output: $regLoadOutput. Ensure script is running as Administrator."
             }
 
             # 1. TPM/SecureBoot/RAM/CPU/Storage bypasses (Get-Win11.cmd method)
