@@ -1242,10 +1242,10 @@ function Invoke-ISOModding {
                 throw "Failed to extract NTUSER.DAT from WIM index $index"
             }
 
-            # Ensure no leftover hives from previous failed runs
-            reg unload HKLM\TMP_SOFTWARE 2>&1 | Out-Null
-            reg unload HKLM\TMP_SYSTEM 2>&1 | Out-Null
-            reg unload HKLM\TMP_DEFAULT 2>&1 | Out-Null
+            # Ensure no leftover hives from previous failed runs (silently ignore if not loaded)
+            if (Test-Path "HKLM:\TMP_SOFTWARE") { reg unload HKLM\TMP_SOFTWARE 2>&1 | Out-Null }
+            if (Test-Path "HKLM:\TMP_SYSTEM") { reg unload HKLM\TMP_SYSTEM 2>&1 | Out-Null }
+            if (Test-Path "HKLM:\TMP_DEFAULT") { reg unload HKLM\TMP_DEFAULT 2>&1 | Out-Null }
             Start-Sleep -Milliseconds 500
 
             # Load registry hives and modify them
@@ -1305,6 +1305,7 @@ function Invoke-ISOModding {
             reg unload HKLM\TMP_SOFTWARE | Out-Null
             reg unload HKLM\TMP_SYSTEM | Out-Null
             reg unload HKLM\TMP_DEFAULT | Out-Null
+            Start-Sleep -Milliseconds 200
 
             # Update WIM with modified registry hives
             & $wimlibExe update "$installWim" $index --command="add `"$regDir\SOFTWARE`" /Windows/System32/config/SOFTWARE" 2>&1 | Out-Null
@@ -1374,10 +1375,10 @@ function Invoke-ISOModding {
         return $null
     }
     finally {
-        # Ensure registry hives are unloaded (in case of error)
-        reg unload HKLM\TMP_SOFTWARE 2>&1 | Out-Null
-        reg unload HKLM\TMP_SYSTEM 2>&1 | Out-Null
-        reg unload HKLM\TMP_DEFAULT 2>&1 | Out-Null
+        # Ensure registry hives are unloaded (in case of error) - only if they exist
+        if (Test-Path "HKLM:\TMP_SOFTWARE") { reg unload HKLM\TMP_SOFTWARE 2>&1 | Out-Null }
+        if (Test-Path "HKLM:\TMP_SYSTEM") { reg unload HKLM\TMP_SYSTEM 2>&1 | Out-Null }
+        if (Test-Path "HKLM:\TMP_DEFAULT") { reg unload HKLM\TMP_DEFAULT 2>&1 | Out-Null }
 
         # Dismount ISO if still mounted
         Dismount-DiskImage -ImagePath $SourceISO -ErrorAction SilentlyContinue | Out-Null
