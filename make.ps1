@@ -1700,7 +1700,6 @@ function Invoke-FidoDownload {
         return $null
     }
 }
-}
 
 function Expand-Archive7z {
     param(
@@ -3141,7 +3140,7 @@ try {
     Main
 }
 catch {
-    Write-Log "Fatal error: $($_.Exception.Message)" -Level ERROR
-    Write-Log "Stack trace: $($_.ScriptStackTrace)" -Level ERROR
+    Write-Host "FATAL ERROR: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "Stack trace: $($_.ScriptStackTrace)" -ForegroundColor Red
     exit 1
 }
