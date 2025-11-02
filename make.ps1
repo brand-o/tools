@@ -1254,6 +1254,13 @@ function Invoke-ISOModding {
                 throw "Registry hive loading requires Administrator privileges. Current user is not elevated."
             }
 
+            # Grant full permissions on registry hive files (fixes "Access is denied")
+            Write-Host "[INFO]   Granting permissions on registry hives..."
+            $currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+            & icacls "$regDir\SOFTWARE" /grant "${currentUser}:F" /C 2>&1 | Out-Null
+            & icacls "$regDir\SYSTEM" /grant "${currentUser}:F" /C 2>&1 | Out-Null
+            & icacls "$regDir\NTUSER.DAT" /grant "${currentUser}:F" /C 2>&1 | Out-Null
+
             # Load registry hives and modify them
             Write-Verbose "Loading SOFTWARE hive from: $regDir\SOFTWARE"
             $regLoadOutput = & reg load HKLM\TMP_SOFTWARE "$regDir\SOFTWARE" 2>&1
