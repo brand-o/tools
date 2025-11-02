@@ -1426,13 +1426,20 @@ function Invoke-UUPdumpDownload {
     try {
         $response = Invoke-RestMethod -Uri $apiUrl -Method Get -UseBasicParsing -ErrorAction Stop
         
-        if ($response.response.builds.Count -eq 0) {
+        # API returns builds as object with numeric keys, convert to array
+        $buildsArray = $response.response.builds.PSObject.Properties | 
+            ForEach-Object { $_.Value } | 
+            Where-Object { $_.title -like "Windows 11*" -or $_.title -like "Windows 10*" } |
+            Where-Object { $_.arch -eq $uupParams.arch } |
+            Sort-Object created -Descending
+        
+        if ($buildsArray.Count -eq 0) {
             Write-Log "  No builds found for $Edition" -Level ERROR
             return $null
         }
 
         # Get the first (latest) build
-        $latestBuild = $response.response.builds[0]
+        $latestBuild = $buildsArray[0]
         $buildId = $latestBuild.uuid
         $buildTitle = $latestBuild.title
         
