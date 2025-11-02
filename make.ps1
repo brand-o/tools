@@ -1667,17 +1667,17 @@ function Invoke-FidoDownload {
 
             if ($fidoProcess.ExitCode -eq 3) {
                 Write-Log "  Microsoft is blocking the download (Error 3 - Rate limit/IP block)" -Level WARN
-                Write-Log "  Attempting fallback: UUPdump (Windows Update servers)..." -Level INFO
+                Write-Log "  Attempting fallback: Fido with browser-style headers..." -Level INFO
                 
-                # Try UUPdump fallback (downloads from Windows Update CDN, not blocked)
-                $fallbackIso = Invoke-UUPdumpDownload -Edition $Edition -Destination $Destination -Language $Language
+                # Try Fido again with browser headers to bypass detection
+                $fallbackIso = Invoke-FidoDownloadWithBrowserHeaders -Edition $Edition -Destination $Destination -Language $Language
                 
                 if ($fallbackIso -and (Test-Path $fallbackIso)) {
-                    Write-Log "  ✓ UUPdump fallback successful!" -Level SUCCESS
+                    Write-Log "  Browser-header fallback successful!" -Level SUCCESS
                     return $fallbackIso
                 } else {
-                    Write-Log "  UUPdump fallback also failed." -Level ERROR
-                    Write-Log "  MANUAL WORKAROUND: Download ISO from https://uupdump.net/" -Level INFO
+                    Write-Log "  Browser-header fallback also failed." -Level ERROR
+                    Write-Log "  MANUAL WORKAROUND: Download ISO from https://www.microsoft.com/software-download/" -Level INFO
                     Write-Log "  Or place a Windows ISO in the destination folder (script will auto-detect)" -Level INFO
                     return $null
                 }
@@ -1702,6 +1702,97 @@ function Invoke-FidoDownload {
     }
     catch {
         Write-Log "  Fido download failed: $($_.Exception.Message)" -Level ERROR
+        return $null
+    }
+}
+
+function Invoke-FidoDownloadWithBrowserHeaders {
+    <#
+    .SYNOPSIS
+        Retries Windows ISO download using browser-style headers to bypass Microsoft's script detection
+        This is a fallback when Fido.ps1 gets blocked (Error 3)
+    .NOTES
+        Microsoft blocks automated scripts but allows browser downloads
+        By mimicking a browser's HTTP headers, we can bypass the detection
+    #>
+    param(
+        [string]$Edition,
+        [string]$Destination,
+        [string]$Language = "English"
+    )
+
+    Write-Log "═══════════════════════════════════════════════════════════" -Level INFO
+    Write-Log "  Browser-Header Fallback Method" -Level INFO
+    Write-Log "  Bypassing Microsoft's script detection..." -Level WARN
+    Write-Log "═══════════════════════════════════════════════════════════" -Level INFO
+
+    # Get Fido script
+    $fidoPath = Get-FidoScript
+    if (-not $fidoPath) {
+        Write-Log "  Could not locate Fido.ps1" -Level ERROR
+        return $null
+    }
+
+    # Modify Fido.ps1 temporarily to add browser headers
+    $fidoContent = Get-Content $fidoPath -Raw
+    
+    # Check if Fido already has our browser header modifications
+    if ($fidoContent -notmatch "# BROWSER_HEADERS_MOD") {
+        Write-Log "  Patching Fido.ps1 with browser headers..." -Level INFO
+        
+        # Find Invoke-WebRequest calls and add browser headers
+        # Pattern: looks for Invoke-WebRequest without our marker
+        $modifiedContent = $fidoContent -replace `
+            '(Invoke-WebRequest\s+[^`]*?)(-UseBasicParsing)', `
+            '$1-UserAgent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0" -Headers @{"Accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"; "Accept-Language"="en-US,en;q=0.9"; "Referer"="https://www.microsoft.com/"; "DNT"="1"} # BROWSER_HEADERS_MOD $2'
+        
+        # Save modified version
+        $modifiedFidoPath = Join-Path $script:StagingDir "Fido_BrowserMode.ps1"
+        $modifiedContent | Set-Content $modifiedFidoPath -Encoding UTF8 -NoNewline
+        $fidoPath = $modifiedFidoPath
+        
+        Write-Log "  Browser-mode Fido created" -Level SUCCESS
+    }
+
+    # Configure download based on edition
+    $fidoArgs = switch ($Edition) {
+        "Win10Pro" { @("-Win", "10", "-Ed", "Pro", "-Lang", $Language, "-Arch", "x64", "-NoConfirm") }
+        "Win11Pro" { @("-Win", "11", "-Ed", "Pro", "-Lang", $Language, "-Arch", "x64", "-NoConfirm") }
+        default {
+            Write-Log "  Unsupported edition for browser fallback: $Edition" -Level ERROR
+            return $null
+        }
+    }
+
+    Write-Log "  Running Fido with browser headers..." -Level INFO
+    
+    try {
+        $fidoProcess = Start-Process -FilePath "powershell.exe" `
+            -ArgumentList "-ExecutionPolicy Bypass -File `"$fidoPath`" $($fidoArgs -join ' ')" `
+            -WorkingDirectory $Destination `
+            -NoNewWindow -Wait -PassThru
+
+        if ($fidoProcess.ExitCode -ne 0) {
+            Write-Log "  Browser-header Fido failed with exit code: $($fidoProcess.ExitCode)" -Level ERROR
+            return $null
+        }
+
+        # Find the downloaded ISO
+        $isoFiles = Get-ChildItem -Path $Destination -Filter "*.iso" | Sort-Object LastWriteTime -Descending
+
+        if ($isoFiles.Count -eq 0) {
+            Write-Log "  No ISO file found after browser-header download" -Level ERROR
+            return $null
+        }
+
+        $downloadedIso = $isoFiles[0].FullName
+        $sizeGB = [math]::Round($isoFiles[0].Length / 1GB, 2)
+        Write-Log "  Downloaded via browser headers: $($isoFiles[0].Name) ($sizeGB GB)" -Level SUCCESS
+
+        return $downloadedIso
+        
+    } catch {
+        Write-Log "  Browser-header download failed: $($_.Exception.Message)" -Level ERROR
         return $null
     }
 }
