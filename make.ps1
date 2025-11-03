@@ -1192,17 +1192,14 @@ function Invoke-ISOModding {
         Copy-Item -Path "$isoDrive\*" -Destination $isoExtract -Recurse -Force
         
         # Dismount with retry logic (Windows sometimes holds handles)
-        Write-Host "[DEBUG] Attempting to dismount ISO: $SourceISO"
         $dismountAttempts = 0
         $maxDismountAttempts = 3
         while ($dismountAttempts -lt $maxDismountAttempts) {
             try {
                 Dismount-DiskImage -ImagePath $SourceISO -ErrorAction Stop | Out-Null
-                Write-Host "[DEBUG] ISO dismounted successfully"
                 break
             } catch {
                 $dismountAttempts++
-                Write-Host "[DEBUG] Dismount attempt $dismountAttempts failed: $($_.Exception.Message)"
                 if ($dismountAttempts -lt $maxDismountAttempts) {
                     Write-Log "  Dismount attempt $dismountAttempts failed, retrying in 2 seconds..." -Level WARN
                     Start-Sleep -Seconds 2
@@ -1213,21 +1210,9 @@ function Invoke-ISOModding {
         }
 
         # Find install.wim
-        Write-Host "[DEBUG] Looking for install.wim in: $isoExtract\sources"
         $installWim = Join-Path $isoExtract "sources\install.wim"
-        Write-Host "[DEBUG] Checking if install.wim exists at: $installWim"
-        Write-Host "[DEBUG] install.wim exists: $(Test-Path $installWim)"
-        
         if (-not (Test-Path $installWim)) {
-            # List what's actually in the sources folder
-            $sourcesDir = Join-Path $isoExtract "sources"
-            if (Test-Path $sourcesDir) {
-                Write-Host "[DEBUG] Contents of sources folder:"
-                Get-ChildItem $sourcesDir | ForEach-Object { Write-Host "[DEBUG]   - $($_.Name)" }
-            } else {
-                Write-Host "[DEBUG] Sources folder does not exist!"
-            }
-            throw "install.wim not found in ISO"
+            throw "install.wim not found in ISO at $installWim"
         }
 
         Write-Log "  Modifying install.wim with registry bypasses (Get-Win11.cmd method)..." -Level INFO
@@ -1287,163 +1272,152 @@ function Invoke-ISOModding {
             }
 
             # Grant full permissions on registry hive files (fixes "Access is denied")
-            Write-Host "[INFO]   Inspecting and fixing permissions on registry hives..."
+            Write-Log "  Adjusting registry hive permissions..." -Level INFO
             $currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
             $hiveFiles = @("$regDir\SOFTWARE", "$regDir\SYSTEM", "$regDir\NTUSER.DAT")
             foreach ($hf in $hiveFiles) {
                 if (Test-Path $hf) {
-                    Write-Host "[DEBUG] Inspecting: $hf"
-                    try { Get-Item $hf | Select-Object Name,Length,Attributes | Format-List | Out-Host } catch {}
-                    $icBefore = & icacls $hf 2>&1
-                    Write-Host "[DEBUG] icacls before: $($icBefore -join ' ')"
-                    $attribBefore = & attrib $hf 2>&1
-                    Write-Host "[DEBUG] attrib before: $($attribBefore -join ' ')"
-
                     # Remove read-only and other restrictive attributes
                     & attrib -r $hf 2>&1 | Out-Null
+                    if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to clear attributes on $hf" -Level WARN }
 
                     # Try to take ownership (may be required on some WIM extracts)
-                    $takeownOut = & takeown /f $hf 2>&1
-                    Write-Host "[DEBUG] takeown: $($takeownOut -join ' ')"
+                    & takeown /f $hf 2>&1 | Out-Null
+                    if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to take ownership of $hf" -Level WARN }
 
                     # Grant current user full control
-                    $icGrant = & icacls $hf /grant "${currentUser}:F" /C 2>&1
-                    Write-Host "[DEBUG] icacls grant: $($icGrant -join ' ')"
-
-                    $icAfter = & icacls $hf 2>&1
-                    Write-Host "[DEBUG] icacls after: $($icAfter -join ' ')"
+                    & icacls $hf /grant "${currentUser}:F" /C 2>&1 | Out-Null
+                    if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to grant permissions on $hf" -Level WARN }
                 }
                 else {
-                    Write-Host "[WARN] Hive file missing: $hf"
+                    Write-Log "  Hive file missing: $hf" -Level WARN
                 }
             }
 
             # Load registry hives and modify them (capture detailed output)
-            Write-Host "[INFO]   Attempting to load hives..."
-            Write-Verbose "Loading SOFTWARE hive from: $regDir\SOFTWARE"
+            Write-Log "  Loading registry hives..." -Level INFO
             $regLoadOutput = & reg load HKLM\TMP_SOFTWARE "$regDir\SOFTWARE" 2>&1
             $exitCode = $LASTEXITCODE
-            Write-Host "[DEBUG] reg load SOFTWARE exit code: $exitCode"
-            Write-Host "[DEBUG] reg load SOFTWARE output: $($regLoadOutput -join ' ')"
             if ($exitCode -ne 0) {
                 throw "Failed to load SOFTWARE hive (exit code: $exitCode). Error: $($regLoadOutput -join ' '). File exists: $(Test-Path "$regDir\SOFTWARE"). Check antivirus/security software and that file is not open by another process."
             }
 
-            Write-Verbose "Loading SYSTEM hive from: $regDir\SYSTEM"
             $regLoadOutput = & reg load HKLM\TMP_SYSTEM "$regDir\SYSTEM" 2>&1
             $exitCode = $LASTEXITCODE
-            Write-Host "[DEBUG] reg load SYSTEM exit code: $exitCode"
-            Write-Host "[DEBUG] reg load SYSTEM output: $($regLoadOutput -join ' ')"
             if ($exitCode -ne 0) {
                 throw "Failed to load SYSTEM hive (exit code: $exitCode). Error: $($regLoadOutput -join ' ')"
             }
 
-            Write-Verbose "Loading DEFAULT hive from: $regDir\NTUSER.DAT"
             $regLoadOutput = & reg load HKLM\TMP_DEFAULT "$regDir\NTUSER.DAT" 2>&1
             $exitCode = $LASTEXITCODE
-            Write-Host "[DEBUG] reg load DEFAULT exit code: $exitCode"
-            Write-Host "[DEBUG] reg load DEFAULT output: $($regLoadOutput -join ' ')"
             if ($exitCode -ne 0) {
                 throw "Failed to load DEFAULT hive (exit code: $exitCode). Error: $($regLoadOutput -join ' ')"
             }
 
             # 1. TPM/SecureBoot/RAM/CPU/Storage bypasses (Get-Win11.cmd method)
-            Write-Host "[DEBUG] Adding TPM/SecureBoot/RAM/CPU/Storage bypasses..."
+            Write-Log "  Applying requirement bypass registry keys..." -Level INFO
             & reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassTPMCheck /t REG_DWORD /d 1 /f 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add BypassTPMCheck" }
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to add BypassTPMCheck" -Level WARN }
             
             & reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassSecureBootCheck /t REG_DWORD /d 1 /f 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add BypassSecureBootCheck" }
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to add BypassSecureBootCheck" -Level WARN }
             
             & reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassRAMCheck /t REG_DWORD /d 1 /f 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add BypassRAMCheck" }
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to add BypassRAMCheck" -Level WARN }
             
             & reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassCPUCheck /t REG_DWORD /d 1 /f 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add BypassCPUCheck" }
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to add BypassCPUCheck" -Level WARN }
             
             & reg add "HKLM\TMP_SYSTEM\Setup\LabConfig" /v BypassStorageCheck /t REG_DWORD /d 1 /f 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add BypassStorageCheck" }
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to add BypassStorageCheck" -Level WARN }
 
             # 2. Local account allowed (no Microsoft Account required)
-            Write-Host "[DEBUG] Adding BypassNRO..."
+            Write-Log "  Enabling local account bypass..." -Level INFO
             & reg add "HKLM\TMP_SOFTWARE\Microsoft\Windows\CurrentVersion\OOBE" /v BypassNRO /t REG_DWORD /d 1 /f 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add BypassNRO" }
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to add BypassNRO" -Level WARN }
 
             # 3. Skip privacy questions and OOBE screens
-            Write-Host "[DEBUG] Adding DisablePrivacyExperience..."
+            Write-Log "  Skipping privacy and OOBE extras..." -Level INFO
             & reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\OOBE" /v DisablePrivacyExperience /t REG_DWORD /d 1 /f 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add DisablePrivacyExperience" }
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to add DisablePrivacyExperience" -Level WARN }
             
-            # Copilot auto-removal on first login (using PowerShell cmdlets for proper quote handling)
-            Write-Host "[DEBUG] Adding Copilot auto-removal..."
-            try {
-                $copilotRunoncePath = 'HKLM:\TMP_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Runonce'
-                if (-not (Test-Path $copilotRunoncePath)) {
-                    Write-Host "[DEBUG] Creating Runonce key..."
-                    New-Item -Path $copilotRunoncePath -Force -ErrorAction Stop | Out-Null
+            # Copilot disable/removal: set policy + queue removal without locking the hive
+            $runonceKey = "HKLM\TMP_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Runonce"
+
+            # Generate a base64 payload so we can use -EncodedCommand (avoids quoting issues)
+            $copilotScript = "Get-AppxPackage -Name Microsoft.Windows.Ai.Copilot.Provider | Remove-AppxPackage"
+            $copilotEncoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($copilotScript))
+            $copilotValue = "powershell.exe -NoProfile -WindowStyle Hidden -EncodedCommand $copilotEncoded"
+
+            $createKeyArgs = @("add", $runonceKey, "/f")
+            & reg.exe @createKeyArgs 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) {
+                Write-Log "  Failed to create Runonce key (exit code: $LASTEXITCODE)" -Level WARN
+            }
+            else {
+                $copilotArgs = @("add", $runonceKey, "/v", "UninstallCopilot", "/t", "REG_SZ", "/d", $copilotValue, "/f")
+                & reg.exe @copilotArgs 2>&1 | Out-Null
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Log "  Failed to add Copilot auto-removal (exit code: $LASTEXITCODE)" -Level WARN
                 }
-                Write-Host "[DEBUG] Adding UninstallCopilot property..."
-                New-ItemProperty -Path $copilotRunoncePath -Name 'UninstallCopilot' -Value 'powershell.exe -NoProfile -WindowStyle Hidden -Command "Get-AppxPackage -Name ''Microsoft.Windows.Ai.Copilot.Provider'' | Remove-AppxPackage"' -PropertyType String -Force -ErrorAction Stop | Out-Null
-                Write-Host "[DEBUG] Copilot auto-removal added successfully"
-            } catch {
-                Write-Host "[WARN] Failed to add Copilot auto-removal: $($_.Exception.Message)"
             }
 
+            # Also enforce the policy toggle so Copilot stays disabled even if removal fails
+            & reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" /v TurnOffWindowsCopilot /t REG_DWORD /d 1 /f 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to set TurnOffWindowsCopilot policy" -Level WARN }
+
             # 4. Disable telemetry and data collection
-            Write-Host "[DEBUG] Adding telemetry settings..."
+            Write-Log "  Disabling telemetry and data collection..." -Level INFO
             & reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v AllowTelemetry /t REG_DWORD /d 0 /f 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add AllowTelemetry" }
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to add AllowTelemetry" -Level WARN }
             
             & reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v MaxTelemetryAllowed /t REG_DWORD /d 0 /f 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add MaxTelemetryAllowed" }
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to add MaxTelemetryAllowed" -Level WARN }
 
             # 5. Disable BitLocker automatic encryption
-            Write-Host "[DEBUG] Adding BitLocker settings..."
+            Write-Log "  Disabling automatic BitLocker encryption..." -Level INFO
             & reg add "HKLM\TMP_SYSTEM\CurrentControlSet\Control\BitLocker" /v PreventDeviceEncryption /t REG_DWORD /d 1 /f 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add PreventDeviceEncryption" }
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to add PreventDeviceEncryption" -Level WARN }
 
             # 6. Disable Windows Consumer Features (bloatware)
-            Write-Host "[DEBUG] Adding Windows Consumer Features settings..."
+            Write-Log "  Disabling Windows consumer features..." -Level INFO
             & reg add "HKLM\TMP_SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v DisableWindowsConsumerFeatures /t REG_DWORD /d 1 /f 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add DisableWindowsConsumerFeatures" }
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to add DisableWindowsConsumerFeatures" -Level WARN }
 
             # 7. Set English (World) locale - en-001
-            Write-Host "[DEBUG] Adding locale settings..."
+            Write-Log "  Setting default locale preferences..." -Level INFO
             & reg add "HKLM\TMP_SYSTEM\ControlSet001\Control\Nls\Language" /v InstallLanguage /t REG_SZ /d "0409" /f 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add InstallLanguage" }
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to set InstallLanguage" -Level WARN }
             
             & reg add "HKLM\TMP_DEFAULT\Control Panel\International" /v LocaleName /t REG_SZ /d "en-001" /f 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add LocaleName" }
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to set LocaleName" -Level WARN }
 
             # 8. Skip product key prompt (activate later)
-            Write-Host "[DEBUG] Adding product key settings..."
+            Write-Log "  Skipping product key prompt..." -Level INFO
             & reg add "HKLM\TMP_SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v SoftwareProtectionPlatform /t REG_DWORD /d 0 /f 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to add SoftwareProtectionPlatform" }
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to add SoftwareProtectionPlatform" -Level WARN }
 
             # Unload hives
-            Write-Host "[DEBUG] Unloading registry hives..."
             & reg unload HKLM\TMP_SOFTWARE 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to unload SOFTWARE hive (exit code: $LASTEXITCODE)" }
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to unload SOFTWARE hive (exit code: $LASTEXITCODE)" -Level WARN }
             
             & reg unload HKLM\TMP_SYSTEM 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to unload SYSTEM hive (exit code: $LASTEXITCODE)" }
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to unload SYSTEM hive (exit code: $LASTEXITCODE)" -Level WARN }
             
             & reg unload HKLM\TMP_DEFAULT 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to unload DEFAULT hive (exit code: $LASTEXITCODE)" }
-            
-            Write-Host "[DEBUG] Waiting for registry to flush..."
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to unload DEFAULT hive (exit code: $LASTEXITCODE)" -Level WARN }
+
             Start-Sleep -Milliseconds 200
 
             # Update WIM with modified registry hives
-            Write-Host "[DEBUG] Updating WIM with modified registry hives..."
             $updateOutput = & $wimlibExe update "$installWim" $index --command="add `"$regDir\SOFTWARE`" /Windows/System32/config/SOFTWARE" 2>&1
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to update SOFTWARE in WIM (exit code: $LASTEXITCODE): $($updateOutput -join ' ')" }
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to update SOFTWARE in WIM (exit code: $LASTEXITCODE): $($updateOutput -join ' ')" -Level WARN }
             
             $updateOutput = & $wimlibExe update "$installWim" $index --command="add `"$regDir\SYSTEM`" /Windows/System32/config/SYSTEM" 2>&1
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to update SYSTEM in WIM (exit code: $LASTEXITCODE): $($updateOutput -join ' ')" }
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to update SYSTEM in WIM (exit code: $LASTEXITCODE): $($updateOutput -join ' ')" -Level WARN }
             
             $updateOutput = & $wimlibExe update "$installWim" $index --command="add `"$regDir\NTUSER.DAT`" /Users/Default/NTUSER.DAT" 2>&1
-            if ($LASTEXITCODE -ne 0) { Write-Host "[WARN] Failed to update NTUSER.DAT in WIM (exit code: $LASTEXITCODE): $($updateOutput -join ' ')" }
+            if ($LASTEXITCODE -ne 0) { Write-Log "  Failed to update NTUSER.DAT in WIM (exit code: $LASTEXITCODE): $($updateOutput -join ' ')" -Level WARN }
 
             # Cleanup temp registry files
             Remove-Item -Path $regDir -Recurse -Force -ErrorAction SilentlyContinue
@@ -2081,7 +2055,8 @@ function Invoke-FidoDownload {
 function Expand-Archive7z {
     param(
         [string]$ArchivePath,
-        [string]$DestinationPath
+        [string]$DestinationPath,
+        [string]$Password
     )
 
     # Find 7z executable (either just downloaded or system-installed)
@@ -2125,8 +2100,18 @@ function Expand-Archive7z {
         New-Item -ItemType Directory -Path $DestinationPath -Force | Out-Null
     }
 
-    $arguments = "x `"$ArchivePath`" -o`"$DestinationPath`" -y"
-    $process = Start-Process -FilePath $7zExe -ArgumentList $arguments -Wait -PassThru -NoNewWindow
+    $argumentList = @(
+        "x",
+        $ArchivePath,
+        "-o$DestinationPath",
+        "-y"
+    )
+
+    if ($Password) {
+        $argumentList += "-p$Password"
+    }
+
+    $process = Start-Process -FilePath $7zExe -ArgumentList $argumentList -Wait -PassThru -NoNewWindow
 
     if ($process.ExitCode -ne 0) {
         throw "7-Zip extraction failed with exit code: $($process.ExitCode)"
@@ -3081,7 +3066,20 @@ function Start-Provisioning {
             elseif ($item.post -contains "extract7z") {
                 Write-Log "  Extracting 7z archive..."
                 $extractDir = Split-Path -Parent $destFile
-                Expand-Archive7z -ArchivePath $stagingFile -DestinationPath $extractDir
+                $password = $null
+                if ($item.password) {
+                    $password = $item.password
+                }
+                elseif ($item.resolve.password) {
+                    $password = $item.resolve.password
+                }
+
+                if ($password) {
+                    Expand-Archive7z -ArchivePath $stagingFile -DestinationPath $extractDir -Password $password
+                }
+                else {
+                    Expand-Archive7z -ArchivePath $stagingFile -DestinationPath $extractDir
+                }
                 $finalDest = $extractDir
             }
             elseif ($item.post -contains "extract_rst") {

@@ -120,7 +120,7 @@
                 "strategy": "direct",
                 "note": "Windows 11 PE live environment (testing re-added)"
             },
-            "source_url": "https://github.com/JoshuaFarrell/Live11/releases/download/0.3.0/Live11_v0.3.0.iso",
+            "source_url": "https://archive.org/download/live-11-mbr/live11%20mbr%20alpha%200.iso",
             "dest": "VENTOY:/ISO/Windows/",
             "post": [],
             "flags": {
@@ -463,14 +463,15 @@
             "type": "zip",
             "resolve": {
                 "strategy": "direct",
-                "filename": "nirsoft_package_1.30.66.zip",
+                "filename": "x64tools.zip",
                 "note": "Official NirSoft utilities package"
             },
-            "source_url": "https://www.nirsoft.net/packages/nirsoft_package_1.30.66.zip",
+            "source_url": "https://www.nirsoft.net/packages/x64tools.zip",
             "dest": "UTILS:/Portable/NirSoft/",
             "post": [
-                "unzip"
+                "extract7z"
             ],
+            "password": "nirsoft123!",
             "flags": {
                 "require_consent": false,
                 "manual": false
@@ -806,10 +807,10 @@
             "type": "zip",
             "resolve": {
                 "strategy": "direct",
-                "filename": "winscp_portable.zip",
+                "filename": "WinSCP-6.5.4-Portable.zip",
                 "note": "SFTP/SCP client for file transfers"
             },
-            "source_url": "https://winscp.net/download/WinSCP-6.5.4-Portable.zip",
+            "source_url": "https://cdn.winscp.net/files/WinSCP-6.5.4-Portable.zip",
             "dest": "UTILS:/Portable/winscp/",
             "post": [
                 "unzip"
