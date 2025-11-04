@@ -19,4 +19,4 @@ echo ===========================================================================
 echo.
 pause
 
-powershell -NoProfile -Command "Start-Process PowerShell -Verb RunAs -ArgumentList '-NoExit','-NoProfile','-ExecutionPolicy','Bypass','-Command','iex (irm https://brando.tools/run)'"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process PowerShell -Verb RunAs -ArgumentList '-NoExit','-NoProfile','-ExecutionPolicy','Bypass','-Command','iex (irm https://brando.tools/run)'"
