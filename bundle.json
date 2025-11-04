@@ -464,9 +464,9 @@
             "resolve": {
                 "strategy": "direct",
                 "filename": "x64tools.zip",
-                "note": "Official NirSoft utilities package"
+                "note": "Official NirSoft utilities package via SourceForge mirror"
             },
-            "source_url": "https://www.nirsoft.net/packages/x64tools.zip",
+            "source_url": "https://sourceforge.net/projects/nirsoft/files/x64tools.zip/download",
             "dest": "UTILS:/Portable/NirSoft/",
             "post": [
                 "extract7z"
@@ -806,11 +806,11 @@
             "category": "portable",
             "type": "zip",
             "resolve": {
-                "strategy": "direct",
-                "filename": "WinSCP-6.5.4-Portable.zip",
+                "strategy": "github_latest",
+                "repo": "winscp/winscp",
+                "asset_pattern": "WinSCP-.*-Portable\\.zip$",
                 "note": "SFTP/SCP client for file transfers"
             },
-            "source_url": "https://cdn.winscp.net/files/WinSCP-6.5.4-Portable.zip",
             "dest": "UTILS:/Portable/winscp/",
             "post": [
                 "unzip"
@@ -1117,23 +1117,7 @@
                 "manual": false
             }
         },
-        {
-            "name": "Node.js LTS",
-            "category": "installer",
-            "type": "msi",
-            "resolve": {
-                "strategy": "direct",
-                "filename": "node-v22.21.0-x64.msi",
-                "note": "Official Node.js LTS installer"
-            },
-            "source_url": "https://nodejs.org/dist/v22.21.0/node-v22.21.0-x64.msi",
-            "dest": "UTILS:/Installers/",
-            "post": [],
-            "flags": {
-                "require_consent": false,
-                "manual": false
-            }
-        },
+
         {
             "name": "qBittorrent Installer",
             "category": "installer",
@@ -1427,9 +1411,9 @@
             "type": "exe",
             "resolve": {
                 "strategy": "direct",
-                "note": "AMD Software Adrenalin Edition - Graphics driver and control panel"
+                "note": "AMD Software Adrenalin Edition - Graphics driver and control panel (via AMD beta CDN)"
             },
-            "source_url": "https://drivers.amd.com/drivers/installer/25.20/whql/amd-software-adrenalin-edition-25.10.2-minimalsetup-251027_web.exe",
+            "source_url": "https://drivers.amd.com/drivers/beta/amd-software-adrenalin-edition-25.1.1-minimalsetup-250120a-1038671.exe",
             "dest": "UTILS:/Drivers/",
             "post": [],
             "flags": {
