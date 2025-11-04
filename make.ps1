@@ -2062,6 +2062,21 @@ function Expand-Archive7z {
     # Find 7z executable (either just downloaded or system-installed)
     $7zExe = $null
 
+    # Check if 7-Zip portable installer exists in staging and extract it
+    $7zipInstaller = Join-Path $script:StagingDir "7z2501-x64.exe"
+    if ((Test-Path $7zipInstaller) -and -not (Test-Path (Join-Path $script:StagingDir "7zip\7z.exe"))) {
+        Write-Log "  Extracting 7-Zip portable for archive operations..." -Level INFO
+        $7zipExtractPath = Join-Path $script:StagingDir "7zip"
+        if (-not (Test-Path $7zipExtractPath)) {
+            New-Item -ItemType Directory -Path $7zipExtractPath -Force | Out-Null
+        }
+        # 7-Zip installer is a self-extracting archive, extract it silently
+        $process = Start-Process -FilePath $7zipInstaller -ArgumentList "/S","/D=$7zipExtractPath" -Wait -PassThru -NoNewWindow
+        if ($process.ExitCode -eq 0) {
+            Write-Log "  7-Zip extracted successfully" -Level SUCCESS
+        }
+    }
+
     # Check staging directory first
     $stagingPaths = @(
         (Join-Path $script:StagingDir "7zip\7z.exe"),
