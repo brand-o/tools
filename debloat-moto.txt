@@ -1,3 +1,4 @@
+https://dl.google.com/android/repository/platform-tools-latest-windows.zip 
 .\adb shell pm disable-user --user 0 android.autoinstalls.config.motorola.layout
 .\adb shell pm disable-user --user 0 com.amazon.appmanager
 .\adb shell pm disable-user --user 0 com.motorola.android.nativedropboxagent
