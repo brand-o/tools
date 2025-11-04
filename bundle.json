@@ -458,26 +458,6 @@
             }
         },
         {
-            "name": "NirSoft Suite",
-            "category": "portable",
-            "type": "zip",
-            "resolve": {
-                "strategy": "direct",
-                "filename": "x64tools.zip",
-                "note": "Official NirSoft utilities package via SourceForge mirror"
-            },
-            "source_url": "https://sourceforge.net/projects/nirsoft/files/x64tools.zip/download",
-            "dest": "UTILS:/Portable/NirSoft/",
-            "post": [
-                "extract7z"
-            ],
-            "password": "nirsoft123!",
-            "flags": {
-                "require_consent": false,
-                "manual": false
-            }
-        },
-        {
             "name": "DDU (Display Driver Uninstaller)",
             "category": "portable",
             "type": "exe",
@@ -796,25 +776,6 @@
             "source_url": "https://nmap.org/dist/nmap-7.98-setup.exe",
             "dest": "UTILS:/Installers/",
             "post": [],
-            "flags": {
-                "require_consent": false,
-                "manual": false
-            }
-        },
-        {
-            "name": "WinSCP Portable",
-            "category": "portable",
-            "type": "zip",
-            "resolve": {
-                "strategy": "github_latest",
-                "repo": "winscp/winscp",
-                "asset_pattern": "WinSCP-.*-Portable\\.zip$",
-                "note": "SFTP/SCP client for file transfers"
-            },
-            "dest": "UTILS:/Portable/winscp/",
-            "post": [
-                "unzip"
-            ],
             "flags": {
                 "require_consent": false,
                 "manual": false
@@ -1406,39 +1367,6 @@
             }
         },
         {
-            "name": "AMD Adrenalin Software",
-            "category": "driver",
-            "type": "exe",
-            "resolve": {
-                "strategy": "direct",
-                "note": "AMD Software Adrenalin Edition - Graphics driver and control panel (via AMD beta CDN)"
-            },
-            "source_url": "https://drivers.amd.com/drivers/beta/amd-software-adrenalin-edition-25.1.1-minimalsetup-250120a-1038671.exe",
-            "dest": "UTILS:/Drivers/",
-            "post": [],
-            "flags": {
-                "require_consent": false,
-                "manual": false
-            }
-        },
-        {
-            "name": "BleachBit",
-            "category": "installer",
-            "type": "exe",
-            "resolve": {
-                "strategy": "github_latest",
-                "repo": "bleachbit/bleachbit",
-                "asset_regex": "BleachBit-.*-setup\\.exe$"
-            },
-            "source_url": "",
-            "dest": "UTILS:/Installers/",
-            "post": [],
-            "flags": {
-                "require_consent": false,
-                "manual": false
-            }
-        },
-        {
             "name": "WizTree",
             "category": "installer",
             "type": "exe",
@@ -1479,23 +1407,6 @@
                 "strategy": "github_latest",
                 "repo": "HandBrake/HandBrake",
                 "asset_regex": "HandBrake-.*-x86_64-Win_GUI\\.exe$"
-            },
-            "source_url": "",
-            "dest": "UTILS:/Installers/",
-            "post": [],
-            "flags": {
-                "require_consent": false,
-                "manual": false
-            }
-        },
-        {
-            "name": "ImageGlass",
-            "category": "installer",
-            "type": "msi",
-            "resolve": {
-                "strategy": "github_latest",
-                "repo": "d2phap/ImageGlass",
-                "asset_regex": "ImageGlass_Kobe_.*_x64\\.msi$"
             },
             "source_url": "",
             "dest": "UTILS:/Installers/",
