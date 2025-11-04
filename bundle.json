@@ -1440,12 +1440,11 @@
         {
             "name": "BleachBit",
             "category": "installer",
-            "type": "package_manager",
-            "winget_id": "BleachBit.BleachBit",
-            "choco_id": "bleachbit",
+            "type": "exe",
             "resolve": {
-                "strategy": "package_manager",
-                "note": "System cleaner - removes junk files, clears privacy traces"
+                "strategy": "github_latest",
+                "repo": "bleachbit/bleachbit",
+                "asset_regex": "BleachBit-.*-setup\\.exe$"
             },
             "source_url": "",
             "dest": "UTILS:/Installers/",
@@ -1458,14 +1457,12 @@
         {
             "name": "WizTree",
             "category": "installer",
-            "type": "package_manager",
-            "winget_id": "AntibodySoftware.WizTree",
-            "choco_id": "wiztree",
+            "type": "exe",
             "resolve": {
-                "strategy": "package_manager",
-                "note": "Fastest disk space analyzer - faster than WinDirStat"
+                "strategy": "direct",
+                "filename": "wiztree_setup.exe"
             },
-            "source_url": "",
+            "source_url": "https://www.diskanalyzer.com/files/wiztree_4_24_setup.exe",
             "dest": "UTILS:/Installers/",
             "post": [],
             "flags": {
@@ -1476,12 +1473,11 @@
         {
             "name": "ShareX",
             "category": "installer",
-            "type": "package_manager",
-            "winget_id": "ShareX.ShareX",
-            "choco_id": "sharex",
+            "type": "exe",
             "resolve": {
-                "strategy": "package_manager",
-                "note": "Screenshot/screen recording tool with built-in uploader"
+                "strategy": "github_latest",
+                "repo": "ShareX/ShareX",
+                "asset_regex": "ShareX-.*-setup\\.exe$"
             },
             "source_url": "",
             "dest": "UTILS:/Installers/",
@@ -1494,12 +1490,11 @@
         {
             "name": "HandBrake",
             "category": "installer",
-            "type": "package_manager",
-            "winget_id": "HandBrake.HandBrake",
-            "choco_id": "handbrake",
+            "type": "exe",
             "resolve": {
-                "strategy": "package_manager",
-                "note": "Video transcoder - convert videos to modern codecs"
+                "strategy": "github_latest",
+                "repo": "HandBrake/HandBrake",
+                "asset_regex": "HandBrake-.*-x86_64-Win_GUI\\.exe$"
             },
             "source_url": "",
             "dest": "UTILS:/Installers/",
@@ -1512,12 +1507,11 @@
         {
             "name": "ImageGlass",
             "category": "installer",
-            "type": "package_manager",
-            "winget_id": "DuongDieuPhap.ImageGlass",
-            "choco_id": "imageglass",
+            "type": "msi",
             "resolve": {
-                "strategy": "package_manager",
-                "note": "Lightweight, modern image viewer - Windows Photos alternative"
+                "strategy": "github_latest",
+                "repo": "d2phap/ImageGlass",
+                "asset_regex": "ImageGlass_Kobe_.*_x64\\.msi$"
             },
             "source_url": "",
             "dest": "UTILS:/Installers/",
@@ -1530,14 +1524,12 @@
         {
             "name": "Postman",
             "category": "installer",
-            "type": "package_manager",
-            "winget_id": "Postman.Postman",
-            "choco_id": "postman",
+            "type": "exe",
             "resolve": {
-                "strategy": "package_manager",
-                "note": "API development and testing platform"
+                "strategy": "direct",
+                "filename": "Postman-win64-Setup.exe"
             },
-            "source_url": "",
+            "source_url": "https://dl.pstmn.io/download/latest/win64",
             "dest": "UTILS:/Installers/",
             "post": [],
             "flags": {
@@ -1548,12 +1540,11 @@
         {
             "name": "DBeaver Community",
             "category": "installer",
-            "type": "package_manager",
-            "winget_id": "dbeaver.dbeaver",
-            "choco_id": "dbeaver",
+            "type": "exe",
             "resolve": {
-                "strategy": "package_manager",
-                "note": "Universal database tool - supports MySQL, PostgreSQL, SQLite, etc."
+                "strategy": "github_latest",
+                "repo": "dbeaver/dbeaver",
+                "asset_regex": "dbeaver-ce-.*-x86_64-setup\\.exe$"
             },
             "source_url": "",
             "dest": "UTILS:/Installers/",
@@ -1566,14 +1557,12 @@
         {
             "name": "Everything Search",
             "category": "installer",
-            "type": "package_manager",
-            "winget_id": "voidtools.Everything",
-            "choco_id": "everything",
+            "type": "exe",
             "resolve": {
-                "strategy": "package_manager",
-                "note": "Instant file search for Windows (already have portable, this is installer)"
+                "strategy": "direct",
+                "filename": "Everything-Setup.exe"
             },
-            "source_url": "",
+            "source_url": "https://www.voidtools.com/Everything-1.4.1.1029.x64-Setup.exe",
             "dest": "UTILS:/Installers/",
             "post": [],
             "flags": {
