@@ -77,14 +77,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # When executed via 'irm | iex', parameters are not supported
 # For parameter support, download and run the script locally: .\make.ps1 -ConfigPath <path>
 
-param(
-    [string]$ConfigPath = "",
-    [string]$BundleUrl = "",
-    [switch]$SkipDownloads,
-    [switch]$TestMode,
-    [switch]$Force,
-    [string[]]$Skip = @()
-)
+# Workaround: Define variables instead of using param() for iex compatibility
+if (-not $ConfigPath) { $ConfigPath = "" }
+if (-not $BundleUrl) { $BundleUrl = "" }
+if (-not $SkipDownloads) { $SkipDownloads = $false }
+if (-not $TestMode) { $TestMode = $false }
+if (-not $Force) { $Force = $false }
+if (-not $Skip) { $Skip = @() }
 
 # ============================================================================
 # AUTO-ELEVATION - Re-launch as admin if not already elevated
