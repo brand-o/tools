@@ -117,7 +117,14 @@ $ProgressPreference = "SilentlyContinue"
 # ============================================================================
 
 # Handle paths when running via iex (PSScriptRoot is empty)
-$scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { $PWD.Path }
+# Use TEMP directory if running from system32 (typical when elevated via iex)
+$scriptRoot = if ($PSScriptRoot) { 
+    $PSScriptRoot 
+} elseif ($PWD.Path -match 'system32') { 
+    $env:TEMP 
+} else { 
+    $PWD.Path 
+}
 $script:LogFile = Join-Path $scriptRoot "make.log"
 $script:StagingDir = Join-Path $scriptRoot "_staging"
 $script:VentoyDir = Join-Path $script:StagingDir "ventoy"
@@ -2568,7 +2575,8 @@ function Install-Ventoy {
         $processInfo.CreateNoWindow = $false  # Show window for progress
         $processInfo.RedirectStandardOutput = $true
         $processInfo.RedirectStandardError = $true
-        $processInfo.WorkingDirectory = $script:VentoyDir
+        # Set working directory to the Ventoy executable's directory (required by Ventoy)
+        $processInfo.WorkingDirectory = Split-Path -Parent $ventoyExe
 
         $process = New-Object System.Diagnostics.Process
         $process.StartInfo = $processInfo
