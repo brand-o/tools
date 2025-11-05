@@ -3321,7 +3321,14 @@ function Main {
 
     # Set default ConfigPath for fallback
     if ([string]::IsNullOrEmpty($ConfigPath)) {
-        $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+        # Handle paths when running via iex
+        $scriptDir = if ($PSScriptRoot) { 
+            $PSScriptRoot 
+        } elseif ($MyInvocation.MyCommand.Path) { 
+            Split-Path -Parent $MyInvocation.MyCommand.Path 
+        } else { 
+            $PWD.Path 
+        }
         $ConfigPath = Join-Path $scriptDir "bundle.json"
     }
 
