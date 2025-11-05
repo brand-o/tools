@@ -74,8 +74,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     License: MIT
 #>
 
-& {
-
 # When executed via 'irm | iex', parameters are not supported
 # For parameter support, download and run the script locally: .\make.ps1 -ConfigPath <path>
 
@@ -3556,5 +3554,3 @@ catch {
     Write-Host "Stack trace: $($_.ScriptStackTrace)" -ForegroundColor Red
     exit 1
 }
-
-} # Close script block started with & { at line 75
