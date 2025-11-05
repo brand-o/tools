@@ -116,8 +116,10 @@ $ProgressPreference = "SilentlyContinue"
 # CONSTANTS & GLOBALS
 # ============================================================================
 
-$script:LogFile = Join-Path $PSScriptRoot "make.log"
-$script:StagingDir = Join-Path $PSScriptRoot "_staging"
+# Handle paths when running via iex (PSScriptRoot is empty)
+$scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { $PWD.Path }
+$script:LogFile = Join-Path $scriptRoot "make.log"
+$script:StagingDir = Join-Path $scriptRoot "_staging"
 $script:VentoyDir = Join-Path $script:StagingDir "ventoy"
 $script:DownloadRetries = 3
 $script:DownloadTimeout = 600
