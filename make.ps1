@@ -2549,7 +2549,7 @@ function Install-Ventoy {
 
     # Install Ventoy
     Write-Log "Installing Ventoy to \\.\PhysicalDrive${DiskNumber}..."
-    Write-Log ('  Flags: GPT, Secure Boot enabled, Reserve {0} MB ({1} GB)' -f $reserveMB, [math]::Round($reserveMB/1024, 2))
+    Write-Log ('  Flags: GPT, Secure Boot support, Reserve {0} MB ({1} GB)' -f $reserveMB, [math]::Round($reserveMB/1024, 2))
 
     try {
         # Use Ventoy CLI mode (documented at https://www.ventoy.net/en/doc_windows_cli.html)
@@ -2559,10 +2559,9 @@ function Install-Ventoy {
             "/I",
             "/PhyDrive:$DiskNumber",
             "/GPT",           # Use GPT partition style
+            "/SECUREBOOT",    # Enable Secure Boot support (fixes "Security Violation" error)
             "/R:$reserveMB"   # Reserve space in MB
         )
-
-        # Don't add /NOSB - we WANT Secure Boot support (enabled by default)
 
         $argsString = $cliArgs -join " "
         Write-Log "  Running: Ventoy2Disk.exe $argsString"
