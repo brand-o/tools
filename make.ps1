@@ -51,11 +51,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     Skip specific categories (e.g., "iso", "portable", "installer", "driver")
     Can specify multiple categories: -Skip iso,driver
 
+.PARAMETER ReinstallVentoy
+    Reinstall Ventoy bootloader only without reformatting or redownloading files
+    Useful for fixing boot issues or updating Ventoy version while preserving data
+
 .EXAMPLE
     .\make.ps1
 
 .EXAMPLE
     .\make.ps1 -ConfigPath .\custom-bundle.json
+
+.EXAMPLE
+    .\make.ps1 -ReinstallVentoy
+    Reinstall Ventoy bootloader only (keeps all existing files)
 
 .EXAMPLE
     .\make.ps1 -BundleUrl "https://brando.tools/bundle.json"
@@ -84,6 +92,7 @@ if (-not $SkipDownloads) { $SkipDownloads = $false }
 if (-not $TestMode) { $TestMode = $false }
 if (-not $Force) { $Force = $false }
 if (-not $Skip) { $Skip = @() }
+if (-not $ReinstallVentoy) { $ReinstallVentoy = $false }
 
 # ============================================================================
 # AUTO-ELEVATION - Re-launch as admin if not already elevated
@@ -3436,12 +3445,20 @@ function Main {
         Write-Host "EXISTING TECHDRIVE DETECTED!" -ForegroundColor Yellow
         Write-Host "This disk appears to already have brando's toolkit partitions." -ForegroundColor Yellow
         Write-Host ""
-        Write-Host "Do you want to:" -ForegroundColor Cyan
-        Write-Host "  [R] REFORMAT - Wipe and rebuild everything (fresh start)" -ForegroundColor White
-        Write-Host "  [K] KEEP - Skip formatting and only update downloads" -ForegroundColor White
-        Write-Host ""
+        
+        # If ReinstallVentoy flag is set, automatically choose reinstall option
+        if ($ReinstallVentoy) {
+            Write-Log "ReinstallVentoy flag detected - reinstalling Ventoy only" -Level INFO
+            $response = 'V'
+        } else {
+            Write-Host "Do you want to:" -ForegroundColor Cyan
+            Write-Host "  [R] REFORMAT - Wipe and rebuild everything (fresh start)" -ForegroundColor White
+            Write-Host "  [V] REINSTALL VENTOY - Only reinstall Ventoy bootloader (keeps all files)" -ForegroundColor White
+            Write-Host "  [K] KEEP - Skip formatting and only update downloads" -ForegroundColor White
+            Write-Host ""
 
-        $response = Read-Host "Enter choice (R/K)"
+            $response = Read-Host "Enter choice (R/V/K)"
+        }
 
         if ($response -eq 'K' -or $response -eq 'k') {
             Write-Log "User chose to KEEP existing partitions" -Level SUCCESS
@@ -3463,6 +3480,43 @@ function Main {
             
             # Staging directory stays in temp - used only for temporary processing
             Write-Log "Staging directory (temp processing): $script:StagingDir" -Level INFO
+        }
+        elseif ($response -eq 'V' -or $response -eq 'v') {
+            Write-Log "User chose to REINSTALL VENTOY" -Level INFO
+            Write-Log "Reinstalling Ventoy bootloader only (preserving all files)..."
+
+            # Build drive info from existing partitions
+            $driveInfo = @{
+                VentoyLetter = if ($existingDrive.Ventoy) { $existingDrive.Ventoy.DriveLetter } else { $null }
+                UtilsLetter = if ($existingDrive.Utils) { $existingDrive.Utils.DriveLetter } else { $null }
+                FILESLetter = if ($existingDrive.FILES) { $existingDrive.FILES.DriveLetter } else { $null }
+            }
+
+            if (-not $driveInfo.VentoyLetter) {
+                throw "Cannot reinstall Ventoy - VENTOY partition not found"
+            }
+
+            # Reinstall Ventoy using Install-Ventoy function
+            try {
+                $ventoyResult = Install-Ventoy -DiskNumber $selectedDisk.DiskNumber -Settings $settings
+                Write-Log "Ventoy reinstalled successfully!" -Level SUCCESS
+                
+                # Update drive info with new Ventoy partition info
+                $driveInfo.VentoySize = $ventoyResult.VentoySize
+                $driveInfo.UtilsSize = $ventoyResult.UtilsSize
+                $driveInfo.FILESSize = $ventoyResult.FILESSize
+            }
+            catch {
+                throw "Failed to reinstall Ventoy: $($_.Exception.Message)"
+            }
+
+            # Initialize folder structure from existing partitions
+            $folders = Initialize-FolderStructure -DriveInfo $driveInfo
+            Write-Log "Staging directory (temp processing): $script:StagingDir" -Level INFO
+            
+            # Skip downloads - set flag
+            $SkipDownloads = $true
+            Write-Log "Skipping downloads (Ventoy reinstall mode)" -Level INFO
         }
         elseif ($response -eq 'R' -or $response -eq 'r') {
             Write-Log "User chose to REFORMAT" -Level WARN
