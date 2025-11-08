@@ -3618,17 +3618,30 @@ function Main {
         }
         elseif ($response -eq 'V' -or $response -eq 'v') {
             Write-Log "User chose to REINSTALL VENTOY" -Level INFO
+            
+            # Check if all required partitions exist
+            if (-not $existingDrive.Ventoy) {
+                throw "Cannot reinstall Ventoy - VENTOY partition not found"
+            }
+            
+            if (-not $existingDrive.Utils) {
+                Write-Host ""
+                Write-Host "ERROR: UTILS partition not found!" -ForegroundColor Red
+                Write-Host "The 'Reinstall Ventoy' option only works when all partitions exist." -ForegroundColor Yellow
+                Write-Host "It appears this drive was previously reformatted with only Ventoy installed." -ForegroundColor Yellow
+                Write-Host ""
+                Write-Host "Please choose [R] REFORMAT to rebuild all partitions." -ForegroundColor Cyan
+                Write-Host ""
+                throw "Cannot reinstall - UTILS partition missing. Use REFORMAT instead."
+            }
+            
             Write-Log "Reinstalling Ventoy bootloader only (preserving all files)..."
 
             # Build drive info from existing partitions
             $driveInfo = @{
-                VentoyLetter = if ($existingDrive.Ventoy) { $existingDrive.Ventoy.DriveLetter } else { $null }
-                UtilsLetter = if ($existingDrive.Utils) { $existingDrive.Utils.DriveLetter } else { $null }
+                VentoyLetter = $existingDrive.Ventoy.DriveLetter
+                UtilsLetter = $existingDrive.Utils.DriveLetter
                 FILESLetter = if ($existingDrive.FILES) { $existingDrive.FILES.DriveLetter } else { $null }
-            }
-
-            if (-not $driveInfo.VentoyLetter) {
-                throw "Cannot reinstall Ventoy - VENTOY partition not found"
             }
 
             # Update Ventoy using Update-Ventoy function (preserves partitions and data)
