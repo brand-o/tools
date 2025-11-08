@@ -93,7 +93,7 @@ if (-not $TestMode) { $TestMode = $false }
 if (-not $Force) { $Force = $false }
 if (-not $Skip) { $Skip = @() }
 if (-not $ReinstallVentoy) { $ReinstallVentoy = $false }
-if (-not $EnableSecureBoot) { $EnableSecureBoot = $false }
+if (-not $DisableSecureBoot) { $DisableSecureBoot = $false }
 
 # ============================================================================
 # AUTO-ELEVATION - Re-launch as admin if not already elevated
@@ -2575,13 +2575,13 @@ function Install-Ventoy {
             "/R:$reserveMB"   # Reserve space in MB
         )
         
-        # Only add /S flag if requested (disabled by default due to compatibility issues)
-        # Users can enable Secure Boot support by setting $EnableSecureBoot variable
-        if ($EnableSecureBoot) {
+        # Add /S flag by default for Secure Boot support (works on both SB enabled/disabled systems)
+        # Users can disable by setting $DisableSecureBoot variable
+        if (-not $DisableSecureBoot) {
             $cliArgs += "/S"
-            Write-Log "  Secure Boot support enabled" -Level INFO
+            Write-Log "  Secure Boot support enabled (universal compatibility)" -Level INFO
         } else {
-            Write-Log "  Secure Boot support disabled (set `$EnableSecureBoot=`$true to enable)" -Level INFO
+            Write-Log "  Secure Boot support disabled (set `$DisableSecureBoot=`$false to enable)" -Level WARN
         }
 
         $argsString = $cliArgs -join " "
@@ -2726,12 +2726,13 @@ function Update-Ventoy {
             "/PhyDrive:$DiskNumber"
         )
         
-        # Only add /S flag if requested (disabled by default due to compatibility issues)
-        if ($EnableSecureBoot) {
+        # Add /S flag by default for Secure Boot support (works on both SB enabled/disabled systems)
+        # Users can disable by setting $DisableSecureBoot variable
+        if (-not $DisableSecureBoot) {
             $cliArgs += "/S"
-            Write-Log "  Secure Boot support enabled" -Level INFO
+            Write-Log "  Secure Boot support enabled (universal compatibility)" -Level INFO
         } else {
-            Write-Log "  Secure Boot support disabled (set `$EnableSecureBoot=`$true to enable)" -Level INFO
+            Write-Log "  Secure Boot support disabled (set `$DisableSecureBoot=`$false to enable)" -Level WARN
         }
 
         $argsString = $cliArgs -join " "
