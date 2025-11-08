@@ -93,6 +93,7 @@ if (-not $TestMode) { $TestMode = $false }
 if (-not $Force) { $Force = $false }
 if (-not $Skip) { $Skip = @() }
 if (-not $ReinstallVentoy) { $ReinstallVentoy = $false }
+if (-not $EnableSecureBoot) { $EnableSecureBoot = $false }
 
 # ============================================================================
 # AUTO-ELEVATION - Re-launch as admin if not already elevated
@@ -2571,9 +2572,17 @@ function Install-Ventoy {
             "/I",
             "/PhyDrive:$DiskNumber",
             "/GPT",           # Use GPT partition style
-            "/S",             # Enable Secure Boot support (per CLI documentation)
             "/R:$reserveMB"   # Reserve space in MB
         )
+        
+        # Only add /S flag if requested (disabled by default due to compatibility issues)
+        # Users can enable Secure Boot support by setting $EnableSecureBoot variable
+        if ($EnableSecureBoot) {
+            $cliArgs += "/S"
+            Write-Log "  Secure Boot support enabled" -Level INFO
+        } else {
+            Write-Log "  Secure Boot support disabled (set `$EnableSecureBoot=`$true to enable)" -Level INFO
+        }
 
         $argsString = $cliArgs -join " "
         Write-Log "  Running: Ventoy2Disk.exe $argsString"
@@ -2714,9 +2723,16 @@ function Update-Ventoy {
         $cliArgs = @(
             "VTOYCLI",
             "/U",             # UPDATE mode (preserves partitions and data)
-            "/PhyDrive:$DiskNumber",
-            "/S"              # Enable Secure Boot support
+            "/PhyDrive:$DiskNumber"
         )
+        
+        # Only add /S flag if requested (disabled by default due to compatibility issues)
+        if ($EnableSecureBoot) {
+            $cliArgs += "/S"
+            Write-Log "  Secure Boot support enabled" -Level INFO
+        } else {
+            Write-Log "  Secure Boot support disabled (set `$EnableSecureBoot=`$true to enable)" -Level INFO
+        }
 
         $argsString = $cliArgs -join " "
         Write-Log "  Running: Ventoy2Disk.exe $argsString"
