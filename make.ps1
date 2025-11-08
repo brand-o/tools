@@ -1561,12 +1561,14 @@ function Get-StandardizedFilename {
         [string]$ItemName
     )
 
-    # Windows ISOs
-    if ($ItemName -match "Windows 11.*Pro.*Modded") { return "Win11_Mod.iso" }
-    if ($ItemName -match "Windows 11.*Pro.*Stock") { return "Win11_OEM.iso" }
-    if ($ItemName -match "Windows 10.*Pro") { return "Win10_OEM.iso" }
+    # Windows ISOs (order matters - check specific patterns before general ones)
     if ($ItemName -match "Windows 11.*LTSC") { return "Win11_LTSC.iso" }
     if ($ItemName -match "Windows 10.*LTSC") { return "Win10_LTSC.iso" }
+    if ($ItemName -match "Windows 11.*Pro.*Modded") { return "Win11_Mod.iso" }
+    if ($ItemName -match "Windows 11.*Pro.*Stock") { return "Win11_OEM.iso" }
+    if ($ItemName -match "Windows 11.*Pro") { return "Win11_OEM.iso" }
+    if ($ItemName -match "Windows 10.*Pro.*22H2") { return "Win10_OEM.iso" }
+    if ($ItemName -match "Windows 10.*Pro") { return "Win10_OEM.iso" }
 
     # Other ISOs
     if ($ItemName -match "Tiny11") { return "Tiny11.iso" }
@@ -3022,7 +3024,15 @@ function Start-Provisioning {
                             Write-Log "  Windows ISO downloaded successfully!" -Level SUCCESS
 
                             # Apply standardized filename (only for newly downloaded ISOs)
-                            $standardizedName = Get-StandardizedFilename -OriginalName $resolved.filename -ItemName $item.name
+                            # For modding strategies, use stock naming pattern for the source ISO
+                            $nameForStandardization = if ($resolved.requires_modding) {
+                                # Replace "Modded" with "Stock" in the item name for stock ISO naming
+                                $item.name -replace "Modded.*\)", "Stock)"
+                            } else {
+                                $item.name
+                            }
+                            
+                            $standardizedName = Get-StandardizedFilename -OriginalName $resolved.filename -ItemName $nameForStandardization
                             $finalPath = Join-Path $destBase $standardizedName
 
                             if ($downloadedIso -ne $finalPath) {
