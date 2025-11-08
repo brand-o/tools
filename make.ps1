@@ -1448,8 +1448,50 @@ function Invoke-ISOModding {
         Write-Log "    ? Telemetry disabled" -Level INFO
         Write-Log "    ? BitLocker auto-encryption disabled" -Level INFO
         Write-Log "    ? Bloatware/Consumer Features disabled" -Level INFO
-        Write-Log "    ? English (World) locale - en-001" -Level INFO
+        Write-Log "    ? English (World) time/currency format (en-001)" -Level INFO
+        Write-Log "    ? Locale selection screen skipped (auto-configured)" -Level INFO
         Write-Log "    ? Product key prompt skipped" -Level INFO
+
+        # Create autounattend.xml to skip locale selection during OOBE
+        Write-Log "  Creating autounattend.xml for automatic locale configuration..." -Level INFO
+        $autounattendPath = Join-Path $isoExtract "autounattend.xml"
+        
+        $autounattendXml = @"
+<?xml version="1.0" encoding="utf-8"?>
+<unattend xmlns="urn:schemas-microsoft-com:unattend">
+    <settings pass="windowsPE">
+        <component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <SetupUILanguage>
+                <UILanguage>en-US</UILanguage>
+            </SetupUILanguage>
+            <InputLocale>en-US</InputLocale>
+            <SystemLocale>en-US</SystemLocale>
+            <UILanguage>en-US</UILanguage>
+            <UserLocale>en-001</UserLocale>
+        </component>
+    </settings>
+    <settings pass="oobeSystem">
+        <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <InputLocale>en-US</InputLocale>
+            <SystemLocale>en-US</SystemLocale>
+            <UILanguage>en-US</UILanguage>
+            <UserLocale>en-001</UserLocale>
+        </component>
+        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <OOBE>
+                <HideEULAPage>true</HideEULAPage>
+                <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
+                <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
+                <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
+                <ProtectYourPC>3</ProtectYourPC>
+            </OOBE>
+        </component>
+    </settings>
+</unattend>
+"@
+        
+        Set-Content -Path $autounattendPath -Value $autounattendXml -Encoding UTF8
+        Write-Log "    ? Autounattend.xml created - locale screen will be skipped" -Level INFO
 
         # Rebuild ISO using PowerShell IMAPI2 (no external dependencies required!)
         Write-Log "  Rebuilding ISO with built-in Windows IMAPI2..." -Level INFO
