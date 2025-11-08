@@ -2702,10 +2702,13 @@ function Initialize-FolderStructure {
 
     Write-Log "Folder structure created" -Level SUCCESS
 
+    # Handle case where FILES partition might not exist or have no drive letter
+    $filesRoot = if ($DriveInfo.FILESLetter) { "$($DriveInfo.FILESLetter):\" } else { $null }
+
     return @{
         VentoyRoot = $ventoyRoot
         UtilsRoot = $utilsRoot
-        FILESRoot = "$($DriveInfo.FILESLetter):\"
+        FILESRoot = $filesRoot
     }
 }
 
@@ -3501,10 +3504,19 @@ function Main {
                 $ventoyResult = Install-Ventoy -DiskNumber $selectedDisk.DiskNumber -Settings $settings
                 Write-Log "Ventoy reinstalled successfully!" -Level SUCCESS
                 
-                # Update drive info with new Ventoy partition info
-                $driveInfo.VentoySize = $ventoyResult.VentoySize
-                $driveInfo.UtilsSize = $ventoyResult.UtilsSize
-                $driveInfo.FILESSize = $ventoyResult.FILESSize
+                # Refresh partition info after Ventoy reinstall (drive letters may have changed)
+                Start-Sleep -Seconds 3
+                $refreshedDrive = Test-ExistingBrandoToolkit -DiskNumber $selectedDisk.DiskNumber
+                
+                # Update drive info with refreshed partition info
+                $driveInfo = @{
+                    VentoyLetter = if ($refreshedDrive.Ventoy) { $refreshedDrive.Ventoy.DriveLetter } else { $null }
+                    UtilsLetter = if ($refreshedDrive.Utils) { $refreshedDrive.Utils.DriveLetter } else { $null }
+                    FILESLetter = if ($refreshedDrive.FILES) { $refreshedDrive.FILES.DriveLetter } else { $null }
+                    VentoySize = $ventoyResult.VentoySize
+                    UtilsSize = $ventoyResult.UtilsSize
+                    FILESSize = $ventoyResult.FILESSize
+                }
             }
             catch {
                 throw "Failed to reinstall Ventoy: $($_.Exception.Message)"
