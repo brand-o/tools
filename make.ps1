@@ -3617,10 +3617,12 @@ function Main {
             Write-Host "Do you want to:" -ForegroundColor Cyan
             Write-Host "  [R] REFORMAT - Wipe and rebuild everything (fresh start)" -ForegroundColor White
             Write-Host "  [V] REINSTALL VENTOY - Only reinstall Ventoy bootloader (keeps all files)" -ForegroundColor White
+            Write-Host "  [S] REINSTALL VENTOY with Secure Boot - Update bootloader with /S flag" -ForegroundColor White
+            Write-Host "  [N] REINSTALL VENTOY without Secure Boot - Update bootloader without /S flag" -ForegroundColor White
             Write-Host "  [K] KEEP - Skip formatting and only update downloads" -ForegroundColor White
             Write-Host ""
 
-            $response = Read-Host "Enter choice (R/V/K)"
+            $response = Read-Host "Enter choice (R/V/S/N/K)"
         }
 
         if ($response -eq 'K' -or $response -eq 'k') {
@@ -3676,6 +3678,128 @@ function Main {
             try {
                 $ventoyResult = Update-Ventoy -DiskNumber $selectedDisk.DiskNumber
                 Write-Log "Ventoy updated successfully!" -Level SUCCESS
+                
+                # Refresh partition info after Ventoy update
+                Start-Sleep -Seconds 3
+                $refreshedDrive = Test-ExistingBrandoToolkit -DiskNumber $selectedDisk.DiskNumber
+                
+                # Update drive info with refreshed partition info
+                $driveInfo = @{
+                    VentoyLetter = if ($refreshedDrive.Ventoy) { $refreshedDrive.Ventoy.DriveLetter } else { $null }
+                    UtilsLetter = if ($refreshedDrive.Utils) { $refreshedDrive.Utils.DriveLetter } else { $null }
+                    FILESLetter = if ($refreshedDrive.FILES) { $refreshedDrive.FILES.DriveLetter } else { $null }
+                }
+                
+                if (-not $driveInfo.VentoyLetter -or -not $driveInfo.UtilsLetter) {
+                    throw "Cannot continue - required partitions (VENTOY or UTILS) not found after update"
+                }
+            }
+            catch {
+                throw "Failed to update Ventoy: $($_.Exception.Message)"
+            }
+
+            # Initialize folder structure from existing partitions
+            $folders = Initialize-FolderStructure -DriveInfo $driveInfo
+            Write-Log "Staging directory (temp processing): $script:StagingDir" -Level INFO
+            
+            # Skip downloads - set flag
+            $SkipDownloads = $true
+            Write-Log "Skipping downloads (Ventoy reinstall mode)" -Level INFO
+        }
+        elseif ($response -eq 'S' -or $response -eq 's') {
+            Write-Log "User chose to REINSTALL VENTOY WITH SECURE BOOT" -Level INFO
+            
+            # Check if all required partitions exist
+            if (-not $existingDrive.Ventoy) {
+                throw "Cannot reinstall Ventoy - VENTOY partition not found"
+            }
+            
+            if (-not $existingDrive.Utils) {
+                Write-Host ""
+                Write-Host "ERROR: UTILS partition not found!" -ForegroundColor Red
+                Write-Host "The 'Reinstall Ventoy' option only works when all partitions exist." -ForegroundColor Yellow
+                Write-Host "It appears this drive was previously reformatted with only Ventoy installed." -ForegroundColor Yellow
+                Write-Host ""
+                Write-Host "Please choose [R] REFORMAT to rebuild all partitions." -ForegroundColor Cyan
+                Write-Host ""
+                throw "Cannot reinstall - UTILS partition missing. Use REFORMAT instead."
+            }
+            
+            Write-Log "Reinstalling Ventoy bootloader WITH SECURE BOOT support (preserving all files)..."
+
+            # Build drive info from existing partitions
+            $driveInfo = @{
+                VentoyLetter = $existingDrive.Ventoy.DriveLetter
+                UtilsLetter = $existingDrive.Utils.DriveLetter
+                FILESLetter = if ($existingDrive.FILES) { $existingDrive.FILES.DriveLetter } else { $null }
+            }
+
+            # Update Ventoy with Secure Boot enabled (DisableSecureBoot = false)
+            try {
+                $script:DisableSecureBoot = $false
+                $ventoyResult = Update-Ventoy -DiskNumber $selectedDisk.DiskNumber
+                Write-Log "Ventoy updated successfully with Secure Boot support!" -Level SUCCESS
+                
+                # Refresh partition info after Ventoy update
+                Start-Sleep -Seconds 3
+                $refreshedDrive = Test-ExistingBrandoToolkit -DiskNumber $selectedDisk.DiskNumber
+                
+                # Update drive info with refreshed partition info
+                $driveInfo = @{
+                    VentoyLetter = if ($refreshedDrive.Ventoy) { $refreshedDrive.Ventoy.DriveLetter } else { $null }
+                    UtilsLetter = if ($refreshedDrive.Utils) { $refreshedDrive.Utils.DriveLetter } else { $null }
+                    FILESLetter = if ($refreshedDrive.FILES) { $refreshedDrive.FILES.DriveLetter } else { $null }
+                }
+                
+                if (-not $driveInfo.VentoyLetter -or -not $driveInfo.UtilsLetter) {
+                    throw "Cannot continue - required partitions (VENTOY or UTILS) not found after update"
+                }
+            }
+            catch {
+                throw "Failed to update Ventoy: $($_.Exception.Message)"
+            }
+
+            # Initialize folder structure from existing partitions
+            $folders = Initialize-FolderStructure -DriveInfo $driveInfo
+            Write-Log "Staging directory (temp processing): $script:StagingDir" -Level INFO
+            
+            # Skip downloads - set flag
+            $SkipDownloads = $true
+            Write-Log "Skipping downloads (Ventoy reinstall mode)" -Level INFO
+        }
+        elseif ($response -eq 'N' -or $response -eq 'n') {
+            Write-Log "User chose to REINSTALL VENTOY WITHOUT SECURE BOOT" -Level INFO
+            
+            # Check if all required partitions exist
+            if (-not $existingDrive.Ventoy) {
+                throw "Cannot reinstall Ventoy - VENTOY partition not found"
+            }
+            
+            if (-not $existingDrive.Utils) {
+                Write-Host ""
+                Write-Host "ERROR: UTILS partition not found!" -ForegroundColor Red
+                Write-Host "The 'Reinstall Ventoy' option only works when all partitions exist." -ForegroundColor Yellow
+                Write-Host "It appears this drive was previously reformatted with only Ventoy installed." -ForegroundColor Yellow
+                Write-Host ""
+                Write-Host "Please choose [R] REFORMAT to rebuild all partitions." -ForegroundColor Cyan
+                Write-Host ""
+                throw "Cannot reinstall - UTILS partition missing. Use REFORMAT instead."
+            }
+            
+            Write-Log "Reinstalling Ventoy bootloader WITHOUT SECURE BOOT support (preserving all files)..."
+
+            # Build drive info from existing partitions
+            $driveInfo = @{
+                VentoyLetter = $existingDrive.Ventoy.DriveLetter
+                UtilsLetter = $existingDrive.Utils.DriveLetter
+                FILESLetter = if ($existingDrive.FILES) { $existingDrive.FILES.DriveLetter } else { $null }
+            }
+
+            # Update Ventoy with Secure Boot disabled (DisableSecureBoot = true)
+            try {
+                $script:DisableSecureBoot = $true
+                $ventoyResult = Update-Ventoy -DiskNumber $selectedDisk.DiskNumber
+                Write-Log "Ventoy updated successfully without Secure Boot support!" -Level SUCCESS
                 
                 # Refresh partition info after Ventoy update
                 Start-Sleep -Seconds 3
