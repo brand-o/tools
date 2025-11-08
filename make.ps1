@@ -2653,6 +2653,138 @@ function Install-Ventoy {
     }
 }
 
+function Update-Ventoy {
+    <#
+    .SYNOPSIS
+    Updates existing Ventoy installation without reformatting (preserves data)
+    #>
+    param(
+        [int]$DiskNumber
+    )
+
+    # Download Ventoy if not already present
+    $ventoyExe = Join-Path $script:VentoyDir "Ventoy2Disk.exe"
+
+    if (-not (Test-Path $ventoyExe)) {
+        Write-Log "Downloading Ventoy..."
+
+        try {
+            $release = Invoke-GitHubAPI -Endpoint "/repos/ventoy/Ventoy/releases/latest"
+            $asset = $release.assets | Where-Object { $_.name -match 'ventoy-.*-windows\.zip$' } | Select-Object -First 1
+
+            if (-not $asset) {
+                throw "Ventoy Windows release not found"
+            }
+
+            $ventoyZip = Join-Path $script:StagingDir "ventoy.zip"
+
+            Invoke-FileDownload -Url $asset.browser_download_url -Destination $ventoyZip -DisplayName "Ventoy" -ExpectedSize $asset.size
+
+            Write-Log "Extracting Ventoy..."
+            Expand-Archive -Path $ventoyZip -DestinationPath $script:VentoyDir -Force
+
+            # Find Ventoy2Disk.exe in extracted structure
+            $ventoyExe = Get-ChildItem -Path $script:VentoyDir -Filter "Ventoy2Disk.exe" -Recurse | Select-Object -First 1 -ExpandProperty FullName
+
+            if (-not $ventoyExe) {
+                throw "Ventoy2Disk.exe not found in extracted archive"
+            }
+
+            # Update ventoyDir to actual location
+            $script:VentoyDir = Split-Path -Parent $ventoyExe
+
+            Write-Log "  Ventoy extracted to: $script:VentoyDir" -Level SUCCESS
+        }
+        catch {
+            Write-Log "Failed to download/extract Ventoy: $($_.Exception.Message)" -Level ERROR
+            throw
+        }
+    }
+
+    # Update Ventoy (preserves existing partitions and data)
+    Write-Log "Updating Ventoy on \\.\PhysicalDrive${DiskNumber}..."
+    Write-Log "  Using UPDATE mode (preserves all partitions and data)"
+
+    try {
+        # Use Ventoy CLI UPDATE mode (documented at https://www.ventoy.net/en/doc_windows_cli.html)
+        # /U = Update (preserves data), /S = Enable Secure Boot
+        $cliArgs = @(
+            "VTOYCLI",
+            "/U",             # UPDATE mode (preserves partitions and data)
+            "/PhyDrive:$DiskNumber",
+            "/S"              # Enable Secure Boot support
+        )
+
+        $argsString = $cliArgs -join " "
+        Write-Log "  Running: Ventoy2Disk.exe $argsString"
+
+        # Run Ventoy in CLI mode
+        $processInfo = New-Object System.Diagnostics.ProcessStartInfo
+        $processInfo.FileName = $ventoyExe
+        $processInfo.Arguments = $argsString
+        $processInfo.UseShellExecute = $false
+        $processInfo.CreateNoWindow = $false  # Show window for progress
+        $processInfo.RedirectStandardOutput = $true
+        $processInfo.RedirectStandardError = $true
+        # Set working directory to the Ventoy executable's directory (required by Ventoy)
+        $processInfo.WorkingDirectory = Split-Path -Parent $ventoyExe
+
+        $process = New-Object System.Diagnostics.Process
+        $process.StartInfo = $processInfo
+        $process.Start() | Out-Null
+
+        # Read output in real-time
+        $stdout = ""
+        $stderr = ""
+
+        while (-not $process.HasExited) {
+            $stdout += $process.StandardOutput.ReadToEnd()
+            $stderr += $process.StandardError.ReadToEnd()
+            Start-Sleep -Milliseconds 100
+        }
+
+        # Read any remaining output
+        $stdout += $process.StandardOutput.ReadToEnd()
+        $stderr += $process.StandardError.ReadToEnd()
+
+        if ($stdout) {
+            Write-Log "  Ventoy output: $stdout"
+        }
+
+        if ($stderr -and $stderr.Trim() -ne "") {
+            Write-Log "  Ventoy stderr: $stderr" -Level WARN
+        }
+
+        if ($process.ExitCode -ne 0) {
+            throw "Ventoy update failed with exit code: $($process.ExitCode)"
+        }
+
+        Write-Log "  Ventoy updated successfully!" -Level SUCCESS
+
+        # Find the Ventoy data partition
+        Start-Sleep -Seconds 3
+        $ventoyPartition = Get-Partition -DiskNumber $DiskNumber | Where-Object { $_.Type -eq 'Basic' } | Sort-Object -Property Size -Descending | Select-Object -First 1
+
+        if ($ventoyPartition) {
+            $ventoyLetter = $ventoyPartition.DriveLetter
+            $friendlySize = Get-FriendlySize $ventoyPartition.Size
+            Write-Log "  Ventoy partition: ${ventoyLetter}:\ ($friendlySize)" -Level SUCCESS
+
+            return @{
+                Success = $true
+                VentoyLetter = $ventoyLetter
+            }
+        }
+        else {
+            throw "Could not find Ventoy partition after update"
+        }
+    }
+    catch {
+        Write-Log "  Ventoy update error: $($_.Exception.Message)" -Level ERROR
+        throw
+    }
+}
+
 # ============================================================================
 # FOLDER STRUCTURE
 # ============================================================================
@@ -3499,12 +3631,12 @@ function Main {
                 throw "Cannot reinstall Ventoy - VENTOY partition not found"
             }
 
-            # Reinstall Ventoy using Install-Ventoy function
+            # Update Ventoy using Update-Ventoy function (preserves partitions and data)
             try {
-                $ventoyResult = Install-Ventoy -DiskNumber $selectedDisk.DiskNumber -Settings $settings
-                Write-Log "Ventoy reinstalled successfully!" -Level SUCCESS
+                $ventoyResult = Update-Ventoy -DiskNumber $selectedDisk.DiskNumber
+                Write-Log "Ventoy updated successfully!" -Level SUCCESS
                 
-                # Refresh partition info after Ventoy reinstall (drive letters may have changed)
+                # Refresh partition info after Ventoy update
                 Start-Sleep -Seconds 3
                 $refreshedDrive = Test-ExistingBrandoToolkit -DiskNumber $selectedDisk.DiskNumber
                 
@@ -3513,13 +3645,14 @@ function Main {
                     VentoyLetter = if ($refreshedDrive.Ventoy) { $refreshedDrive.Ventoy.DriveLetter } else { $null }
                     UtilsLetter = if ($refreshedDrive.Utils) { $refreshedDrive.Utils.DriveLetter } else { $null }
                     FILESLetter = if ($refreshedDrive.FILES) { $refreshedDrive.FILES.DriveLetter } else { $null }
-                    VentoySize = $ventoyResult.VentoySize
-                    UtilsSize = $ventoyResult.UtilsSize
-                    FILESSize = $ventoyResult.FILESSize
+                }
+                
+                if (-not $driveInfo.VentoyLetter -or -not $driveInfo.UtilsLetter) {
+                    throw "Cannot continue - required partitions (VENTOY or UTILS) not found after update"
                 }
             }
             catch {
-                throw "Failed to reinstall Ventoy: $($_.Exception.Message)"
+                throw "Failed to update Ventoy: $($_.Exception.Message)"
             }
 
             # Initialize folder structure from existing partitions
