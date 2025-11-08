@@ -2562,13 +2562,14 @@ function Install-Ventoy {
 
     try {
         # Use Ventoy CLI mode (documented at https://www.ventoy.net/en/doc_windows_cli.html)
+        # Secure Boot: https://www.ventoy.net/en/doc_secure.html
         # Format: Ventoy2Disk.exe VTOYCLI /I /PhyDrive:[options]
         $cliArgs = @(
             "VTOYCLI",
             "/I",
             "/PhyDrive:$DiskNumber",
             "/GPT",           # Use GPT partition style
-            "/SECUREBOOT",    # Enable Secure Boot support (fixes "Security Violation" error)
+            "/S",             # Enable Secure Boot support (per CLI documentation)
             "/R:$reserveMB"   # Reserve space in MB
         )
 
