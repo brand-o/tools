@@ -1440,49 +1440,46 @@ function Invoke-ISOModding {
         }
 
         Write-Log "  Successfully applied all modifications to $imageCount edition(s):" -Level SUCCESS
-        Write-Log "    ? TPM 2.0 bypass" -Level INFO
-        Write-Log "    ? Secure Boot bypass" -Level INFO
-        Write-Log "    ? RAM/CPU/Storage requirement bypasses" -Level INFO
-        Write-Log "    ? Local account allowed (no Microsoft Account)" -Level INFO
-        Write-Log "    ? Privacy questions skipped" -Level INFO
-        Write-Log "    ? Telemetry disabled" -Level INFO
-        Write-Log "    ? BitLocker auto-encryption disabled" -Level INFO
-        Write-Log "    ? Bloatware/Consumer Features disabled" -Level INFO
-        Write-Log "    ? English (World) time/currency format (en-001)" -Level INFO
-        Write-Log "    ? Locale selection screen skipped (auto-configured)" -Level INFO
-        Write-Log "    ? Product key prompt skipped" -Level INFO
+        Write-Log "    ? TPM 2.0 / Secure Boot / 4GB+ RAM requirement bypasses" -Level INFO
+        Write-Log "    ? Microsoft online account requirement removed (BypassNRO)" -Level INFO
+        Write-Log "    ? Regional: English (United States) + Time/Currency: English (World)" -Level INFO
+        Write-Log "    ? Data collection disabled (privacy questions skipped)" -Level INFO
+        Write-Log "    ? BitLocker automatic device encryption disabled" -Level INFO
+        Write-Log "    ? Copilot auto-removal scheduled" -Level INFO
+        Write-Log "    ? Windows bloatware/consumer features disabled" -Level INFO
 
-        # Create autounattend.xml to skip locale selection during OOBE
-        Write-Log "  Creating autounattend.xml for automatic locale configuration..." -Level INFO
+        # Create autounattend.xml using Rufus-style minimal approach
+        # Reference: https://github.com/pbatard/rufus/blob/master/src/wue.c (CreateUnattendXml function)
+        Write-Log "  Creating Rufus-style autounattend.xml..." -Level INFO
         $autounattendPath = Join-Path $isoExtract "autounattend.xml"
         
         $autounattendXml = @"
 <?xml version="1.0" encoding="utf-8"?>
 <unattend xmlns="urn:schemas-microsoft-com:unattend">
-    <settings pass="windowsPE">
-        <component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-            <SetupUILanguage>
-                <UILanguage>en-US</UILanguage>
-            </SetupUILanguage>
-            <InputLocale>0409:00000409</InputLocale>
-            <SystemLocale>en-US</SystemLocale>
-            <UILanguage>en-US</UILanguage>
-            <UserLocale>en-001</UserLocale>
-        </component>
-    </settings>
-    <settings pass="oobeSystem">
-        <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-            <InputLocale>0409:00000409</InputLocale>
-            <SystemLocale>en-US</SystemLocale>
-            <UILanguage>en-US</UILanguage>
-            <UserLocale>en-001</UserLocale>
-        </component>
-    </settings>
+  <settings pass="oobeSystem">
+    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <OOBE>
+        <ProtectYourPC>3</ProtectYourPC>
+      </OOBE>
+    </component>
+    <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <InputLocale>0409:00000409</InputLocale>
+      <SystemLocale>en-US</SystemLocale>
+      <UserLocale>en-001</UserLocale>
+      <UILanguage>en-US</UILanguage>
+    </component>
+    <component name="Microsoft-Windows-SecureStartup-FilterDriver" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <PreventDeviceEncryption>true</PreventDeviceEncryption>
+    </component>
+    <component name="Microsoft-Windows-EnhancedStorage-Adm" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <TCGSecurityActivationDisabled>1</TCGSecurityActivationDisabled>
+    </component>
+  </settings>
 </unattend>
 "@
         
         Set-Content -Path $autounattendPath -Value $autounattendXml -Encoding UTF8
-        Write-Log "    ? Autounattend.xml created - locale screen will be skipped" -Level INFO
+        Write-Log "    ? Rufus-style autounattend.xml created (oobeSystem only)" -Level INFO
 
         # Rebuild ISO using PowerShell IMAPI2 (no external dependencies required!)
         Write-Log "  Rebuilding ISO with built-in Windows IMAPI2..." -Level INFO
