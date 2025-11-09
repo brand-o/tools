@@ -906,7 +906,7 @@
             }
         },
         {
-            "name": "BullCrapUninstaller",
+            "name": "BulkCrapUninstaller",
             "category": "installer",
             "type": "zip",
             "resolve": {

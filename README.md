@@ -125,7 +125,7 @@ if the script is interrupted, it will detect partial installs and offer to:
 - Android Platform Tools
 - AnyDesk
 - Brave Browser
-- BullCrapUninstaller
+- BulkCrapUninstaller
 - Discord
 - Git for Windows
 - HWiNFO64 Installer
